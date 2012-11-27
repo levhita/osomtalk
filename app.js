@@ -61,18 +61,16 @@ app.get('/rooms/get/:id', function(req, res){
 });
 
 /** creates a new room and then returns the generated id. **/
-app.get('/rooms/create', function(req, res){
+app.post('/rooms/create', function(req, res){
+	console.log(req);
 	/** Generates an unused room id **/
 	do {
-		id = Utils.makeId(7);    
+		id = utils.makeId(7);    
 	} while (rooms[id] !== undefined);
 
 	room = new Room({id:id, name:req.body.name});
-	rooms.push(room);
-
-	client.subscribe('/messages/' + id, function(message) {
-		console.log('Got a message on room: ' + message.id);
-	});
+	room.subscribe(client);
+	rooms[id] = room;
 
 	console.log('Room Created: ' + id + '(' + req.body.name + ')');
 	res.send({id:id});
@@ -83,8 +81,8 @@ server.listen(8000);
 app.use(server);
 
 client = new faye.Client('http://localhost:8000/faye');
-rooms['osomtest'] = new Room({id:'osomtest', name:'OsomTalk Test, if you find this chat say hi!'}); 
-rooms['osomtest'].subscribe(client);
+rooms['ibgdl'] = new Room({id:'ibgdl', name:'OsomTalk Beta, For the IBGDL Crew!'}); 
+rooms['ibgdl'].subscribe(client);
 
 http.createServer(app).listen(app.get('port'), function(){
 	console.log("Express server listening on port " + app.get('port'));

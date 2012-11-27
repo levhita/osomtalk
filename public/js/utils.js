@@ -3,56 +3,50 @@
 var Utils = function() {
 	var self = {};
 
- 	self.prettify = function(inputText) {
-		var expression, matches, replaceText, replacePattern0, replacePattern1, replacePattern2, replacePattern3;
-
-		/**~Equivalent to HTMLentities **/
-		replacedText = inputText.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-
-		//URLs starting with ftp://
-		replacePattern1 = /(\bftp:\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
-		replacedText = inputText.replace(replacePattern1, '<a href="$1" target="_blank">$1</a>');
-
-
-		//URLs starting with http://, https://.
+ 	self.markdown = function(text) {
+ 		console.log("using marked");
+ 		var html = marked(text);
+ 		return html;
+ 	}
+ 	
+ 	self.getPreviewsHTML = function(text) {
+		var previews = [];
+		
+		//Search for all links in the text
 		searchPattern = /(\bhttps?:\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
-
-		matches = inputText.match(searchPattern);
+		matches = text.match(searchPattern);
 		if(matches) {
 			matches = $.unique(matches);
-			matches.forEach(function(entry) {
-				expression = new RegExp(XRegExp.escape(entry), "g");
+			matches.forEach( function(entry) {
+				//var expression = new RegExp(XRegExp.escape(entry), "g");
+				var preview = '';
+				var video_id = '';
 				if (entry.match(/\.(gif|png|jpg|jpeg)$/)) {
 					// Turn images into previews
-					replacedText = inputText.replace(expression, '<a href="' + entry + '" target="_blank"><img class="image_preview" src="' + entry + '" alt="Image preview"/></a>');
+					preview = '<a href="' + entry + '" target="_blank"><img class="image_preview" src="' + entry + '" alt="Image preview"/></a>';
+					previews.push(preview);
 				} else if (id_matchs = entry.match(/(?:youtube\.com\/watch\?)((?:[\w\d\-\_\=]+&amp;(?:amp;)?)*v(?:&lt;[A-Z]+&gt;)?=([0-9a-zA-Z\-\_]+))/i)) {
 					video_id = id_matchs[2];
-					videoString = '<iframe id="ytplayer" type="text/html" width="640" height="390" src="http://www.youtube.com/embed/' + video_id + '?autoplay=0&origin=http://osomtalk.com" frameborder="0"/>';
+					preview = '<iframe id="ytplayer" type="text/html" width="640" height="390" src="http://www.youtube.com/embed/' + video_id + '?autoplay=0&origin=http://osomtalk.com" frameborder="0"/>';
 
-					//Turn Youtubes into Embededs
-					replacedText = inputText.replace(expression, videoString);
-				} else {
-					//Turn Urls not in our best interest as just links
-					replacedText = inputText.replace(expression, '<a href="' + entry + '" target="_blank">' + entry + '</a>');
+					//Turn Youtubes into Embeddeds
+					previews.push(preview);
 				}
 			});
 		}
 
-		//URLs starting with "www." (without // before it, or it'd re-link the ones done above).
-		replacePattern2 = /(^|[^\/])(www\.[\S]+(\b|$))/gim;
-		replacedText = replacedText.replace(replacePattern2, '$1<a href="http://$2" target="_blank">$2</a>');
-
-		//Change email addresses to mailto:: links.
-		replacePattern3 = /(\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,6})/gim;
-		replacedText = replacedText.replace(replacePattern3, '<a href="mailto:$1">$1</a>');
-
-		return replacedText
+		var previewHTML = '<div class="previews">';
+		previews.forEach( function(entry) {
+			previewHTML += entry + " ";
+		});
+		previewHTML += '</div>';
+		return previewHTML;
 	}
 
 	/** Taken From http://stackoverflow.com/a/5885493/7946 **/
-	self.makeId = function (length,current){
+	self.makeId = function (length, current){
 		current = current ? current : '';
-		return length ? rand( --length , "0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz".charAt( Math.floor( Math.random() * 60 ) ) + current ) : current;
+		return length ? self.makeId( --length , "0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz".charAt( Math.floor( Math.random() * 60 ) ) + current ) : current;
 	}
 
 	return self;

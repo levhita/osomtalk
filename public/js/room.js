@@ -35,14 +35,22 @@ var Room = function(config){
 			user: 'Test',
 			text: text
 		}
-		self.messages.push(message);
+		
 		if ( typeof window  !== 'undefined' ) {
 			self.renderMessage(message);
+		} else {
+			//If you ever need to have the messages as data on the client side, take this line out of the if
+			self.messages.push(message);
+			if ( self.messages.length > 100 ) {
+				//Maximum of 100 messages in memory for each chat on the server chat
+				console.log('deleting extra message', self.messages.shift());
+			}
 		}
 	};
 	
 	self.renderMessage = function (message) {
-		$('#messages').prepend('<div class="message"><span class="time">'+message.time +'</span> : <span class="user">'+message.user +'</span><br/>' + utils.prettify(message.text) + '</div><hr/>');
+		var previewsHTML = utils.getPreviewsHTML(message.text);
+		$('#messages').prepend('<div class="message"><span class="time">'+message.time +'</span> : <span class="user">'+message.user +'</span><br/>' + utils.markdown(message.text) + '</div>'+previewsHTML+'<hr/>');
 	}
 	
 	/** renders the chat **/

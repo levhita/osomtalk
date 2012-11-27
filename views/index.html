@@ -20,7 +20,16 @@
 
 	});
 	function createChat() {
-		alert("Creating Chat" + $('#name').val());
+		var name = $('#name').val();
+		console.log("Creating Chat: " + name);
+		$.ajax({
+			url: '/rooms/create',
+			type: 'POST',
+			data: {name: name},
+			success: function(data) {
+				window.location = "/room/" + data.id;
+			}
+		});
 	};
 
 	</script>
@@ -182,6 +191,7 @@
 			<form class="validate form-inline">
 				<label>Name:</label> <input type="text" name="name" id="name" placeholder="My awesome chat room name" required/>
 			</form>
+			<p>We are on beta, soo chats doesn't have persistence beyond 100 messages, and they can be deleted anytime along with the chat.</p>
 		</div>
 		<div class="modal-footer">
 			<button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>

@@ -1,5 +1,5 @@
 $(document).ready(function(){
-	window.client = new Faye.Client('http://192.168.15.66:8000/faye');
+	window.client = new Faye.Client('http://192.168.37.80:8000/faye');
 	
 	var room_id = $('#room_id').text();
 	room = new Room({id:room_id});
@@ -7,6 +7,14 @@ $(document).ready(function(){
 	
 	room.getRoomData(function (){
 		room.renderRoom();
+	});
+	
+	
+	/** MarkDown Configuration **/
+	marked.setOptions({
+	  gfm: true,
+	  pedantic: false,
+	  sanitize: true,
 	});
 	
 	/** 
