@@ -1,5 +1,6 @@
 $(document).ready(function(){
-	window.client = new Faye.Client('http://192.168.37.80:8000/faye');
+	window.client = new Faye.Client('http://osomtalk.jit.su/faye');
+	//window.client = new Faye.Client('http://localhost:3000/faye');
 	
 	var room_id = $('#room_id').text();
 	room = new Room({id:room_id});
@@ -42,3 +43,16 @@ function sendMessage() {
 		$('#message_input').focus();
 	}
 }
+
+function activateNotifications () {
+	console.log('Activating notifications');
+	if (window.webkitNotifications) {
+  		console.log("Notifications are supported!");
+	    if (window.webkitNotifications.checkPermission() == 0) { // 0 is PERMISSION_ALLOWED
+		    window.webkitNotifications.createNotification(
+	        '/img/favicon.png', 'OsomTalk', 'notifications active');
+		} else {
+			window.webkitNotifications.requestPermission();
+		}
+	}
+};

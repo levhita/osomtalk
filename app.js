@@ -8,7 +8,6 @@ var express = require('express')
 , cons    = require('consolidate');
 
 var app = express();
-var server = new faye.NodeAdapter({mount: '/faye'});
 
 var Room = require('./public/js/room.js').Room;
 var utils = require('./public/js/utils.js').utils;
@@ -60,30 +59,31 @@ app.get('/rooms/get/:id', function(req, res){
 	}
 });
 
-/** creates a new room and then returns the generated id. **/
-app.post('/rooms/create', function(req, res){
-	console.log(req);
-	/** Generates an unused room id **/
-	do {
-		id = utils.makeId(7);    
-	} while (rooms[id] !== undefined);
+	/** creates a new room and then returns the generated id. **/
+	app.post('/rooms/create', function(req, res){
+		/** Generates an unused room id **/
+		do {
+			id = utils.makeId(7);    
+		} while (rooms[id] !== undefined);
 
-	room = new Room({id:id, name:req.body.name});
-	room.subscribe(client);
-	rooms[id] = room;
+		room = new Room({id:id, name:req.body.name});
+		room.subscribe(client);
+		rooms[id] = room;
 
-	console.log('Room Created: ' + id + '(' + req.body.name + ')');
-	res.send({id:id});
-});
+		console.log('Room Created: ' + id + '(' + req.body.name + ')');
+		res.send({id:id});
+	});
 
+var server = http.createServer(app);
+var faye_server = new faye.NodeAdapter({mount: '/faye'});
+server.listen(80);
+//server.listen(3000);
+faye_server.attach(server);
 
-server.listen(8000);
-app.use(server);
+console.log("Express server listening on port 80");
 
-client = new faye.Client('http://localhost:8000/faye');
+client = new faye.Client('http://osomtalk.jit.su/faye');
+//client = new faye.Client('http://localhost:3000/faye');
+
 rooms['ibgdl'] = new Room({id:'ibgdl', name:'OsomTalk Beta, For the IBGDL Crew!'}); 
 rooms['ibgdl'].subscribe(client);
-
-http.createServer(app).listen(app.get('port'), function(){
-	console.log("Express server listening on port " + app.get('port'));
-});
