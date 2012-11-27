@@ -8,13 +8,12 @@
 /**
  * Block-Level Grammar
  */
-
 var block = {
   newline: /^\n+/,
   code: /^( {4}[^\n]+\n*)+/,
   fences: noop,
   hr: /^( *[-*_]){3,} *(?:\n+|$)/,
-  heading: /^ *(#{1,6}) *([^\n]+?) *#* *(?:\n+|$)/,
+  heading: /^ *(#{3,6}) *([^\n]+?) *#* *(?:\n+|$)/,
   lheading: /^([^\n]+)\n *(=|-){3,} *\n*/,
   blockquote: /^( *>[^\n]+(\n[^\n]+)*\n*)+/,
   list: /^( *)(bull) [\s\S]+?(?:hr|\n{2,}(?! )(?!\1bull )\n*|\s*$)/,
@@ -41,6 +40,7 @@ block.html = replace(block.html)
   ('closing', /<tag(?:"[^"]*"|'[^']*'|[^'">])*?>/)
   (/tag/g, tag())
   ();
+
 
 block.paragraph = replace(block.paragraph)
   ('hr', block.hr)
@@ -138,7 +138,7 @@ block.token = function(src, tokens, top) {
     }
 
     // lheading
-    if (cap = block.lheading.exec(src)) {
+    /*if (cap = block.lheading.exec(src)) {
       src = src.substring(cap[0].length);
       tokens.push({
         type: 'heading',
@@ -146,16 +146,16 @@ block.token = function(src, tokens, top) {
         text: cap[1]
       });
       continue;
-    }
+    }*/
 
     // hr
-    if (cap = block.hr.exec(src)) {
+    /*if (cap = block.hr.exec(src)) {
       src = src.substring(cap[0].length);
       tokens.push({
         type: 'hr'
       });
       continue;
-    }
+    }*/
 
     // blockquote
     if (cap = block.blockquote.exec(src)) {
@@ -256,14 +256,14 @@ block.token = function(src, tokens, top) {
     }
 
     // def
-    if (top && (cap = block.def.exec(src))) {
+    /*if (top && (cap = block.def.exec(src))) {
       src = src.substring(cap[0].length);
       tokens.links[cap[1].toLowerCase()] = {
         href: cap[2],
         title: cap[3]
       };
       continue;
-    }
+    }*/
 
     // top-level paragraph
     if (top && (cap = block.paragraph.exec(src))) {
@@ -401,17 +401,17 @@ inline.lexer = function(src) {
     }
 
     // link
-    if (cap = inline.link.exec(src)) {
+    /*if (cap = inline.link.exec(src)) {
       src = src.substring(cap[0].length);
       out += outputLink(cap, {
         href: cap[2],
         title: cap[3]
       });
       continue;
-    }
+    }*/
 
     // reflink, nolink
-    if ((cap = inline.reflink.exec(src))
+    /*if ((cap = inline.reflink.exec(src))
         || (cap = inline.nolink.exec(src))) {
       src = src.substring(cap[0].length);
       link = (cap[2] || cap[1]).replace(/\s+/g, ' ');
@@ -423,7 +423,7 @@ inline.lexer = function(src) {
       }
       out += outputLink(cap, link);
       continue;
-    }
+    }*/
 
     // strong
     if (cap = inline.strong.exec(src)) {
