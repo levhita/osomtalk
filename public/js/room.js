@@ -40,12 +40,12 @@
 				self.renderMessage(message);
 				if (window.webkitNotifications.checkPermission() == 0) { // 0 is PERMISSION_ALLOWED
 					var text = (message.text >30)? message.text.substring(0,27) + '...': message.text;
-					notification = window.webkitNotifications.createNotification(
+					var notification = window.webkitNotifications.createNotification(
 						'/img/favicon.png', 'OsomTalk', text);
 					notification.ondisplay = function() {
 						setTimeout(function() {
 							notification.cancel();
-						}, 3000);
+						}, 5000);
 					};
 					notification.show();
 				}			

@@ -11,7 +11,7 @@ var Utils = function() {
  	
  	self.getPreviewsHTML = function(text) {
 		var previews = [];
-		
+		var previewHTML = '';
 		//Search for all links in the text
 		searchPattern = /(\bhttps?:\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
 		matches = text.match(searchPattern);
@@ -23,23 +23,23 @@ var Utils = function() {
 				var video_id = '';
 				if (entry.match(/\.(gif|png|jpg|jpeg)$/)) {
 					// Turn images into previews
-					preview = '<a href="' + entry + '" target="_blank"><img class="image_preview" src="' + entry + '" alt="Image preview"/></a>';
+					preview = '<a href="' + entry + '" target="_blank"><img class="image_preview span12" src="' + entry + '" alt="Image preview"/></a>';
 					previews.push(preview);
 				} else if (id_matchs = entry.match(/(?:youtube\.com\/watch\?)((?:[\w\d\-\_\=]+&amp;(?:amp;)?)*v(?:&lt;[A-Z]+&gt;)?=([0-9a-zA-Z\-\_]+))/i)) {
 					video_id = id_matchs[2];
-					preview = '<iframe id="ytplayer" type="text/html" width="640" height="390" src="http://www.youtube.com/embed/' + video_id + '?autoplay=0&origin=http://osomtalk.com" frameborder="0"/>';
+					preview = '<div class="flex-video"><iframe id="ytplayer" type="text/html" height="400" src="http://www.youtube.com/embed/' + video_id + '?autoplay=0&origin=http://osomtalk.com" frameborder="0"/></div>';
 
 					//Turn Youtubes into Embeddeds
 					previews.push(preview);
 				}
 			});
+					
+			previewHTML += '<div class="preview_container"><button type="button" class="pull-right toggle_previews btn btn-small" onclick="tooglePreview(this);"><i class="icon-circle-arrow-up"></i> Hide Previews</button><br/><br/><div class="previews">';
+			previews.forEach( function(entry) {
+				previewHTML += entry + " ";
+			});
+			previewHTML += '</div></div>';
 		}
-
-		var previewHTML = '<div class="previews">';
-		previews.forEach( function(entry) {
-			previewHTML += entry + " ";
-		});
-		previewHTML += '</div>';
 		return previewHTML;
 	}
 
