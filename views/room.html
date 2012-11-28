@@ -17,7 +17,10 @@
 			margin-bottom: 16px;
 			overflow: hidden;
 		}
-
+		.message{
+			word-wrap:break-word;
+		}
+		
 		.flex-video.widescreen { padding-bottom: 57.25%; }
 		.flex-video.vimeo { padding-top: 0; }
 
@@ -74,7 +77,8 @@
 		<div class="page-header">
 			<h1 id=""><span id="room_id">${room_id}</span> - ${room_name}</h1>
 		</div>
-		
+		<div id="alert_place_holder">
+		</div>
 		<div class="row-fluid">
 
 			<div class="span4">
@@ -92,6 +96,10 @@
 						Send Message
 					</a>
 					</form>
+					<ul>
+						<li><small>Uses <a href="http://daringfireball.net/projects/markdown/syntax" target="_blank">Markdown's syntax</a></small>
+						<li><small>Use SHIFT+ENTER to send you message like a boss.</small>
+					</ul>
 				</div>
 				<div>
 					<button id="show_previews" type="button" class="btn"><i class="icon-circle-arrow-down"></i> Show Previews</button>

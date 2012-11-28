@@ -1,6 +1,6 @@
 {
   "name": "osomtalk",
-  "version": "0.0.1-19",
+  "version": "0.0.1-38",
   "private": true,
   "scripts": {
     "start": "node app.js"

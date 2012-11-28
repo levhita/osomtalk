@@ -4,7 +4,6 @@ var Utils = function() {
 	var self = {};
 
  	self.markdown = function(text) {
- 		console.log("using marked");
  		var html = marked(text);
  		return html;
  	}
@@ -13,7 +12,8 @@ var Utils = function() {
 		var previews = [];
 		var previewHTML = '';
 		//Search for all links in the text
-		searchPattern = /(\bhttps?:\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
+		var searchPattern = /(\bhttps?:\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
+		var videoRegExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=)([^#\&\?]*).*/i;
 		matches = text.match(searchPattern);
 		if(matches) {
 			matches = $.unique(matches);
@@ -25,9 +25,11 @@ var Utils = function() {
 					// Turn images into previews
 					preview = '<a href="' + entry + '" target="_blank"><img class="image_preview span12" src="' + entry + '" alt="Image preview"/></a>';
 					previews.push(preview);
-				} else if (id_matchs = entry.match(/(?:youtube\.com\/watch\?)((?:[\w\d\-\_\=]+&amp;(?:amp;)?)*v(?:&lt;[A-Z]+&gt;)?=([0-9a-zA-Z\-\_]+))/i)) {
-					video_id = id_matchs[2];
-					preview = '<div class="flex-video"><iframe id="ytplayer" type="text/html" height="400" src="http://www.youtube.com/embed/' + video_id + '?autoplay=0&origin=http://osomtalk.com" frameborder="0"/></div>';
+				} else if (id_matchs = entry.match( videoRegExp )) {
+					if (id_matchs[2].length==11){
+ 					   video_id = id_matchs[2];
+					}
+					preview = '<div class="flex-video"><iframe id="ytplayer" type="text/html" src="http://www.youtube.com/embed/' + video_id + '?autoplay=0&origin=http://osomtalk.com" frameborder="0"/></div>';
 
 					//Turn Youtubes into Embeddeds
 					previews.push(preview);

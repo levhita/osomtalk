@@ -372,7 +372,7 @@ inline.lexer = function(src) {
       }
       out += '<a href="'
         + href
-        + '">'
+        + '" target="_blank">'
         + text
         + '</a>';
       continue;
@@ -385,7 +385,7 @@ inline.lexer = function(src) {
       href = text;
       out += '<a href="'
         + href
-        + '">'
+        + '" target="_blank">'
         + text
         + '</a>';
       continue;
@@ -480,7 +480,7 @@ function outputLink(cap, link) {
       + escape(link.title)
       + '"'
       : '')
-      + '>'
+      + ' target="_blank">'
       + inline.lexer(cap[1])
       + '</a>';
   } else {

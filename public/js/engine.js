@@ -24,7 +24,7 @@ $(document).ready(function(){
 	 * adds a new line.
 	 **/
 	 $('#message_input').bind('keypress', function(e) {
-	 	if (e.keyCode == 13 && !e.shiftKey) {
+	 	if (e.keyCode == 13 && e.shiftKey) {
 	 		sendMessage();
 	 		e.preventDefault();
 	 	}
@@ -47,13 +47,30 @@ function sendMessage() {
 	var room_id = $('#room_id').text();
 	var text = $('#message_input').val();
 	if (text!=='') {
-		window.client.publish('/messages' + room_id, {
-			data: {
-				text: $('#message_input').val()
-			}
+		var publication = window.client.publish('/messages_' + room_id, {
+			text: $('#message_input').val()
 		});
-		$('#message_input').val('');
-		$('#message_input').focus();
+		publication.callback(function() {
+  			$('#message_input').val('');
+			$('#message_input').focus();
+		});
+		publication.errback(function(error) {
+  			if(error.message=="BLOCKED_TYPING") {
+  				$('#alert_place_holder').html('<div class="alert"><button type="button" class="close" data-dismiss="alert">×</button><strong>Warning!</strong> Slow down cowboy!, you don\'t want spam everyone do you?</div>');
+  				$('#alert_place_holder').fadeIn();
+  				setTimeout(function() {
+ 					$('#alert_place_holder').fadeOut();
+  				} , 3000); 
+  			} else if (error.message=="BLOCKED_LARGE" ){
+  				$('#alert_place_holder').html('<div class="alert"><button type="button" class="close" data-dismiss="alert">×</button><strong>Warning!</strong> Your message is too long and you should feel bad.</div>');
+  				$('#alert_place_holder').fadeIn();
+  				setTimeout(function() {
+ 					$('#alert_place_holder').fadeOut();
+  				} , 3000); 
+  			} else if(error.message=="BLOCKED_FLOODING") {
+  				window.location.href="/"
+  			}
+  		});
 	}
 }
 

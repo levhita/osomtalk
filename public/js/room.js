@@ -29,10 +29,11 @@
 			self.users.push(user);
 		};
 
-		self.addMessage = function(text) {
+		self.addMessage = function(text, clientId) {
 			var message = {
 				time: Math.round(+new Date()/1000),
 				user: 'Test',
+				clientId: clientId,
 				text: text
 			}
 
@@ -61,7 +62,7 @@
 	
 	self.renderMessage = function (message) {
 		var previewsHTML = utils.getPreviewsHTML(message.text);
-		$('#messages').prepend('<div class="message"><span class="time">'+message.time +'</span> : <span class="user">'+message.user +'</span><br/>' + utils.markdown(message.text) + '</div>'+previewsHTML+'<hr/>');
+		$('#messages').prepend('<div class="message"><span class="time">'+message.time +'</span> : <span class="user">'+message.clientId +'</span><br/>' + utils.markdown(message.text) + '</div>'+previewsHTML+'<hr/>');
 	}
 	
 	/** renders the chat **/
@@ -87,11 +88,10 @@
 	};
 
 	self.subscribe = function(client) {
-		client.subscribe('/messages'+ self.id, function(message) {
-			self.addMessage(message.data.text, message.clientID);
+		client.subscribe('/server_messages_'+ self.id, function(message) {
+			self.addMessage(message.data.text, message.data.clientId);
 		});
 	}
-	
 	return self;
 };
 
