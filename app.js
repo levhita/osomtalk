@@ -79,7 +79,7 @@ app.get('/rooms/get/:id', function(req, res){
 
 /** Get all the room data **/
 app.get('/user/take/', function(req, res){
-	var username = req.query.username;
+	var username = req.query.username.toLowerCase().replace(/^\s\s*/, '').replace(/\s\s*$/, '');
 
 	var match = false;
 	console.log(users);

@@ -23,7 +23,7 @@ var Utils = function() {
 				var video_id = '';
 				if (entry.match(/\.(gif|png|jpg|jpeg)$/)) {
 					// Turn images into previews
-					preview = '<a href="' + entry + '" target="_blank"><img class="image_preview span12" src="' + entry + '" alt="Image preview"/></a>';
+					preview = '<a href="' + entry + '" target="_blank"><img class="image_preview" src="' + entry + '" alt="Image preview"/></a>';
 					previews.push(preview);
 				} else if (id_matchs = entry.match( videoRegExp )) {
 					if (id_matchs[2].length==11){
