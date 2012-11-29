@@ -83,14 +83,18 @@
 
 			<div class="span4">
 				<div id="utility_div">
-					<!--<div id="username_div">
+					{{if error == 'NAMELESS'}}
+					<div id="username_div">
 						<form>
 							<input type="text" name="username" id="username" placeholder="Choose Your Awesome Username" class="span12"/>
 							<a href="#" onclick="takeName();" class="btn btn-primary btn-block">Use it</a>
 						</form>
-					</div>-->
+					</div>
+					{{else}}
 					<form class="form-inline">
+					<h3>${username}</h3>
 					<textarea rows="5" class="span12" name="message_input" id="message_input" placeholder="Write Your Message"></textarea>
+					<input type="hidden" name="user" id="user" value="${username}"/><input type="hidden" name="token" id="token" value="${token}"/><input type="hidden" name="identifier" id="identifier" value="${identifier}"/>
 					<br/><br/>
 					<a href="#" onclick="sendMessage()" class="btn btn-primary btn-block">
 						Send Message
@@ -100,6 +104,7 @@
 						<li><small>Uses <a href="http://daringfireball.net/projects/markdown/syntax" target="_blank">Markdown's syntax</a></small>
 						<li><small>Use SHIFT+ENTER to send you message like a boss.</small>
 					</ul>
+					{{/if}}
 				</div>
 				<div>
 					<button id="show_previews" type="button" class="btn"><i class="icon-circle-arrow-down"></i> Show Previews</button>
