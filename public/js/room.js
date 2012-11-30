@@ -63,7 +63,8 @@
 	
 	self.renderMessage = function (message) {
 		var previewsHTML = utils.getPreviewsHTML(message.text);
-		$('#messages').prepend('<div class="message"><span class="time">'+message.time +'</span> : <span class="user">' + message.username + '</span><br/>' + utils.markdown(message.text) + '</div>'+previewsHTML+'<hr/>');
+		var escapedName = message.username.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+		$('#messages').prepend('<div class="message"><span class="time">'+message.time +'</span> : <span class="user">' + escapedName + '</span><br/>' + utils.markdown(message.text) + '</div>'+previewsHTML+'<hr/>');
 	}
 	
 	/** renders the chat **/

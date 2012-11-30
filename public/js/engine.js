@@ -30,6 +30,13 @@ $(document).ready(function(){
 	 	}
 	 });
 
+	 $('#username').bind('keypress', function(e) {
+	 	if (e.keyCode == 13) {
+	 		takeName();
+	 		e.preventDefault();
+	 	}
+	 });
+
 	 $('#hide_previews').bind('click', function(e) {
 	 	console.log('hidding');
 	 	$(".toggle_previews").html('<i class="icon-circle-arrow-down"></i> Show Previews');
@@ -115,7 +122,14 @@ function takeName() {
 		data: {username: username},
 		success: function(data) {
 			if(data.error) {
-				$('#alert_place_holder').html('<div class="alert"><button type="button" class="close" data-dismiss="alert">×</button><strong>Warning!</strong> Mmmm...that name is already taken.</div>');
+				if (data.error=="NAME_TAKEN") {
+					$('#alert_place_holder').html('<div class="alert"><button type="button" class="close" data-dismiss="alert">×</button><strong>Warning!</strong> Mmmm...that name is already taken.</div>');
+  				} else if(data.error=="TOO_LONG"){
+  					$('#alert_place_holder').html('<div class="alert"><button type="button" class="close" data-dismiss="alert">×</button><strong>Warning!</strong> That username is too long, the limit is 12 chars</div>');	
+  				} else if(data.error=="EMPTY"){
+  					$('#alert_place_holder').html('<div class="alert"><button type="button" class="close" data-dismiss="alert">×</button><strong>Warning!</strong> Your name is empty and you should feel bad</div>');
+  				}
+
   				$('#alert_place_holder').fadeIn();
   				setTimeout(function() {
  					$('#alert_place_holder').fadeOut();

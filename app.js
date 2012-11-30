@@ -81,6 +81,19 @@ app.get('/rooms/get/:id', function(req, res){
 app.get('/user/take/', function(req, res){
 	var username = req.query.username.toLowerCase().replace(/^\s\s*/, '').replace(/\s\s*$/, '');
 
+	/**Check For Empty**/
+	if (username=='') {
+		res.send({error: 'EMPTY'});
+		return true;
+	}
+
+	/**Check For Too Long**/
+	if (username.length > 12) {
+		res.send({error: 'TOO_LONG'});
+		return true;
+	}
+
+	/** Check For Duplicates **/
 	var match = false;
 	console.log(users);
 	var i = users.length-1;
@@ -93,31 +106,32 @@ app.get('/user/take/', function(req, res){
     	}
     }
 	if(match) {
-		res.send({error: 'Name Taken'});
-	} else{
-		if(req.session.identifier === undefined) {
-			console.log('New user requesting: ' + username);
-			req.session.identifier = utils.makeId(11);
-			req.session.username = username;
-			var hmac = crypto.createHmac('sha256', 'anyquerykey');
-			req.session.token  = hmac.update(req.session.username).digest('hex');
-			
-			users[req.session.identifier] = {
-				username: username,
-				token: req.session.token,
-				identifier: req.session.identifier
-			}
-		} /*else {
-		console.log('Current user requesting: ' + username);
-		req.session.username = username;
-		req.session.token  = hmac.update(req.session.username).digest('hex');
-
-		users[req.session.identifier].username = req.session.username;
-		users[req.session.identifier].token = req.session.token;
-		users[req.session.identifier].identifier = req.session.identifier;
-		}*/
-		res.send( {username:req.session.username, token: req.session.token} );
+		res.send({error: 'NAME_TAKEN'});
+		return true;
 	}
+	
+	if(req.session.identifier === undefined) {
+		console.log('New user requesting: ' + username);
+		req.session.identifier = utils.makeId(11);
+		req.session.username = username;
+		var hmac = crypto.createHmac('sha256', 'anyquerykey');
+		req.session.token  = hmac.update(req.session.username).digest('hex');
+		
+		users[req.session.identifier] = {
+			username: username,
+			token: req.session.token,
+			identifier: req.session.identifier
+		}
+	} /*else {
+	console.log('Current user requesting: ' + username);
+	req.session.username = username;
+	req.session.token  = hmac.update(req.session.username).digest('hex');
+	users[req.session.identifier].username = req.session.username;
+	users[req.session.identifier].token = req.session.token;
+	users[req.session.identifier].identifier = req.session.identifier;
+	}*/
+	res.send( {username:req.session.username, token: req.session.token} );
+	
 });
 
 /** creates a new room and then returns the generated id. **/
