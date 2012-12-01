@@ -142,7 +142,24 @@ app.post('/rooms/create', function(req, res){
 	} while (rooms[id] !== undefined);
 
 	room = new Room({id:id, name:req.body.name});
-	//room.subscribe(client);
+	var welcomeMessage = 
+	   ['##Welcome to OsomTalk',
+		'OsomTalk isn\'t like any other chat out there, here you can.',
+		'',
+		'* Use MarkDown Syntax -> http://daringfireball.net/projects/markdown/syntax',
+		'* Have youtube videos inserted by just pasting the link-> http://youtu.be/vbrII7frHV0',
+		'* Even images (gifs included) are inserted without any fuzz -> http://i0.kym-cdn.com/photos/images/original/000/090/603/258witx.gif',
+		'',
+		'Have fun using with **OsomTalk!**',
+		'',
+		'PD: This Message was written directly in OsomTalk, isn\'t that OSOM.'
+	   ].join('\n');
+
+	room.addMessage({
+		text: welcomeMessage,
+		username: 'OsomTalk Welcome Bot',
+		identifier: 'OSOM'
+	});
 	rooms[id] = room;
 
 	console.log('Room Created: ' + id + '(' + req.body.name + ')');
@@ -162,51 +179,45 @@ var extension = {
            		var sender ='';
            		var block = '';
            		var current_time = Math.round(+new Date()/1000);
-           		
-           		if ( message.data.text.length >1024 ) {
+           		if (users[message.data.identifier].token !== message.data.token) {
+           			block = 'ISEEWHATYOUDIDTHERE';
+           			return false;
+           		} else if ( message.data.text.length >1024 ) {
 					block = 'BLOCKED_LARGE';
-           		} else if ( clients[message.clientId] === undefined ) {
-           			clients[message.identifier] = {
+           		} else if ( clients[message.data.identifier] === undefined ) {
+           			clients[message.data.identifier] = {
            				last: 0,
            				times: []
            			};
-           		} else if ( (current_time - clients[message.identifier].last) > 1 ){
-           		    var i_time = 0;
+           		} else if ( (current_time - clients[message.data.identifier].last) > 1 ){
+           		    /*var i_time = 0;
            		    do {
-           		    	i_time = clients[message.identifier].times.shift();
+           		    	i_time = clients[message.data.identifier].times.shift();
            		    } while( (current_time - i_time) > 60 );
-           		    clients[message.identifier].times.unshift(i_time);
+           		    clients[message.data.identifier].times.unshift(i_time);
          			
-         			console.log(clients[message.identifier].times.length);
-         			
-         			if ( clients[message.identifier].times.length > 15) {
-         				console.log('Blocking ' + message.identifier + ' For _flooding_');
+         			if ( clients[message.data.identifier].times.length > 15) {
          				block = 'BLOCKED_FLOODING';
-         			}
+         			}*/
            		} else {
-           			console.log('Blocking ' + message.identifier + 'For _fast typing_');
            			block = 'BLOCKED_TYPING';
            		}
-           		clients[message.identifier].last = current_time;
-           		clients[message.identifier].times.push(current_time);
+           		clients[message.data.identifier].last = current_time;
+           		clients[message.data.identifier].times.push(current_time);
            		
-           		//console.log(clients[message.clientId].times.length);
-           		//console.log(clients[message.clientId].times);
-           		//console.log(current_time - 60);
            		var data = {
 					data: {
 						time: Math.round(+new Date()/1000),
 						text: message.data.text,
 						username: users[message.data.identifier].username,
-						identifier: message.identifier,
+						identifier: message.data.identifier,
 					}
 				}
            		if (!block) {
-	           		//console.log('Publishing Message to room: ' + room_id);
-					rooms[room_id].addMessage(message.data);	
+	           		rooms[room_id].addMessage(message.data);	
 					client.publish('/server_messages_' + room_id, data);
 				} else {
-					console.log('returning the message to room ' + room_id);
+					console.log('Blocking ' + message.data.identifier + ' For ' + block);
 					message.error = block;
 				}
 			}
@@ -229,4 +240,4 @@ console.log("Express server listening on port 80");
 client = new faye.Client('http://osomtalk.jit.su/faye');
 
 rooms['ibgdl'] = new Room({id:'ibgdl', name:'OsomTalk Beta, For the IBGDL Crew!'}); 
-//rooms['ibgdl'].subscribe(client);
+rooms['osombeta'] = new Room({id:'osombeta', name:'Welcome to OsomTalk Beta!'}); 

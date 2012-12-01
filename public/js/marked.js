@@ -13,7 +13,7 @@ var block = {
   code: /^( {4}[^\n]+\n*)+/,
   fences: noop,
   hr: /^( *[-*_]){3,} *(?:\n+|$)/,
-  heading: /^ *(#{2,6}) *([^\n]+?) *#* *(?:\n+|$)/,
+  heading: /^ *(#{1,3}) *([^\n]+?) *#* *(?:\n+|$)/,
   lheading: /^([^\n]+)\n *(=|-){3,} *\n*/,
   blockquote: /^( *>[^\n]+(\n[^\n]+)*\n*)+/,
   list: /^( *)(bull) [\s\S]+?(?:hr|\n{2,}(?! )(?!\1bull )\n*|\s*$)/,
@@ -519,7 +519,7 @@ function tok() {
     }
     case 'heading': {
       return '<h'
-        + token.depth
+        + (token.depth+1)
         + '>'
         + inline.lexer(token.text)
         + '</h'
