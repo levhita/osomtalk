@@ -1,6 +1,6 @@
 $(document).ready(function(){
-	//window.client = new Faye.Client('http://localhost:3000/faye');
-	window.client = new Faye.Client('http://osomtalk.jit.su/faye');
+	window.client = new Faye.Client('http://localhost:3000/faye');
+	//window.client = new Faye.Client('http://osomtalk.jit.su/faye');
 	
 	
 	var room_id = $('#room_id').text();

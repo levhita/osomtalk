@@ -1,21 +1,26 @@
 /** Module dependencies **/
 
 var express = require('express')
-, http		= require('http')
-, path		= require('path')
+, http      = require('http')
+, path      = require('path')
 , faye      = require('faye')
-, jqtpl		= require("jqtpl")
-, cons		= require('consolidate')
-, crypto	= require('crypto');
+, jqtpl     = require("jqtpl")
+, cons      = require('consolidate')
+, crypto    = require('crypto')
+, OAuth     = require('oauth').OAuth
+, OsomTalk  = require('./models/osomtalk.js').OsomTalk
+, Room      = require('./public/js/room.js').Room
+, User      = require('./public/js/user.js').User
+, utils     = require('./public/js/utils.js').utils;
+
+var osomtalk = new OsomTalk({
+	url: "http://localhost:3000",
+	port: 3000,
+	consumer_key: "WRUKIvt5FAsvs43NKnYJzA",
+	consumer_secret: "g2AIdoR16IB6iDXPnKf8fJZMVZsUDOswikl7VQU19k"
+});
 
 var app = express();
-
-var Room = require('./public/js/room.js').Room;
-var utils = require('./public/js/utils.js').utils;
-
-var rooms = [];
-var clients = [];
-users = [];
 
 app.configure ( function(){
 	app.set('port', process.env.PORT || 3000);
@@ -29,7 +34,7 @@ app.configure ( function(){
 	//app.use(express.methodOverride());
 	//app.use(app.router);
 	app.use(express.bodyParser());
-	app.use(express.cookieParser('nunca descrubriras mi secreto!'));
+	app.use(express.cookieParser('nunca descubriras mi secreto!'));
 	app.use(express.session());
 	
 
@@ -46,187 +51,152 @@ app.get('/', function(req, res) {
 	res.render('index');
 });
 
-	app.get('/room/:id', function(req, res) {
-		var id = req.params.id;
-		if(id in rooms) {
-			if (req.session.identifier === undefined) {
-				res.render('room', {
-					error: "NAMELESS",
-					room_id: id,
-					room_name:rooms[id].name}
-					);
-			} else {
-				res.render('room', {
-					error: "",
-					username: req.session.username,
-					token: req.session.token,
-					identifier: req.session.identifier,
-					room_id: id,
-					room_name:rooms[id].name});	
-			}
-		} else {
-			res.redirect('/');
-		}
-	});
-
-/** Get all the room data **/
-app.get('/rooms/get/:id', function(req, res){
-	var id = req.params.id;
-	if ( id in rooms ) {
-		res.send(rooms[id].getRoom());
+app.get('/room/:room_id', function(req, res) {
+	var room_id = req.params.room_id;
+	if ( room = osomtalk.getRoom(room_id) ) {
+		data = {user: false, room: room};
+		//In case of logged in user, add it to the template
+		if (req.session.user !== undefined) data.user = req.session.user;
+		res.render('room', data);
+	} else {
+		//Chat room doesn't exists
+		res.redirect('/');
 	}
 });
 
 /** Get all the room data **/
+app.get('/rooms/get/:room_id', function(req, res){
+	var room_id = req.params.room_id;
+	if( room = osomtalk.getRoom(room_id)) {
+		res.send(room.getRoom());
+	}
+});
+
+/** Checks for username and take it in case is valid. **/
 app.get('/user/take/', function(req, res){
-	var username = req.query.username.toLowerCase().replace(/^\s\s*/, '').replace(/\s\s*$/, '');
-
-	/**Check For Empty**/
-	if (username=='') {
-		res.send({error: 'EMPTY'});
-		return true;
-	}
-
-	/**Check For Too Long**/
-	if (username.length > 12) {
-		res.send({error: 'TOO_LONG'});
-		return true;
-	}
-
-	/** Check For Duplicates **/
-	var match = false;
-	console.log(users);
-	var i = users.length-1;
-	for(var key in users) {
-		console.log("Checking " + users[key].username);
-		console.log(" Against " + username);
-    	if (users[key].username===username) {
-    		match = true;
-    		break;
-    	}
-    }
-	if(match) {
-		res.send({error: 'NAME_TAKEN'});
-		return true;
-	}
 	
-	if(req.session.identifier === undefined) {
-		console.log('New user requesting: ' + username);
-		req.session.identifier = utils.makeId(11);
-		req.session.username = username;
-		var hmac = crypto.createHmac('sha256', 'anyquerykey');
-		req.session.token  = hmac.update(req.session.username).digest('hex');
-		
-		users[req.session.identifier] = {
-			username: username,
-			token: req.session.token,
-			identifier: req.session.identifier
+	var username = osomtalk.validateUserName(req.query.username);
+
+	if (username.error!==undefined) {
+		res.send({error: username.error });
+
+	} else {
+		if ( !user=osomtalk.addUser({username:username}) ) {
+		res.send({error: 'NAME_TAKEN'});            
 		}
-	} /*else {
-	console.log('Current user requesting: ' + username);
-	req.session.username = username;
-	req.session.token  = hmac.update(req.session.username).digest('hex');
-	users[req.session.identifier].username = req.session.username;
-	users[req.session.identifier].token = req.session.token;
-	users[req.session.identifier].identifier = req.session.identifier;
-	}*/
-	res.send( {username:req.session.username, token: req.session.token} );
-	
+	}
+	req.session.user = user;
+	res.send(user);
 });
 
 /** creates a new room and then returns the generated id. **/
 app.post('/rooms/create', function(req, res){
-	/** Generates an unused room id **/
-	do {
-		id = utils.makeId(7);    
-	} while (rooms[id] !== undefined);
+	var room = osomtalk.addRoom({name:req.body.name});
+	console.log('Room Created: ' + room.id + '(' + room.name + ')');
+	res.send({id:room.id});
+});
 
-	room = new Room({id:id, name:req.body.name});
-	//room.subscribe(client);
-	rooms[id] = room;
+/** Start's the oAuth Dance (is much more natural in node by the way) **/
+app.get('/auth/twitter', function(req, res){
+	req.session.oauth = {};
+	req.session.oauth.referer = req.header('Referer');
+	if ( req.session.user===undefined ) {
+		osomtalk.oa.getOAuthRequestToken(function(error, oauth_token, oauth_token_secret, results) {
+			if (error) {
+				console.log(error);
+				res.send("yeah no. didn't work.")
+			} else {
+				req.session.oauth.token = oauth_token;
+				req.session.oauth.token_secret = oauth_token_secret;
+				res.redirect('https://twitter.com/oauth/authenticate?oauth_token='+oauth_token)
+			}
+		});
+	} else {
+		res.redirect(req.session.oauth.referer);    
+	}
+});
 
-	console.log('Room Created: ' + id + '(' + req.body.name + ')');
-	res.send({id:id});
+/** Coming back from twitter **/
+app.get('/auth/twitter/callback', function(req, res, next){
+	if (req.session.oauth) {
+		req.session.oauth.verifier = req.query.oauth_verifier;
+		var oauth = req.session.oauth;
+
+		osomtalk.oa.getOAuthAccessToken(oauth.token,oauth.token_secret,oauth.verifier, 
+			function(error, oauth_access_token, oauth_access_token_secret, results){
+				if (error){
+					console.log(error);
+					res.send("yeah something broke.");
+				} else {
+					req.session.user = osomtalk.addUser({
+						type: 'TWITTER',
+						username: results.screen_name,
+						twitter_id: results.user_id,
+						access_token:  oauth_access_token,
+						access_token_secret: oauth_access_token_secret
+					});
+					res.redirect(req.session.oauth.referer);
+				}
+			});
+	} else {
+		next(new Error("you're not supposed to be here."));
+	}
 });
 
 var server = http.createServer(app);
 var faye_server = new faye.NodeAdapter({mount: '/faye'});
 
 var extension = {
-    incoming : function(message, callback) {
-        if(message.channel.substring(0,10) === '/messages_') {
-        	var room_id = message.channel.substring(10);
-        	if ( (message.data.text!=='') && (rooms[room_id]!==undefined && users[message.data.identifier]!==undefined) ) {
-           		//console.log('Checking flooding on message');
-  		
-           		var sender ='';
-           		var block = '';
-           		var current_time = Math.round(+new Date()/1000);
-           		
-           		if ( message.data.text.length >1024 ) {
-					block = 'BLOCKED_LARGE';
-           		} else if ( clients[message.clientId] === undefined ) {
-           			clients[message.identifier] = {
-           				last: 0,
-           				times: []
-           			};
-           		} else if ( (current_time - clients[message.identifier].last) > 1 ){
-           		    var i_time = 0;
-           		    do {
-           		    	i_time = clients[message.identifier].times.shift();
-           		    } while( (current_time - i_time) > 60 );
-           		    clients[message.identifier].times.unshift(i_time);
-         			
-         			console.log(clients[message.identifier].times.length);
-         			
-         			if ( clients[message.identifier].times.length > 15) {
-         				console.log('Blocking ' + message.identifier + ' For _flooding_');
-         				block = 'BLOCKED_FLOODING';
-         			}
-           		} else {
-           			console.log('Blocking ' + message.identifier + 'For _fast typing_');
-           			block = 'BLOCKED_TYPING';
-           		}
-           		clients[message.identifier].last = current_time;
-           		clients[message.identifier].times.push(current_time);
-           		
-           		//console.log(clients[message.clientId].times.length);
-           		//console.log(clients[message.clientId].times);
-           		//console.log(current_time - 60);
-           		var data = {
-					data: {
-						time: Math.round(+new Date()/1000),
-						text: message.data.text,
-						username: users[message.data.identifier].username,
-						identifier: message.identifier,
+	incoming : function(message, callback) {
+		if(message.channel.substring(0,10) === '/messages_') {
+			var message_text = utils.trim(message.data.text);
+			var identifier   = message.data.identifier;
+			var room_id      = message.channel.substring(10);
+			
+			var block='';
+			if ( osomtalk.rooms[room_id]!==undefined && osomtalk.users[identifier]!==undefined ) {
+				block = 'NOT_EXIST';
+			} else {
+				result = osomtalk.validateMessage(message_text);
+				if (result.error !==undefined) {
+					block = result.error; //EMPTY & TOO_LONG
+				} else {
+					result = osomtalk.validateSpam(identifier, room_id)
+					if (result.error !== undefined) {
+						block = result.error; //TYPING & FLOODING
 					}
 				}
-           		if (!block) {
-	           		//console.log('Publishing Message to room: ' + room_id);
-					rooms[room_id].addMessage(message.data);	
-					client.publish('/server_messages_' + room_id, data);
-				} else {
-					console.log('returning the message to room ' + room_id);
-					message.error = block;
-				}
 			}
-            
+			if (!block) {
+				var data = {
+					data: {
+						time: Math.round(+new Date()/1000),
+						text: message_text,
+						username: osomtalk.users[identifier].username,
+						identifier: identifier,
+					}
+				}
+				osomtalk.rooms[room_id].addMessage(message.data);    
+				client.publish('/server_messages_' + room_id, data);
+			} else {
+				console.log('returning the message to room ' + room_id);
+				message.error = block;
+			}
+			
 		}
-        callback(message);
-    }
+		callback(message);
+	}
 };
 faye_server.addExtension(extension);
 
-
-//server.listen(3000);
-server.listen(80);
-
+server.listen(osomtalk.port);
 faye_server.attach(server);
 
-console.log("Express server listening on port 80");
+console.log("Express server listening on port " + osomtalk.port);
 
-//client = new faye.Client('http://localhost:3000/faye');
-client = new faye.Client('http://osomtalk.jit.su/faye');
+client = new faye.Client(osomtalk.url + '/faye');
 
-rooms['ibgdl'] = new Room({id:'ibgdl', name:'OsomTalk Beta, For the IBGDL Crew!'}); 
-//rooms['ibgdl'].subscribe(client);
+rooms['ibgdl'] = new Room({id:'ibgdl', name:'IBGDL Crew!'}); 
+rooms['osombeta'] = new Room({id:'osombeta', name:'OsomTalk Beta'}); 
+rooms['hackergarage'] = new Room({id:'hackergarage', name:'HackerGarage'}); 
+

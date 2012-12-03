@@ -8,6 +8,10 @@ var Utils = function() {
  		return html;
  	}
  	
+ 	self.trim = function(string) {
+ 		return string.req.query.username.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+ 	}
+	
  	self.getPreviewsHTML = function(text) {
 		var previews = [];
 		var previewHTML = '';
