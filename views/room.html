@@ -83,7 +83,7 @@
 			<h1 class="span6">${room.name}</h1>
 			<form class="span6" style="text-align:right">
 				Give your friends this link to invite them to this room:<br/>
-				<input  class="input-xlarge" style="font-size:30px; height:1.1em" type="text" value="https://osomtalk.jit.su/room/${room.id}" onclick="this.select();"/>
+				<input  class="input-xlarge" style="font-size:30px; height:1.1em" type="text" value="${frontEndConfig.url}/room/${room.id}" onclick="this.select();"/>
 				<span class="hide" id="room_id">${room.id}</span>
 			</form>
 		</div>

@@ -5,7 +5,7 @@
 		var self = {};
 
 		self.url			= frontEndConfig.url;
-		self.port			= frontEndConfig.port || 80;
+		self.port			= appConfig.port || 80;
 		self.rooms			= config.rooms || [];
 		self.users 			= config.users || [];
 		self.spam_filter	= [];

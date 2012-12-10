@@ -1,5 +1,5 @@
 $(document).ready(function(){
-	window.client = new Faye.Client(frontEndConfig.url + "/faye");
+	window.client = new Faye.Client(FrontEndConfig.url + "/faye");
 	
 	var room_id = $('#room_id').text();
 	room = new Room({id:room_id});

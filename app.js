@@ -8,9 +8,8 @@ var express = require('express')
 , cons      = require('consolidate')
 , OsomTalk  = require('./models/osomtalk.js').OsomTalk
 
-global.appConfig = require('./app_config.js').appConfig;
-global.frontEndConfig = require('./public/js/frontend_config.js').frontEndConfig;
-
+global.appConfig = require('./app_config.js').AppConfig;
+global.frontEndConfig = require('./public/js/frontend_config.js').FrontEndConfig;
 global.crypto = require('crypto');
 global.OAuth = require('oauth').OAuth;
 global.User = require('./public/js/user.js').User;
@@ -94,7 +93,7 @@ app.post('/rooms/create', function(req, res){
 		return false;
 	}
 	
-	var room = new Room({id:id, name:req.body.name});
+	var room = new osomtalk.addRoom({name:req.body.name});
 	var welcomeMessage = 
 	   ['#Welcome to OsomTalk',
 		'OsomTalk isn\'t like any other chat out there, here you can.',
@@ -110,8 +109,7 @@ app.post('/rooms/create', function(req, res){
 
 	room.addMessage({
 		text: welcomeMessage,
-		username: 'OsomTalk Welcome Bot',
-		type: 'OFFICIAL',
+		user: {username: 'OsomTalk Welcome Bot', type: 'OFFICIAL'},
 		identifier: 'OSOM'
 	});
 
@@ -209,7 +207,7 @@ var extension = {
 };
 faye_server.addExtension(extension);
 
-server.listen(osomtalk.port);
+server.listen(appConfig.port);
 faye_server.attach(server);
 
 console.log("Express server listening on port " + osomtalk.port);
