@@ -103,7 +103,7 @@ app.post('/rooms/create', function(req, res){
 	
 	var room = new Room({id:id, name:req.body.name});
 	var welcomeMessage = 
-	   ['##Welcome to OsomTalk',
+	   ['#Welcome to OsomTalk',
 		'OsomTalk isn\'t like any other chat out there, here you can.',
 		'',
 		'* Use MarkDown Syntax -> http://daringfireball.net/projects/markdown/syntax',
