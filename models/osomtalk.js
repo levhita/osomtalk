@@ -10,21 +10,32 @@
 		self.users 			= config.users || [];
 		self.spam_filter	= [];
 		
+		self.consumer_key			= config.consumer_key||'';
+		self.consumer_secret		= config.consumer_secret||'';
+
 		self.oa = new OAuth (
 			"https://api.twitter.com/oauth/request_token",
 			"https://api.twitter.com/oauth/access_token",
-			self.consumer_key, self.consumer_secret,
+			config.consumer_key, config.consumer_secret,
 			"1.0", self.url + "/auth/twitter/callback",
 			"HMAC-SHA1"
 		);
 		
 		/** Generates an unused room id  and then store the room in it **/
 		self.addRoom = function(room){
-			do {
-				room_id = utils.makeId(7);    
-			} while (self.rooms[room_id] !== undefined);
-
-			room = new Room({id:room_id, name:req.body.name, type:'PUBLIC'});
+			if(room.room_id == undefined) {
+				do {
+					room_id = utils.makeId(7);    
+				} while (self.rooms[room_id] !== undefined);
+			} else {
+				room_id = room.room_id;
+				if(self.rooms[room_id] !== undefined){
+					console.log ('Room id already taken: ' + room_id);
+					return false;
+				}
+			}
+			
+			room = new Room({id:room_id, name:room.name, type:'PUBLIC'});
 			return self.rooms[room_id] = room;
 		}
 
@@ -32,7 +43,7 @@
 			if (self.rooms[room_id]===undefined) {
 				return false;
 			}
-			return self.rooms[room_id].getRoom();
+			return self.rooms[room_id];
 		}
 
 		/** 
@@ -41,9 +52,17 @@
 		 *  @todo think about a better bussiness logic to allow FB login
 		 **/
 		self.addUser = function(user) {
+			/**	Cleanse the name up to a identifier status **/
+			
+			identifier = utils.createIdentifier(user.username);
+			console.log(identifier);
+			
 			if ( self.users[identifier]!==undefined && user.type!=="TWITTER") {
 				return false;
 			}
+			
+			user.username = user.username.trim();
+			user.username.identifier= identifier;
 			return self.users[identifier] = user;
 		}
 

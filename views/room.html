@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<title>OsomTalk - ${room.id}</title>
+	<title>${room.name} - OsomTalk</title>
 	<meta name="viewport" content="width = device-width">
 	<link href="/css/bootstrap.css" rel="stylesheet">
 	<style>
@@ -73,67 +73,82 @@
 					<div class="nav-collapse collapse">
 						<ul class="nav">
 							<li><a href="/">Home</a></li>
-							<li><a href="#about">About</a></li>
-							<li><a href="#contact">Contact</a></li>
-							<li><a href="#" onclick="activateNotifications()" >Allow Notifications</a></li>
 						</ul>
 					</div><!--/.nav-collapse -->
 				</div>
 			</div>
 		</div>
 		
-
+		<div class="row row-fluid">
+			<h1 class="span6">${room.name}</h1>
+			<form class="span6" style="text-align:right">
+				Give your friends this link to invite them to this room:<br/>
+				<input  class="input-xlarge" style="font-size:30px; height:1.1em" type="text" value="https://osomtalk.jit.su/room/${room.id}" onclick="this.select();"/>
+				<span class="hide" id="room_id">${room.id}</span>
+			</form>
+		</div>
 		
-		<div class="page-header">
-			<h1 id=""><span id="room_id">${rooom.id}</span> - ${room.name}</h1>
-		</div>
-		<div id="alert_place_holder">
-		</div>
-		<div class="row-fluid">
-
+		<div id="alert_place_holder"></div>
+		
+		<div class="row-fluid clearfix">
+			{{if user == false }}
+			<h2 class="row-fluid offset2 span8">Please login to continue...</h2>
+			<div class="row-fluid offset2 span8">
+				<div class="span5" style="text-align:center">
+					<br/>
+					<a href="/auth/twitter" class="btn btn-primary btn-large">Login with Twitter</a>
+				</div>
+				<div class="span2" style="text-align:center">
+					<br/>
+					<h2>OR</h2>
+				</div>
+				<form id="username_div"class="span5 validate">
+					<p>Choose an Anonymous Nickname:</p>
+					<input type="text" name="username" id="username" placeholder="" class="span12"/><br/>
+					<a href="#" onclick="takeName();" class="pull-right btn btn-primary btn-medium">Login</a>
+				</form>
+			</div>
+			{{else}}			
 			<div class="span4">
 				<div id="utility_div">
-					{{if user == false }}
-						<div id="username_div">
-							<form>
-								<input type="text" name="username" id="username" placeholder="Choose Your Awesome Username" class="span12"/>
-								<a href="#" onclick="takeName();" class="btn btn-primary btn-block">Use it</a>
-							</form>
-						</div>
-					{{else}}
 						<form class="form-inline">
-						<h3>${user.username}</h3>
-						<textarea rows="5" class="span12" name="message_input" id="message_input" placeholder="Write Your Message"></textarea>
-						<input type="hidden" name="token" id="token" value="${user.token}"/>
-						<input type="hidden" name="identifier" id="identifier" value="${user.identifier}"/>
-						<br/><br/>
-						<a href="#" onclick="sendMessage()" class="btn btn-primary btn-block">
-							Send Message
-						</a>
+							<h3>${user.username}</h3>
+							<textarea rows="5" class="span12" name="message_input" id="message_input" placeholder="Write Your Message"></textarea>
+							<input type="hidden" name="token" id="token" value="${user.token}"/>
+							<input type="hidden" name="identifier" id="identifier" value="${user.identifier}"/>
+							<br/><br/>
+							<a href="#" onclick="sendMessage()" class="btn btn-primary btn-block">
+								Send Message
+							</a>
 						</form>
 						<ul>
 							<li><small>Uses <a href="http://daringfireball.net/projects/markdown/syntax" target="_blank">Markdown's syntax</a></small>
 							<li><small>Use SHIFT+ENTER to send you message like a boss.</small>
 						</ul>
-					{{/if}}
 				</div>
-				<div>
-					<button id="show_previews" type="button" class="btn"><i class="icon-circle-arrow-down"></i> Show Previews</button>
-					<button id="hide_previews" type="button" class="btn"><i class="icon-circle-arrow-up"></i> Hide Previews</button>
+				
+				<div class="row-fluid">
+					<div class="row-fluid">
+						<button id="show_previews" type="button" class="btn"><i class="icon-circle-arrow-down"></i> Show Media</button>
+						<button id="hide_previews" type="button" class="btn"><i class="icon-circle-arrow-up"></i> Hide Media</button>
+					</div>
+					<div class="row-fluid">
+						<button id="notifications_button" type="button" class="btn"><i class="icon-exclamation-sign"></i> Show Notifications</button>
+					</div>
 				</div>
+				
 			</div> 
 			
 			<div class="span8">
-				<h2>Messages</h2>
-				<div id="messages">
-
-				</div>
+				<h3>Messages:</h3>
+				<div id="messages"></div>
 			</div>
-			
+			{{/if}}
 		</div>
-		
 	</div><!--Container -->
 	
+
+
 	<!-- Le Scripts -->
 	<script type="text/javascript" src="/js/faye-browser-min.js"></script>
 	<script type="text/javascript" src="/js/bootstrap.min.js"></script>

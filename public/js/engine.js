@@ -48,6 +48,9 @@ $(document).ready(function(){
 	 	$(".toggle_previews").html('<i class="icon-circle-arrow-up"></i> Hide Previews');
 	 	$(".previews").show();
 	 });
+	 $('#notifications_button').bind('click', function(e) {
+	 	activateNotifications();
+	 });
 });
 
 function sendMessage() {
@@ -86,10 +89,8 @@ function sendMessage() {
 }
 
 function activateNotifications () {
-	console.log('Activating notifications');
 	if (window.webkitNotifications) {
-  		console.log("Notifications are supported!");
-	    if (window.webkitNotifications.checkPermission() == 0) { // 0 is PERMISSION_ALLOWED
+  		if (window.webkitNotifications.checkPermission() == 0) { // 0 is PERMISSION_ALLOWED
 		    var notification = window.webkitNotifications.createNotification(
 	        '/img/favicon.png', 'OsomTalk', 'Notifications are already active');
 	        notification.ondisplay = function() {
@@ -101,6 +102,12 @@ function activateNotifications () {
 		} else {
 			window.webkitNotifications.requestPermission();
 		}
+	} else {
+		$('#alert_place_holder').html('<div class="alert"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> Your Browser doesn\'t support notifications.</div>');
+  		$('#alert_place_holder').fadeIn();
+  		setTimeout(function() {
+ 			$('#alert_place_holder').fadeOut();
+  		} , 3000); 
 	}
 };
 

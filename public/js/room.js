@@ -41,7 +41,7 @@
 			if ( typeof window  !== 'undefined' ) {
 				self.renderMessage(message);
 				if (window.webkitNotifications.checkPermission() == 0) { // 0 is PERMISSION_ALLOWED
-					var text = (message.text >30)? message.text.substring(0,27) + '...': message.text;
+					var text = (message.text >30)? message.text.substring(0,20) + '...': message.text;
 					var notification = window.webkitNotifications.createNotification(
 						'/img/favicon.png', 'OsomTalk', text);
 					notification.ondisplay = function() {

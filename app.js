@@ -13,6 +13,11 @@ var express = require('express')
 , User      = require('./public/js/user.js').User
 , utils     = require('./public/js/utils.js').utils;
 
+global.OAuth = OAuth;
+global.User = User;
+global.Room = Room;
+global.utils = utils;
+
 var osomtalk = new OsomTalk({
 	url: "http://localhost:3000",
 	port: 3000,
@@ -74,15 +79,14 @@ app.get('/rooms/get/:room_id', function(req, res){
 
 /** Checks for username and take it in case is valid. **/
 app.get('/user/take/', function(req, res){
-	
-	var username = osomtalk.validateUserName(req.query.username);
-
-	if (username.error!==undefined) {
+	var response = osomtalk.validateUserName(req.query.username);
+	if (  response !== true) {
 		res.send({error: username.error });
-
+		return false;
 	} else {
-		if ( !user=osomtalk.addUser({username:username}) ) {
-		res.send({error: 'NAME_TAKEN'});            
+		var user = osomtalk.addUser({username: req.query.username})
+		if ( user == false) {
+			res.send({error: 'NAME_TAKEN'});            
 		}
 	}
 	req.session.user = user;
@@ -91,6 +95,10 @@ app.get('/user/take/', function(req, res){
 
 /** creates a new room and then returns the generated id. **/
 app.post('/rooms/create', function(req, res){
+	if(req.body.name.length > 20) {
+		res.send({error:'TOO_LONG'});	
+		return false;
+	}
 	var room = osomtalk.addRoom({name:req.body.name});
 	console.log('Room Created: ' + room.id + '(' + room.name + ')');
 	res.send({id:room.id});
@@ -196,7 +204,11 @@ console.log("Express server listening on port " + osomtalk.port);
 
 client = new faye.Client(osomtalk.url + '/faye');
 
-rooms['ibgdl'] = new Room({id:'ibgdl', name:'IBGDL Crew!'}); 
+osomtalk.addRoom({room_id:'ibgdl', name:'IBGDL'});
+osomtalk.addRoom({room_id:'osombeta', name:'OsomTalk Beta'});
+osomtalk.addRoom({room_id:'hackergarage', name:'HackerGarage'});
+
+/*rooms['ibgdl'] = new Room({id:'ibgdl', name:'IBGDL Crew!'}); 
 rooms['osombeta'] = new Room({id:'osombeta', name:'OsomTalk Beta'}); 
-rooms['hackergarage'] = new Room({id:'hackergarage', name:'HackerGarage'}); 
+rooms['hackergarage'] = new Room({id:'hackergarage', name:'HackerGarage'}); */
 
