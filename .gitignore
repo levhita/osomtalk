@@ -12,3 +12,6 @@ results
 npm-debug.log
 node-modules
 *~
+public/js/frontend_config.js
+app_config.js
+node_modules

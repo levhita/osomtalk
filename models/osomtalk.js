@@ -4,19 +4,16 @@
 		config = config || {};
 		var self = {};
 
-		self.url			= config.url;
-		self.port			= config.port || 80;
+		self.url			= frontEndConfig.url;
+		self.port			= frontEndConfig.port || 80;
 		self.rooms			= config.rooms || [];
 		self.users 			= config.users || [];
 		self.spam_filter	= [];
 		
-		self.consumer_key			= config.consumer_key || '';
-		self.consumer_secret		= config.consumer_secret || '';
-
 		self.oa = new OAuth (
 			"https://api.twitter.com/oauth/request_token",
 			"https://api.twitter.com/oauth/access_token",
-			config.consumer_key, config.consumer_secret,
+			appConfig.consumer_key, appConfig.consumer_secret,
 			"1.0", self.url + "/auth/twitter/callback",
 			"HMAC-SHA1"
 		);

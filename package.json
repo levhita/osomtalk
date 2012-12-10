@@ -10,7 +10,8 @@
     "consolidate": "*",
     "jqtpl": ">= 0.0.0",
     "less-middleware": "*",
-    "faye": "*"
+    "faye": "*",
+    "oauth": "~0.9.8"
   },
   "subdomain": "osomtalk",
   "engines": {

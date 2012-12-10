@@ -6,25 +6,18 @@ var express = require('express')
 , faye      = require('faye')
 , jqtpl     = require("jqtpl")
 , cons      = require('consolidate')
-, crypto    = require('crypto')
-, OAuth     = require('oauth').OAuth
 , OsomTalk  = require('./models/osomtalk.js').OsomTalk
-, Room      = require('./public/js/room.js').Room
-, User      = require('./public/js/user.js').User
-, utils     = require('./public/js/utils.js').utils;
 
-global.OAuth = OAuth;
-global.User = User;
-global.Room = Room;
-global.utils = utils;
-global.crypto = crypto;
+global.appConfig = require('./app_config.js').appConfig;
+global.frontEndConfig = require('./public/js/frontend_config.js').frontEndConfig;
 
-var osomtalk = new OsomTalk({
-	url: "http://localhost:3000",
-	port: 3000,
-	consumer_key: "your_consumer_key",
-	consumer_secret: "your_consumer_secret"
-});
+global.crypto = require('crypto');
+global.OAuth = require('oauth').OAuth;
+global.User = require('./public/js/user.js').User;
+global.Room = require('./public/js/room.js').Room;
+global.utils = require('./public/js/utils.js').utils;
+
+var osomtalk = new OsomTalk();
 
 var app = express();
 
@@ -118,7 +111,7 @@ app.post('/rooms/create', function(req, res){
 	room.addMessage({
 		text: welcomeMessage,
 		username: 'OsomTalk Welcome Bot',
-		type: 'OFFICIAL'
+		type: 'OFFICIAL',
 		identifier: 'OSOM'
 	});
 

@@ -42,7 +42,7 @@
 				if (window.webkitNotifications.checkPermission() == 0) { // 0 is PERMISSION_ALLOWED
 					var text = (message.text >30)? message.text.substring(0,20) + '...': message.text;
 					var notification = window.webkitNotifications.createNotification(
-						'/img/favicon.png', self.name, message.username +": " + text);
+						'/img/favicon.png', self.name, message.user.username +": " + text);
 					notification.ondisplay = function() {
 						setTimeout(function() {
 							notification.cancel();

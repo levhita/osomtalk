@@ -1,7 +1,5 @@
 $(document).ready(function(){
-	window.client = new Faye.Client('http://localhost:3000/faye');
-	//window.client = new Faye.Client('http://osomtalk.jit.su/faye');
-	
+	window.client = new Faye.Client(frontEndConfig.url + "/faye");
 	
 	var room_id = $('#room_id').text();
 	room = new Room({id:room_id});
