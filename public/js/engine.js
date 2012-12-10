@@ -38,14 +38,12 @@ $(document).ready(function(){
 	 });
 
 	 $('#hide_previews').bind('click', function(e) {
-	 	console.log('hidding');
-	 	$(".toggle_previews").html('<i class="icon-circle-arrow-down"></i> Show Previews');
+	 	$(".toggle_previews").html('<i class="icon-circle-arrow-down"></i> Show Media');
 	 	$(".previews").hide();
 	 });
 
 	 $('#show_previews').bind('click', function(e) {
-	 	console.log('showing');
-	 	$(".toggle_previews").html('<i class="icon-circle-arrow-up"></i> Hide Previews');
+	 	$(".toggle_previews").html('<i class="icon-circle-arrow-up"></i> Hide Media');
 	 	$(".previews").show();
 	 });
 	 $('#notifications_button').bind('click', function(e) {
@@ -60,7 +58,6 @@ function sendMessage() {
 	if (text!=='') {
 		var publication = window.client.publish('/messages_' + room_id, {
 			text: text,
-			username: $('#user').val(),
 			identifier: $('#identifier').val(),
 			token: $('#token').val()
 		});
@@ -113,12 +110,12 @@ function activateNotifications () {
 
 function tooglePreview(element){
 	var div = $(element).parent();
-	if ( $(element).html() === '<i class="icon-circle-arrow-up"></i> Hide Previews') {
+	if ( $(element).html() === '<i class="icon-circle-arrow-up"></i> Hide Media') {
 		div.children(".previews").hide();	
-		$(element).html('<i class="icon-circle-arrow-down"></i> Show Previews');
+		$(element).html('<i class="icon-circle-arrow-down"></i> Show Media');
 	} else {
 		div.children(".previews").show();	
-		$(element).html('<i class="icon-circle-arrow-up"></i> Hide Previews');
+		$(element).html('<i class="icon-circle-arrow-up"></i> Hide Media');
 	}
 }
 
@@ -147,37 +144,3 @@ function takeName() {
 		}
 	});
 };
-
-
-	/*var room_id = $('#room_id').text();
-	var username = $("#username").val();
-	
-	if (text!=='username') {
-		var publication = window.client.publish('/join_messages_' + room_id, {
-			username: username,
-		});
-		publication.callback(function() {
-
-  			/*$('#message_input').val('');
-			$('#message_input').focus();
-		});
-		publication.errback(function(error) {
-  			if(error.message=="BLOCKED_TYPING") {
-  				$('#alert_place_holder').html('<div class="alert"><button type="button" class="close" data-dismiss="alert">×</button><strong>Warning!</strong> Slow down cowboy!, you don\'t want spam everyone do you?</div>');
-  				$('#alert_place_holder').fadeIn();
-  				setTimeout(function() {
- 					$('#alert_place_holder').fadeOut();
-  				} , 3000); 
-  			} else if (error.message=="BLOCKED_LARGE" ){
-  				$('#alert_place_holder').html('<div class="alert"><button type="button" class="close" data-dismiss="alert">×</button><strong>Warning!</strong> Your message is too long and you should feel bad.</div>');
-  				$('#alert_place_holder').fadeIn();
-  				setTimeout(function() {
- 					$('#alert_place_holder').fadeOut();
-  				} , 3000); 
-  			} else if(error.message=="BLOCKED_FLOODING") {
-  				window.location.href="/"
-  			}
-  		});
-	}*/
-
-//}

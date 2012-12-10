@@ -10,8 +10,8 @@
 		self.users 			= config.users || [];
 		self.spam_filter	= [];
 		
-		self.consumer_key			= config.consumer_key||'';
-		self.consumer_secret		= config.consumer_secret||'';
+		self.consumer_key			= config.consumer_key || '';
+		self.consumer_secret		= config.consumer_secret || '';
 
 		self.oa = new OAuth (
 			"https://api.twitter.com/oauth/request_token",
@@ -26,10 +26,10 @@
 			if(room.room_id == undefined) {
 				do {
 					room_id = utils.makeId(7);    
-				} while (self.rooms[room_id] !== undefined);
+				} while (self.roomExists(room_id) );
 			} else {
 				room_id = room.room_id;
-				if(self.rooms[room_id] !== undefined){
+				if(self.roomExists(room_id)){
 					console.log ('Room id already taken: ' + room_id);
 					return false;
 				}
@@ -40,7 +40,7 @@
 		}
 
 		self.getRoom = function(room_id) {
-			if (self.rooms[room_id]===undefined) {
+			if (!self.roomExists(room_id)) {
 				return false;
 			}
 			return self.rooms[room_id];
@@ -53,17 +53,37 @@
 		 **/
 		self.addUser = function(user) {
 			/**	Cleanse the name up to a identifier status **/
-			
 			identifier = utils.createIdentifier(user.username);
-			console.log(identifier);
-			
 			if ( self.users[identifier]!==undefined && user.type!=="TWITTER") {
 				return false;
 			}
 			
 			user.username = user.username.trim();
-			user.username.identifier= identifier;
+			user.identifier= identifier;
+			user = new User(user);
 			return self.users[identifier] = user;
+		}
+		
+		self.roomExists = function (room_id) {
+			if(room_id==undefined) {
+				console.log("passing undefined to roomExists");
+			}
+			return (self.rooms[room_id]!==undefined);
+		}
+		
+		self.userExists = function(indentifier) {
+			if(room_id==undefined) {
+				console.log("passing undefined to userExists");
+			}
+			return (self.users[identifier]!==undefined);	
+		}
+
+		self.getUser = function(identifier) {
+			/**	Cleanse the name up to a identifier status **/
+			if ( !self.userExists(identifier) ) {
+				return false;
+			}
+			return self.users[identifier];
 		}
 
 		self.validateMessage = function(text) {
@@ -89,7 +109,7 @@
 				block = 'BLOCKED_TYPING';
 			} else {
 				/** Checks for more than 15 messages in less than a minute **/
-				var i_time = 0;
+				/*var i_time = 0;
 				do {
 					i_time = self.spam_filter[identifier].times.shift();
 				} while( (current_time - i_time) > 60 );
@@ -97,7 +117,7 @@
 				if ( self.spam_filter[identifier].times.length > 15) {
 					console.log('Blocking ' + identifier + ' for Flooding');
 					block = 'BLOCKED_FLOODING';
-				}
+				}*/
 			}
 			self.spam_filter[identifier].last = current_time;
 			self.spam_filter[identifier].times.push(current_time);

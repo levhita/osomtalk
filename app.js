@@ -17,12 +17,13 @@ global.OAuth = OAuth;
 global.User = User;
 global.Room = Room;
 global.utils = utils;
+global.crypto = crypto;
 
 var osomtalk = new OsomTalk({
 	url: "http://localhost:3000",
 	port: 3000,
-	consumer_key: "WRUKIvt5FAsvs43NKnYJzA",
-	consumer_secret: "g2AIdoR16IB6iDXPnKf8fJZMVZsUDOswikl7VQU19k"
+	consumer_key: "your_consumer_key",
+	consumer_secret: "your_consumer_secret"
 });
 
 var app = express();
@@ -162,7 +163,7 @@ var extension = {
 			var room_id      = message.channel.substring(10);
 			
 			var block='';
-			if ( osomtalk.rooms[room_id]!==undefined && osomtalk.users[identifier]!==undefined ) {
+			if ( !osomtalk.roomExists(room_id) && !osomtalk.userExists(identifier) ) {
 				block = 'NOT_EXIST';
 			} else {
 				result = osomtalk.validateMessage(message_text);
@@ -176,21 +177,18 @@ var extension = {
 				}
 			}
 			if (!block) {
+				var user = osomtalk.getUser(identifier);
 				var data = {
-					data: {
 						time: Math.round(+new Date()/1000),
 						text: message_text,
-						username: osomtalk.users[identifier].username,
+						user: {username:user.username, type:user.type},
 						identifier: identifier,
-					}
 				}
-				osomtalk.rooms[room_id].addMessage(message.data);    
+				osomtalk.rooms[room_id].addMessage(data);    
 				client.publish('/server_messages_' + room_id, data);
 			} else {
-				console.log('returning the message to room ' + room_id);
 				message.error = block;
 			}
-			
 		}
 		callback(message);
 	}
