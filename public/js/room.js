@@ -1,6 +1,6 @@
 (function (global){
 
-	var Room = function(config){
+	var Room = function(config) {
 		config = config || {};
 		var self = {};
 
@@ -32,16 +32,15 @@
 		self.addMessage = function(data) {
 			var message = {
 				time: Math.round(+new Date()/1000),
-				user: 'Test',
 				text: data.text,
-				username: data.username,
+				user: data.user,
 				identifier: data.identifier
 			}
 
 			if ( typeof window  !== 'undefined' ) {
 				self.renderMessage(message);
 				if (window.webkitNotifications.checkPermission() == 0) { // 0 is PERMISSION_ALLOWED
-					var text = (message.text >30)? message.text.substring(0,27) + '...': message.text;
+					var text = (message.text >30)? message.text.substring(0,20) + '...': message.text;
 					var notification = window.webkitNotifications.createNotification(
 						'/img/favicon.png', self.name, message.username +": " + text);
 					notification.ondisplay = function() {
@@ -52,50 +51,56 @@
 					notification.show();
 				}			
 			} else {
-			//If you ever need to have the messages as data on the client side, take this line out of the if
-			self.messages.push(message);
-			if ( self.messages.length > 100 ) {
-				//Maximum of 100 messages in memory for each chat on the server chat
-				console.log('deleting extra message', self.messages.shift());
+				//If you ever need to have the messages as data on the client side, take this line out of the if
+				self.messages.push(message);
+				if ( self.messages.length > 100 ) {
+					//Maximum of 100 messages in memory for each chat on the server chat
+					console.log('deleting extra message', self.messages.shift());
+				}
 			}
-		}
-	};
+		};
 	
-	self.renderMessage = function (message) {
-		var previewsHTML = utils.getPreviewsHTML(message.text);
-		var escapedName = message.username.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-		$('#messages').prepend('<div class="message"><span class="time">'+message.time +'</span> : <span class="user">' + escapedName + '</span><br/>' + utils.markdown(message.text) + '</div>'+previewsHTML+'<hr/>');
-	}
-	
-	/** renders the chat **/
-	self.renderRoom = function() {
-		/** Render Messages **/
-		for(var i = 0; i < self.messages.length; i++) {
-			self.renderMessage(self.messages[i]);
-		}
-	};
-	
-	/** Connections with web services **/
-	/** Gets full room data **/
-	self.getRoomData = function(callback){
-		$.ajax({
-			url: '/rooms/get/'+ self.id,
-			success: function(data) {
-				self.name = data.name;
-				self.users = data.users;
-				self.messages = data.messages;
-				callback();
+		self.renderMessage = function (message) {
+			var previewsHTML = utils.getPreviewsHTML(message.text);
+			var escapedName = message.user.username.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+			if(message.user.type=='TWITTER') {
+				$('#messages').prepend('<div class="message"><span class="time">'+message.time +'</span> : <span class="user">' + escapedName + '</span> (<a class="muted" target="_BLANK" href="http://twitter.com/'+message.user.username+'">@'+message.user.username+'</a>)<br/>' + utils.markdown(message.text) + '</div>'+previewsHTML+'<hr/>');	
+			} else {
+				$('#messages').prepend('<div class="message"><span class="time">'+message.time +'</span> : <span class="user">' + escapedName + '</span><br/>' + utils.markdown(message.text) + '</div>'+previewsHTML+'<hr/>');
 			}
-		});
+			
+		}
+		
+		/** renders the chat **/
+		self.renderRoom = function() {
+			/** Render Messages **/
+			for(var i = 0; i < self.messages.length; i++) {
+				self.renderMessage(self.messages[i]);
+			}
+		};
+		
+		/** Connections with web services **/
+		/** Gets full room data **/
+		self.getRoomData = function(callback){
+			$.ajax({
+				url: '/rooms/get/'+ self.id,
+				success: function(data) {
+					console.log(data);
+					self.name = data.name;
+					self.users = data.users;
+					self.messages = data.messages;
+					callback();
+				}
+			});
+		};
+
+		self.subscribe = function(client) {
+			client.subscribe('/server_messages_'+ self.id, function(message) {
+				self.addMessage(message);
+			});
+		}
+		return self;
 	};
 
-	self.subscribe = function(client) {
-		client.subscribe('/server_messages_'+ self.id, function(message) {
-			self.addMessage(message.data);
-		});
-	}
-	return self;
-};
-
-global.Room = Room;
+	global.Room = Room;
 }(typeof window  === 'undefined' ? exports : window));
