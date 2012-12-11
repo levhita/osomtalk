@@ -36,12 +36,12 @@ $(document).ready(function(){
 	 });
 
 	 $('#hide_previews').bind('click', function(e) {
-	 	$(".toggle_previews").html('<i class="icon-circle-arrow-down"></i> Show Media');
+	 	$(".toggle_previews").html('<i class="icon-circle-arrow-down icon-white"></i> Show Media');
 	 	$(".previews").hide();
 	 });
 
 	 $('#show_previews').bind('click', function(e) {
-	 	$(".toggle_previews").html('<i class="icon-circle-arrow-up"></i> Hide Media');
+	 	$(".toggle_previews").html('<i class="icon-circle-arrow-up icon-white"></i> Hide Media');
 	 	$(".previews").show();
 	 });
 	 $('#notifications_button').bind('click', function(e) {
@@ -108,12 +108,12 @@ function activateNotifications () {
 
 function tooglePreview(element){
 	var div = $(element).parent();
-	if ( $(element).html() === '<i class="icon-circle-arrow-up"></i> Hide Media') {
+	if ( $(element).html() === '<i class="icon-circle-arrow-up icon-white"></i> Hide Media') {
 		div.children(".previews").hide();	
-		$(element).html('<i class="icon-circle-arrow-down"></i> Show Media');
+		$(element).html('<i class="icon-circle-arrow-down icon-white"></i> Show Media');
 	} else {
 		div.children(".previews").show();	
-		$(element).html('<i class="icon-circle-arrow-up"></i> Hide Media');
+		$(element).html('<i class="icon-circle-arrow-up icon-white"></i> Hide Media');
 	}
 }
 

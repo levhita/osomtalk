@@ -58,7 +58,7 @@ var Utils = function() {
 				}
 			});
 			if(previews.length > 0) {
-				previewHTML += '<div class="preview_container"><button type="button" class="pull-right toggle_previews btn btn-small" onclick="tooglePreview(this);"><i class="icon-circle-arrow-up"></i> Hide Media</button><br/><br/><div class="previews">';
+				previewHTML += '<div class="preview_container"><button type="button" class="pull-right toggle_previews btn btn-smaller btn-inverse" onclick="tooglePreview(this);"><i class="icon-circle-arrow-up icon-white"></i> Hide Media</button><br/><br/><div class="previews">';
 				previews.forEach( function(entry) {
 					previewHTML += entry + " ";
 				});
