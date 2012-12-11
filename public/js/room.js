@@ -63,10 +63,13 @@
 		self.renderMessage = function (message) {
 			var previewsHTML = utils.getPreviewsHTML(message.text);
 			var escapedName = message.user.username.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+			var date = new Date(message.time * 1000);
+			var date = utils.getLocaleShortDateString(date) + " " + date.toLocaleTimeString();
+			
 			if(message.user.type=='TWITTER') {
-				$('#messages').prepend('<div class="message"><span class="time">'+message.time +'</span> : <span class="user">' + escapedName + '</span> (<a class="muted" target="_BLANK" href="http://twitter.com/'+message.user.username+'">@'+message.user.username+'</a>)<br/>' + utils.markdown(message.text) + '</div>'+previewsHTML+'<hr/>');	
+				$('#messages').prepend('<div class="message"><span class="time">' + date + '</span>: <span class="user">' + escapedName + '</span> (<a class="muted" target="_BLANK" href="http://twitter.com/'+message.user.username+'">@'+message.user.username+'</a>)<br/>' + utils.markdown(message.text) + '</div>'+previewsHTML+'<hr/>');	
 			} else {
-				$('#messages').prepend('<div class="message"><span class="time">'+message.time +'</span> : <span class="user">' + escapedName + '</span><br/>' + utils.markdown(message.text) + '</div>'+previewsHTML+'<hr/>');
+				$('#messages').prepend('<div class="message"><span class="time">' + date + '</span>: <span class="user">' + escapedName + '</span><br/>' + utils.markdown(message.text) + '</div>'+previewsHTML+'<hr/>');
 			}
 			
 		}
@@ -85,7 +88,6 @@
 			$.ajax({
 				url: '/rooms/get/'+ self.id,
 				success: function(data) {
-					console.log(data);
 					self.name = data.name;
 					self.users = data.users;
 					self.messages = data.messages;
