@@ -106,8 +106,10 @@ app.post('/rooms/create', function(req, res){
 		'',
 		'PD: This Message was written directly in OsomTalk, isn\'t that OSOM.'
 	   ].join('\n');
-
+	var timestamp = Math.round(+new Date()/1000);
 	room.addMessage({
+		id: timestamp + "OSOM",
+		time: timestamp,
 		text: welcomeMessage,
 		user: {username: 'OsomTalk Welcome Bot', type: 'OFFICIAL'},
 		identifier: 'OSOM'

@@ -70,7 +70,7 @@
 			if(message.user.type=='TWITTER') {
 				$('#messages').prepend('<div class="message" id="'+message.id+'"><span class="time">' + date + '</span>: <span class="user">' + escapedName + '</span> (<a class="muted" target="_BLANK" href="http://twitter.com/'+message.user.username+'">@'+message.user.username+'</a>)<br/>' + utils.markdown(message.text) + previewsHTML+'</div><hr/>');	
 			} else {
-				$('#messages').prepend('<div class="message" id="'+message.id+'"><span class="time">' + date + '</span>: <span class="user">' + escapedName + '</span><br/>' + utils.markdown(message.text) + previewsHTML+'</div><hr/>');
+				$('#messages').prepend('<div class="message" id="'+message.id+'"><span class="time">' + date + '</span>: <span class="user">' + escapedName + '</span> (<span class="muted">Anonymous</span>) <br/>' + utils.markdown(message.text) + previewsHTML+'</div><hr/>');
 			}
 			
 		}
