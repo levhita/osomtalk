@@ -31,7 +31,8 @@
 
 		self.addMessage = function(data) {
 			var message = {
-				time: Math.round(+new Date()/1000),
+				id: data.id,
+				time: data.time,
 				text: data.text,
 				user: data.user,
 				identifier: data.identifier
@@ -61,15 +62,15 @@
 		};
 	
 		self.renderMessage = function (message) {
-			var previewsHTML = utils.getPreviewsHTML(message.text);
+			var previewsHTML = utils.getPreviewsHTML(message.text, message.id);
 			var escapedName = message.user.username.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 			var date = new Date(message.time * 1000);
 			var date = utils.getLocaleShortDateString(date) + " " + date.toLocaleTimeString();
 			
 			if(message.user.type=='TWITTER') {
-				$('#messages').prepend('<div class="message"><span class="time">' + date + '</span>: <span class="user">' + escapedName + '</span> (<a class="muted" target="_BLANK" href="http://twitter.com/'+message.user.username+'">@'+message.user.username+'</a>)<br/>' + utils.markdown(message.text) + '</div>'+previewsHTML+'<hr/>');	
+				$('#messages').prepend('<div class="message" id="'+message.id+'"><span class="time">' + date + '</span>: <span class="user">' + escapedName + '</span> (<a class="muted" target="_BLANK" href="http://twitter.com/'+message.user.username+'">@'+message.user.username+'</a>)<br/>' + utils.markdown(message.text) + previewsHTML+'</div><hr/>');	
 			} else {
-				$('#messages').prepend('<div class="message"><span class="time">' + date + '</span>: <span class="user">' + escapedName + '</span><br/>' + utils.markdown(message.text) + '</div>'+previewsHTML+'<hr/>');
+				$('#messages').prepend('<div class="message" id="'+message.id+'"><span class="time">' + date + '</span>: <span class="user">' + escapedName + '</span><br/>' + utils.markdown(message.text) + previewsHTML+'</div><hr/>');
 			}
 			
 		}

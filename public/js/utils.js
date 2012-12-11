@@ -30,7 +30,7 @@ var Utils = function() {
 		return f;
 	}
 	
-	self.getPreviewsHTML = function(text) {
+	self.getPreviewsHTML = function(text, message_id) {
 		var previews = [];
 		var previewHTML = '';
 		//Search for all links in the text

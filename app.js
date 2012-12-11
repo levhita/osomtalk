@@ -190,11 +190,13 @@ var extension = {
 			}
 			if (!block) {
 				var user = osomtalk.getUser(identifier);
+				var timestamp = Math.round(+new Date()/1000);
 				var data = {
-						time: Math.round(+new Date()/1000),
-						text: message_text,
-						user: {username:user.username, type:user.type},
-						identifier: identifier,
+					id: timestamp + identifier,
+					time: timestamp,
+					text: message_text,
+					user: {username:user.username, type:user.type},
+					identifier: identifier,
 				}
 				osomtalk.rooms[room_id].addMessage(data);    
 				client.publish('/server_messages_' + room_id, data);
