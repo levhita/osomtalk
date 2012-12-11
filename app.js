@@ -32,7 +32,7 @@ app.configure ( function(){
 	//app.use(express.methodOverride());
 	//app.use(app.router);
 	app.use(express.bodyParser());
-	app.use(express.cookieParser('nunca descubriras mi secreto!'));
+	app.use(express.cookieParser(appConfig.cookiesecret));
 	app.use(express.session());
 	
 
