@@ -68,9 +68,11 @@
 			var date = utils.getLocaleShortDateString(date) + " " + date.toLocaleTimeString();
 			
 			if(message.user.type=='TWITTER') {
-				$('#messages').prepend('<div class="message" id="'+message.id+'"><span class="time">' + date + '</span>: <span class="user">' + escapedName + '</span> (<a class="muted" target="_BLANK" href="http://twitter.com/'+message.user.username+'">@'+message.user.username+'</a>)<br/>' + utils.markdown(message.text) + previewsHTML+'</div><hr/>');	
+				$('#messages').prepend('<div class="message" id="'+message.id+'"><div class="info"><span class="user">' + escapedName + '</span> <a class="muted" target="_BLANK" href="http://twitter.com/'+message.user.username+'">(@'+message.user.username+')</a><div class="time">' + date + '</div></div><div class="text">' + utils.markdown(message.text) +"<div>"+ previewsHTML+'</div>');	
+			} else if(message.user.type=='OFFICIAL') {
+				$('#messages').prepend('<div class="message" id="'+message.id+'"><div class="info"><span class="user">' + escapedName + '</span> <span class="muted">(Official)</span><div class="time">' + date + '</div></div><div class="text">' + utils.markdown(message.text) +'</div>'+ previewsHTML+'</div>');
 			} else {
-				$('#messages').prepend('<div class="message" id="'+message.id+'"><span class="time">' + date + '</span>: <span class="user">' + escapedName + '</span> (<span class="muted">Anonymous</span>) <br/>' + utils.markdown(message.text) + previewsHTML+'</div><hr/>');
+				$('#messages').prepend('<div class="message" id="'+message.id+'"><div class="info"><span class="user">' + escapedName + '</span> <span class="muted">(Anonymous)</span><div class="time">' + date + '</div></div><div class="text">' + utils.markdown(message.text) +'</div>'+ previewsHTML+'</div>');
 			}
 			
 		}

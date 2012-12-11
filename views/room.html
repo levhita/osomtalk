@@ -60,6 +60,7 @@
 	<script type="text/javascript" src="/js/jquery-1.8.3.min.js"></script>
 </head>   
 <body>
+	<span class="hide" id="room_id">${room.id}</span>
 	<div class="container">
 		<div class="navbar navbar-inverse navbar-fixed-top">
 			<div class="navbar-inner">
@@ -79,13 +80,21 @@
 			</div>
 		</div>
 		
-		<div class="row">
-			<h1 class="span6">${room.name}</h1>
-			<form class="span6" style="text-align:right">
+		<div class="room-header row">
+			<h1 class="span5 pull-left">${room.name}</h1>
+			<!-- AddThis Button BEGIN -->
+			<div class="addthis_toolbox addthis_default_style addthis_32x32_style">
+				<a class="addthis_button_preferred_1"></a>
+				<a class="addthis_button_preferred_2"></a>
+				<a class="addthis_button_preferred_3"></a>
+				<a class="addthis_button_preferred_4"></a>
+				<a class="addthis_button_compact"></a>
+				<a class="addthis_counter addthis_bubble_style"></a>
+			</div>
+			<!--<form  class="sharing span5 pull-right" style="text-align:right">
 				Give your friends this link to invite them to this room:<br/>
 				<input  class="input-xlarge" style="font-size:30px; height:1.1em" type="text" value="${frontEndConfig.url}/room/${room.id}" onclick="this.select();"/>
-				<span class="hide" id="room_id">${room.id}</span>
-			</form>
+			</form>-->
 		</div>
 		
 		<div id="alert_place_holder"></div>
@@ -117,13 +126,14 @@
 							<input type="hidden" name="token" id="token" value="${user.token}"/>
 							<input type="hidden" name="identifier" id="identifier" value="${user.identifier}"/>
 							<br/><br/>
-							<a href="#" onclick="sendMessage()" class="btn btn-success btn-block">
+							<a href="#" onclick="sendMessage()" class="btn btn-primary btn-block">
 								Send Message
 							</a>
 						</form>
 						<ul>
-							<li><small>Uses <a href="http://daringfireball.net/projects/markdown/syntax" target="_blank">Markdown's syntax</a></small>
+							<li><small>Uses <a href="http://daringfireball.net/projects/markdown/syntax" target="_blank">Markdown's syntax</a>.</small>
 							<li><small>Use SHIFT+ENTER to send you message like a boss.</small>
+							<li><small>Want to share an image from your computer?, try <a target="_blank" href="http://imgur.com">imgur.com</a> free hosting service.</small>
 						</ul>
 				</div>
 				
@@ -155,6 +165,10 @@
 	<script type="text/javascript" src="/js/xregexp-min.js"></script>
 	<script type="text/javascript" src="/js/utils.js"></script>
 	<script type="text/javascript" src="/js/marked.js"></script>
+
+	<script type="text/javascript">var addthis_config = {"data_track_addressbar":true};</script>
+	<script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-4e906de04dcb0610"></script>
+	<!-- AddThis Button END -->
 	
 	<!-- Our Libraries -->
 	<script type="text/javascript" src="/js/frontend_config.js"></script>

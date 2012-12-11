@@ -13,7 +13,7 @@
     "faye": "*",
     "oauth": "~0.9.8"
   },
-  "subdomain": "osomtalk",
+  "subdomain": "osomtalkdev",
   "engines": {
     "node": "0.8.x"
   }
