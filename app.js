@@ -54,7 +54,10 @@ app.get('/room/:room_id', function(req, res) {
 	if ( room = osomtalk.getRoom(room_id) ) {
 		data = {user: false, room: room};
 		//In case of logged in user, add it to the template
-		if (req.session.user !== undefined) data.user = req.session.user;
+		if (req.session.user !== undefined) {
+			data.user = req.session.user;
+			osomtalk.addUserToRoom(identifier, room_id);
+		} 
 		res.render('room', data);
 	} else {
 		//Chat room doesn't exists
@@ -111,7 +114,7 @@ app.post('/rooms/create', function(req, res){
 		id: timestamp + "OSOM",
 		time: timestamp,
 		text: welcomeMessage,
-		user: {username: 'OsomTalk Welcome Bot', type: 'OFFICIAL'},
+		user: {username: 'OsomTalk Bot', type: 'OFFICIAL'},
 		identifier: 'OSOM'
 	});
 
@@ -201,7 +204,7 @@ var extension = {
 					identifier: identifier,
 				}
 				osomtalk.rooms[room_id].addMessage(data);    
-				client.publish('/server_messages_' + room_id, data);
+				
 			} else {
 				message.error = block;
 			}

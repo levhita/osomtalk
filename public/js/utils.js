@@ -30,6 +30,13 @@ var Utils = function() {
 		return f;
 	}
 	
+	self.contains = function(array, k) {
+    	for(var p in array)
+        	if(array[p] === k)
+            	return true;
+    	return false;
+	}
+
 	self.getPreviewsHTML = function(text, message_id) {
 		var previews = [];
 		var previewHTML = '';

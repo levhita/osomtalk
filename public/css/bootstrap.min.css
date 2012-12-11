@@ -23,8 +23,8 @@ textarea{overflow:auto;vertical-align:top;}
 .hide-text{font:0/0 a;color:transparent;text-shadow:none;background-color:transparent;border:0;}
 .input-block-level{display:block;width:100%;min-height:30px;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box;}
 body{margin:0;font-family:Ubuntu;font-size:14px;line-height:20px;color:#f2f2f2;background-color:#1f1f1f;background-image: url(/img/bg.png)}
-a{color:#f02475;text-decoration:none;}
-a:hover{color:#f783b1;text-decoration:underline;}
+a{color:#33B5E5;text-decoration:none;}
+a:hover{color:#53D5F5;text-decoration:underline;}
 .img-rounded{-webkit-border-radius:6px;-moz-border-radius:6px;border-radius:6px;}
 .img-polaroid{padding:4px;background-color:#fff;border:1px solid #ccc;border:1px solid rgba(0, 0, 0, 0.2);-webkit-box-shadow:0 1px 3px rgba(0, 0, 0, 0.1);-moz-box-shadow:0 1px 3px rgba(0, 0, 0, 0.1);box-shadow:0 1px 3px rgba(0, 0, 0, 0.1);}
 .img-circle{-webkit-border-radius:500px;-moz-border-radius:500px;border-radius:500px;}
@@ -860,7 +860,7 @@ a.label:hover,a.badge:hover{color:#ffffff;text-decoration:none;cursor:pointer;}
 
 .message {
 	padding:5px;
-	border-top:1px solid #777;
+	border-top:1px solid #555;
 }
 .message .info {
 	margin-bottom:7px;

@@ -36,6 +36,16 @@
 			return self.rooms[room_id] = room;
 		}
 
+		self.addUserToRoom = function(identifier, room_id){
+			if (!self.roomExists(room_id)) {
+				return false;
+			}
+			if (!self.userExists(identifier)) {
+				return false;
+			}
+			return self.rooms[room_id].addUser(self.users[identifier]);
+		}
+
 		self.getRoom = function(room_id) {
 			if (!self.roomExists(room_id)) {
 				return false;
@@ -131,7 +141,11 @@
 			if (username=='') {
 				return {error: 'EMPTY'};
 			}
-
+			/** Check For Impersonator **/
+			if (username.toLowerCase()=="osomtalk bot" || username.toLowerCase()=="osomtalk" || username.toLowerCase()=="osom talk" ) {
+				return {error: 'CHEATER'};
+			}
+			
 			/**Check For Too Long**/
 			if (username.length > 20) {
 				return {error: 'TOO_LONG'};

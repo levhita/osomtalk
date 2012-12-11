@@ -509,6 +509,17 @@ function next() {
   return token = tokens.pop();
 }
 
+/*
+//Temptative
+function shortURL(url, length) {
+  url = url.replace("https://", "").replace("http://", "");
+  return url.substring(0, length-3)+"...";
+}
+
+function cleanURL(url, length) {
+  return url.replace("https://", "").replace("http://", "");
+}*/
+
 function tok() {
   switch (token.type) {
     case 'space': {

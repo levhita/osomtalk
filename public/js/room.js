@@ -7,10 +7,11 @@
 		self.id			= config.id;
 		self.name		= config.name || '';
 		self.users  	= config.users || [];
+		self.users_ids 	= config.users_ids || [];
 		self.messages 	= config.messages || [];
 
 		self.getRoom = function () {
-			return {id:self.id, name:self.name, messages:self.messages, users:self.users};
+			return {id:self.id, name:self.name, messages:self.messages, users:self.users_ids};
 		};
 
 		self.getMessages = function () {
@@ -21,12 +22,35 @@
 			self.messages = messages;
 		}
 
-		self.getUsers = function () {
-			return self.users;
+		self.getUsersIds = function () {
+			return self.users_ids;
 		};
 
 		self.addUser = function(user) {
-			self.users.push(user);
+			if ( utils.contains(self.users_ids, user.identifier) ) {
+				return false;
+			}
+			
+			self.users_ids.push(user.identifier);
+			
+			if ( typeof window  === 'undefined' ) {
+				var timestamp = Math.round(+new Date()/1000);
+				var type = '';
+				if (user.type == 'TWITTER') {
+					type= '@' + user.identifier;
+				} else {
+					type= 'Anonymous';
+				}
+				var join_message = 'User ' + user.username +' ('+type+') entered the room.';
+				self.addMessage({
+					id: timestamp + "OSOM",
+					time: timestamp,
+					text: join_message,
+					user: {username: 'OsomTalk Bot', type: 'OFFICIAL'},
+					identifier: 'OSOM'
+				});
+			}
+			return true;
 		};
 
 		self.addMessage = function(data) {
@@ -37,7 +61,7 @@
 				user: data.user,
 				identifier: data.identifier
 			}
-
+			self.messages.push(message);
 			if ( typeof window  !== 'undefined' ) {
 				self.renderMessage(message);
 				if (window.webkitNotifications.checkPermission() == 0) { // 0 is PERMISSION_ALLOWED
@@ -52,8 +76,7 @@
 					notification.show();
 				}			
 			} else {
-				//If you ever need to have the messages as data on the client side, take this line out of the if
-				self.messages.push(message);
+				client.publish('/server_messages_' + self.id, message);
 				if ( self.messages.length > 100 ) {
 					//Maximum of 100 messages in memory for each chat on the server chat
 					console.log('deleting extra message', self.messages.shift());
