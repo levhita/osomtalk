@@ -54,8 +54,15 @@ app.get('/room/:room_id', function(req, res) {
 		data = {user: false, room: room};
 		//In case of logged in user, add it to the template
 		if (req.session.user !== undefined) {
-			if (osomtalk.userExists(req.session.user.identifier) ) {
-				data.user = req.session.user;
+			if ( osomtalk.userExists(req.session.user.identifier) ) {
+				stored_user = osomtalk.getUser(req.session.user.identifier);
+				console.log(stored_user);
+				console.log(req.session.user);
+				if(req.session.user.token !== stored_user.token) {
+					req.session.destroy();
+				} else {
+					data.user = req.session.user;
+				}
 				osomtalk.addUserToRoom(data.user.identifier, room_id);
 			} else{
 				req.session.destroy();

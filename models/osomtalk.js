@@ -79,8 +79,17 @@
 			/**	Cleanse the name up to a identifier status **/
 			identifier = utils.createIdentifier(user.username);
 			
-			if ( self.users[identifier]!==undefined && user.type!=="TWITTER") {
-				return false;
+			if ( self.users[identifier]!==undefined ) {
+				if ( user.type!=="TWITTER" ) {
+					return false;
+				} else {
+					console.log("Overwriting")
+					console.log(self.users[identifier]);
+					console.log(user);
+					delete self.users[identifier];
+					console.log('should be undefined');
+					console.log(self.users[identifier]);
+				}
 			}
 			
 			user.username = user.username.trim();
