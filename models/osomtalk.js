@@ -79,7 +79,7 @@
 		}
 		
 		self.userExists = function(indentifier) {
-			if(room_id==undefined) {
+			if(indentifier==undefined) {
 				console.log("passing undefined to userExists");
 			}
 			return (self.users[identifier]!==undefined);	
