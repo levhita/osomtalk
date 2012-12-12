@@ -97,21 +97,21 @@
 		
 		self.verifyPermission = function(identifier, token, room_id) {
 			if ( !self.userExists(identifier) ) {
-				console.log("User doesn't exists: " + identifier);
+				//console.log("User doesn't exists: " + identifier);
 				return false;
 			}
 			if (self.users[identifier].token !== token) {
-				console.log("Wrong Token: " + token);
+				//console.log("Wrong Token: " + token);
 				return false;
 			}
 			
 			if(room_id !== undefined) {
 				if ( !self.roomExists(room_id) ) {
-					console.log("Room doesn't exists");
+					//console.log("Room doesn't exists");
 					return false;
 				}
 				if (!self.rooms[room_id].userExists(identifier)){
-					console.log("User doesn't belong to room");
+					//console.log("User doesn't belong to room");
 					return false;
 				}
 			}
@@ -156,7 +156,7 @@
 			if (!self.userExists(identifier)) {
 				return false;
 			}
-			console.log(identifier + " pingin " + room_id);
+			//console.log(identifier + " pingin " + room_id);
 			self.rooms[room_id].pingUser(identifier);
 			self.users[identifier].ping();
 		}
@@ -216,7 +216,7 @@
 			var timestamp = Math.round(+new Date()/1000);
 			for( i in self.users) {
 				if( (timestamp - self.users[i].lastPing) >  1800) {//Seconds
-					console.log(i + " Timed out totally");
+					//console.log(i + " Timed out totally");
 					delete self.users[i];
 				}
 			}

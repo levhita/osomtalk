@@ -54,19 +54,11 @@ app.get('/room/:room_id', function(req, res) {
 		data = {user: false, room: room};
 		//In case of logged in user, add it to the template
 		if (req.session.user !== undefined) {
-			if ( osomtalk.userExists(req.session.user.identifier) ) {
-				stored_user = osomtalk.getUser(req.session.user.identifier);
-				console.log(stored_user);
-				console.log(req.session.user);
-				
-				if(req.session.user.token !== stored_user.token) {
-					req.session.destroy();
-				} else {
-					data.user = req.session.user;
-				}
-				osomtalk.addUserToRoom(data.user.identifier, room_id);
-			} else{
+			if ( !osomtalk.verifyPermission(req.session.user.identifier, req.session.user.token) ){
 				req.session.destroy();
+			} else {
+				data.user = req.session.user;
+				osomtalk.addUserToRoom(data.user.identifier, room_id);
 			}
 		} 
 		res.render('room', data);
@@ -97,12 +89,13 @@ app.get('/rooms/get_users/:room_id', function(req, res){
 app.get('/user/take/', function(req, res){
 	var response = osomtalk.validateUserName(req.query.username);
 	if (  response !== true) {
-		res.send({error: username.error });
+		res.send({error: response.error });
 		return false;
 	} else {
 		var user = osomtalk.addUser({username: req.query.username})
-		if ( user == false) {
-			res.send({error: 'NAME_TAKEN'});            
+		if ( user === false) {
+			res.send({error: 'NAME_TAKEN'});
+			return false;
 		}
 	}
 	req.session.user = user;

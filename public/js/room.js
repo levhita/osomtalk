@@ -56,7 +56,6 @@
 			self.users_ids[user.identifier] = Math.round(+new Date()/1000);
 			
 			if ( typeof window  === 'undefined' ) {
-				var timestamp = Math.round(+new Date()/1000);
 				var type = '';
 				if (user.type == 'TWITTER') {
 					type= '@' + user.identifier;
@@ -64,14 +63,8 @@
 					type= 'Anonymous';
 				}
 				var join_message = 'User ' + user.username +' ('+type+') entered the room.';
-				self.addMessage({
-					id: timestamp + "OSOM",
-					time: timestamp,
-					text: join_message,
-					user: {username: 'OsomTalk Bot', type: 'OFFICIAL'},
-					identifier: 'OSOM'
-				});
-
+				
+				self.addSystemMessage(join_message); 
 				var data = {action: 'update_users'};
 				client.publish('/server_actions_' + self.id, data);
 			}
@@ -109,6 +102,18 @@
 				}
 			}
 		};
+
+		self.addSystemMessage = function(text) {
+			var timestamp = Math.round(+new Date()/1000);
+			message = {
+				id: timestamp + "OSOM",
+				time: timestamp,
+				text: text,
+				user: {username: 'OsomTalk Bot', type: 'SYSTEM'},
+				identifier: 'OSOM'
+			};
+			self.addMessage(message);
+		};
 	
 		self.renderMessage = function (message) {
 			var previewsHTML = utils.getPreviewsHTML(message.text, message.id);
@@ -120,6 +125,9 @@
 				$('#messages').prepend('<div class="message" id="'+message.id+'"><div class="info"><span class="user">' + escapedName + '</span> <a class="muted" target="_BLANK" href="http://twitter.com/'+message.user.username+'">(@'+message.user.username+')</a><div class="time">' + date + '</div></div><div class="text">' + utils.markdown(message.text) +"<div>"+ previewsHTML+'</div>');	
 			} else if(message.user.type=='OFFICIAL') {
 				$('#messages').prepend('<div class="message" id="'+message.id+'"><div class="info"><span class="user">' + escapedName + '</span> <span class="muted">(Official)</span><div class="time">' + date + '</div></div><div class="text">' + utils.markdown(message.text) +'</div>'+ previewsHTML+'</div>');
+			} else if(message.user.type=='SYSTEM') {
+				var escapedText = message.text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+				$('#messages').prepend('<div class="message system" id="'+message.id+'"><span class="time">' + date + ':</span> ' + escapedText +'</div>');
 			} else {
 				$('#messages').prepend('<div class="message" id="'+message.id+'"><div class="info"><span class="user">' + escapedName + '</span> <span class="muted">(Anonymous)</span><div class="time">' + date + '</div></div><div class="text">' + utils.markdown(message.text) +'</div>'+ previewsHTML+'</div>');
 			}
@@ -176,7 +184,6 @@
 			$.ajax({
 				url: '/rooms/get_users/'+ self.id,
 				success: function(data) {
-					console.log(data);
 					self.users = data;
 					callback();
 				}
@@ -196,7 +203,7 @@
 
 		self.cleanUsers = function() {
 			var timestamp = Math.round(+new Date()/1000);
-			console.log("Checking timeout " + self.id);
+			//console.log("Checking timeout " + self.id);
 			for( i in self.users_ids ) {
 				if( (timestamp - self.users_ids[i]) >120) { // Seconds
 					delete self.users_ids[i];
@@ -210,13 +217,7 @@
 							type= 'Anonymous';
 						}
 						var leave_message = 'User ' + user.username +' ('+type+') left the room.';
-						self.addMessage({
-							id: timestamp + "OSOM",
-							time: timestamp,
-							text: leave_message,
-							user: {username: 'OsomTalk Bot', type: 'OFFICIAL'},
-							identifier: 'OSOM'
-						});
+						self.addSystemMessage(leave_message);
 						
 						var data = {action: 'update_users'};
 						client.publish('/server_actions_' + self.id, data);

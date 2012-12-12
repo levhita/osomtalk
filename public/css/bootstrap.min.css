@@ -879,7 +879,15 @@ a.label:hover,a.badge:hover{color:#ffffff;text-decoration:none;cursor:pointer;}
 	display:block;
 	float:right;
 	color:#bbb;
-	font-style:italic; 
+	font-size:10px; 
+}
+.message.system{
+	color:#DDD;
+	font-size:10px;
+}
+.message.system .time {
+	display:inline;
+	font-style: italic;
 }
 .message .user {
 	font-weight:bold;
