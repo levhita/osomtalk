@@ -83,19 +83,39 @@
 				if ( user.type!=="TWITTER" ) {
 					return false;
 				} else {
-					console.log("Overwriting")
-					console.log(self.users[identifier]);
-					console.log(user);
 					delete self.users[identifier];
-					console.log('should be undefined');
-					console.log(self.users[identifier]);
 				}
 			}
 			
 			user.username = user.username.trim();
 			user.identifier= identifier;
 			user = new User(user);
-			return self.users[identifier] = user;
+			self.users[identifier] = user;
+			return self.users[identifier];
+		}
+		
+		
+		self.verifyPermission = function(identifier, token, room_id) {
+			if ( !self.userExists(identifier) ) {
+				console.log("User doesn't exists: " + identifier);
+				return false;
+			}
+			if (self.users[identifier].token !== token) {
+				console.log("Wrong Token: " + token);
+				return false;
+			}
+			
+			if(room_id !== undefined) {
+				if ( !self.roomExists(room_id) ) {
+					console.log("Room doesn't exists");
+					return false;
+				}
+				if (!self.rooms[room_id].userExists(identifier)){
+					console.log("User doesn't belong to room");
+					return false;
+				}
+			}
+			return true;
 		}
 		
 		self.roomExists = function (room_id) {
@@ -194,7 +214,6 @@
 
 		self.cleanUsers = function() {
 			var timestamp = Math.round(+new Date()/1000);
-			console.log("Checking timeout osomtalk");
 			for( i in self.users) {
 				if( (timestamp - self.users[i].lastPing) >  1800) {//Seconds
 					console.log(i + " Timed out totally");

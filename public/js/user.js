@@ -9,8 +9,8 @@
 		self.token		= config.token || '';
 		self.identifier = config.identifier || '';
 		self.lastPing	= Math.round(+new Date()/1000);
-
-		var hmac = crypto.createHmac('sha256', 'anyquerykey');
+		
+		var hmac = crypto.createHmac('sha256', utils.makeId(20));
 		self.token  = hmac.update(self.username).digest('hex');
 
 		self.ping = function() {

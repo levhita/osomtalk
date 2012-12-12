@@ -27,6 +27,10 @@
 			self.messages = messages;
 		}
 
+		self.userExists = function(identifier) {
+			return (self.users_ids[identifier]!==undefined);
+		}
+
 		self.getUsersIds = function () {
 			var ids = []
 			for(i in self.users_ids) {
@@ -67,15 +71,11 @@
 					user: {username: 'OsomTalk Bot', type: 'OFFICIAL'},
 					identifier: 'OSOM'
 				});
-				
-				if ( self.messages.length > 100 ) {
-					//Maximum of 100 messages in memory for each chat on the server chat
-					console.log('deleting extra message', self.messages.shift());
-				}
 
 				var data = {action: 'update_users'};
 				client.publish('/server_actions_' + self.id, data);
 			}
+
 			return true;
 		};
 

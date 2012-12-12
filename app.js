@@ -58,6 +58,7 @@ app.get('/room/:room_id', function(req, res) {
 				stored_user = osomtalk.getUser(req.session.user.identifier);
 				console.log(stored_user);
 				console.log(req.session.user);
+				
 				if(req.session.user.token !== stored_user.token) {
 					req.session.destroy();
 				} else {
@@ -208,6 +209,7 @@ var extension = {
 	incoming : function(message, callback) {
 		if(message.channel.substring(0,10) === '/messages_') {
 			var message_text = utils.trim(message.data.text);
+			var token 		 = message.data.token;
 			var identifier   = message.data.identifier;
 			var room_id      = message.channel.substring(10);
 			
@@ -215,13 +217,17 @@ var extension = {
 			if ( !osomtalk.roomExists(room_id) && !osomtalk.userExists(identifier) ) {
 				block = 'NOT_EXIST';
 			} else {
-				result = osomtalk.validateMessage(message_text);
-				if (result.error !==undefined) {
-					block = result.error; //EMPTY & TOO_LONG
+				if ( !osomtalk.verifyPermission(identifier, token, room_id) ) {
+					block = "NO_PERMISSION";
 				} else {
-					result = osomtalk.validateSpam(identifier, room_id)
-					if (result.error !== undefined) {
-						block = result.error; //TYPING & FLOODING
+					result = osomtalk.validateMessage(message_text);
+					if (result.error !==undefined) {
+						block = result.error; //EMPTY & TOO_LONG
+					} else {
+						result = osomtalk.validateSpam(identifier, room_id)
+						if (result.error !== undefined) {
+							block = result.error; //TYPING & FLOODING
+						}
 					}
 				}
 			}
