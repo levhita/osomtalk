@@ -198,13 +198,33 @@
 			var timestamp = Math.round(+new Date()/1000);
 			console.log("Checking timeout " + self.id);
 			for( i in self.users_ids ) {
-				if( (timestamp - self.users_ids[i]) > 10) { // Seconds
+				if( (timestamp - self.users_ids[i]) >120) { // Seconds
 					delete self.users_ids[i];
-					console.log(i + " TimedOut on " + self.id );
+					
+					if ( typeof window  === 'undefined' ) {
+						user = osomtalk.getUser(i);
+						var type = '';
+						if (user.type == 'TWITTER') {
+							type= '@' + user.identifier;
+						} else {
+							type= 'Anonymous';
+						}
+						var leave_message = 'User ' + user.username +' ('+type+') left the room.';
+						self.addMessage({
+							id: timestamp + "OSOM",
+							time: timestamp,
+							text: leave_message,
+							user: {username: 'OsomTalk Bot', type: 'OFFICIAL'},
+							identifier: 'OSOM'
+						});
+						
+						var data = {action: 'update_users'};
+						client.publish('/server_actions_' + self.id, data);
+					}
 				}
 			}
 
-			setTimeout(function(){self.cleanUsers()}, 10000);//Milliseconds
+			setTimeout(function(){self.cleanUsers()}, 120*1000);//Milliseconds
 		}
 		
 		/** Starts the user cleaning iterative process **/

@@ -54,7 +54,7 @@ function pingBack(room_id) {
 	$.ajax({
 		url: '/user/ping/'+ room_id,
 		success: function(data) {
-			setTimeout(function() { pingBack(room_id)}, 10000);
+			setTimeout(function() { pingBack(room_id)}, 60000);
 		}
 	});	
 }

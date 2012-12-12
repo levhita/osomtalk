@@ -187,13 +187,12 @@
 			var timestamp = Math.round(+new Date()/1000);
 			console.log("Checking timeout osomtalk");
 			for( i in self.users) {
-				if( (timestamp - self.users[i].lastPing) >  30) {
+				if( (timestamp - self.users[i].lastPing) >  1800) {//Seconds
 					console.log(i + " Timed out totally");
 					delete self.users[i];
 				}
 			}
-			//setTimeout(function(){self.cleanUsers()}, 1800000);
-			setTimeout(function(){self.cleanUsers()}, 30000);
+			setTimeout(function(){self.cleanUsers()}, 1800*1000);//Milliseconds
 		}
 
 		/** Starts the user cleaning iterative process **/
