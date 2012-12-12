@@ -8,11 +8,16 @@
 		self.type 		= config.type || "ANONYMOUS";
 		self.token		= config.token || '';
 		self.identifier = config.identifier || '';
-		
+		self.lastPing	= Math.round(+new Date()/1000);
+
 		var hmac = crypto.createHmac('sha256', 'anyquerykey');
 		self.token  = hmac.update(self.username).digest('hex');
 
-		return self;
+		self.ping = function() {
+			self.lastPing = Math.round(+new Date()/1000);
+		}
+
+		return self;		
 	};
 
 global.User = User;

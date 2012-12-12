@@ -8,15 +8,14 @@ var express = require('express')
 , cons      = require('consolidate')
 , OsomTalk  = require('./models/osomtalk.js').OsomTalk
 
-global.appConfig = require('./app_config.js').AppConfig;
-global.frontEndConfig = require('./public/js/frontend_config.js').FrontEndConfig;
-global.crypto = require('crypto');
-global.OAuth = require('oauth').OAuth;
-global.User = require('./public/js/user.js').User;
-global.Room = require('./public/js/room.js').Room;
-global.utils = require('./public/js/utils.js').utils;
-
-var osomtalk = new OsomTalk();
+global.frontEndConfig 	= require('./public/js/frontend_config.js').FrontEndConfig;
+global.appConfig 		= require('./app_config.js').AppConfig;
+global.crypto 			= require('crypto');
+global.OAuth 			= require('oauth').OAuth;
+global.User 			= require('./public/js/user.js').User;
+global.Room 			= require('./public/js/room.js').Room;
+global.utils 			= require('./public/js/utils.js').utils;
+global.osomtalk 		= new OsomTalk();
 
 var app = express();
 
@@ -55,8 +54,12 @@ app.get('/room/:room_id', function(req, res) {
 		data = {user: false, room: room};
 		//In case of logged in user, add it to the template
 		if (req.session.user !== undefined) {
-			data.user = req.session.user;
-			osomtalk.addUserToRoom(identifier, room_id);
+			if (osomtalk.userExists(req.session.user.identifier) ) {
+				data.user = req.session.user;
+				osomtalk.addUserToRoom(data.user.identifier, room_id);
+			} else{
+				req.session.destroy();
+			}
 		} 
 		res.render('room', data);
 	} else {
@@ -73,6 +76,15 @@ app.get('/rooms/get/:room_id', function(req, res){
 	}
 });
 
+/** Get all the users from room **/
+app.get('/rooms/get_users/:room_id', function(req, res){
+	var room_id = req.params.room_id;
+	if( osomtalk.roomExists(room_id)) {
+		res.send(osomtalk.getUsersFromRoom(room_id));
+	}
+});
+
+
 /** Checks for username and take it in case is valid. **/
 app.get('/user/take/', function(req, res){
 	var response = osomtalk.validateUserName(req.query.username);
@@ -87,6 +99,19 @@ app.get('/user/take/', function(req, res){
 	}
 	req.session.user = user;
 	res.send(user);
+});
+
+/** Checks for username and take it in case is valid. **/
+app.get('/user/ping/:room_id', function(req, res){
+	var room_id = req.params.room_id;
+	if( osomtalk.roomExists(room_id)) {
+		if(req.session.user!==undefined) {
+			osomtalk.pingUser(room_id, req.session.user.identifier);
+			res.send({response: 'success'});
+		}
+		return true;
+	}
+	res.send({error: 'UNEXISTANT_ROOM'});
 });
 
 /** creates a new room and then returns the generated id. **/

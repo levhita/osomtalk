@@ -11,7 +11,12 @@
 		self.messages 	= config.messages || [];
 
 		self.getRoom = function () {
-			return {id:self.id, name:self.name, messages:self.messages, users:self.users_ids};
+			return {
+				id:self.id,
+				name:self.name,
+				messages:self.messages,
+				users: osomtalk.getUsersFromRoom(self.id)
+			}
 		};
 
 		self.getMessages = function () {
@@ -23,15 +28,28 @@
 		}
 
 		self.getUsersIds = function () {
-			return self.users_ids;
+			var ids = []
+			for(i in self.users_ids) {
+				ids.unshift(i);
+			}
+			return ids;
 		};
 
+		self.pingUser = function(identifier) {
+			if ( self.users_ids[identifier] == undefined ) {
+				return false;
+			}
+			self.users_ids[identifier] = Math.round(+new Date()/1000);
+			return true;
+		}
+
 		self.addUser = function(user) {
-			if ( utils.contains(self.users_ids, user.identifier) ) {
+			if ( self.users_ids[user.identifier] !== undefined ) {
 				return false;
 			}
 			
-			self.users_ids.push(user.identifier);
+			/** Creates last ping **/
+			self.users_ids[user.identifier] = Math.round(+new Date()/1000);
 			
 			if ( typeof window  === 'undefined' ) {
 				var timestamp = Math.round(+new Date()/1000);
@@ -49,6 +67,14 @@
 					user: {username: 'OsomTalk Bot', type: 'OFFICIAL'},
 					identifier: 'OSOM'
 				});
+				
+				if ( self.messages.length > 100 ) {
+					//Maximum of 100 messages in memory for each chat on the server chat
+					console.log('deleting extra message', self.messages.shift());
+				}
+
+				var data = {action: 'update_users'};
+				client.publish('/server_actions_' + self.id, data);
 			}
 			return true;
 		};
@@ -99,14 +125,38 @@
 			}
 			
 		}
+
+		self.renderUser = function (user) {
+			var escapedName = user.username.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+			var type = "";
+			if(user.type=='TWITTER') {
+				type = ' <a class="muted" target="_BLANK" href="http://twitter.com/' + user.username + '">(@' + user.username + ')</a>';
+			} else {
+				type = ' <span class="muted">(Anonymous)</span>';
+			}
+			$('#users').prepend('<div class="user" id="user_' + user.identifier + '">' + escapedName + type + '</div>');
+		}
 		
 		/** renders the chat **/
 		self.renderRoom = function() {
+			self.renderMessages();
+			self.renderUsers();
+		};
+
+		self.renderMessages = function() {
 			/** Render Messages **/
 			for(var i = 0; i < self.messages.length; i++) {
 				self.renderMessage(self.messages[i]);
 			}
-		};
+		}
+
+		self.renderUsers = function() {
+			/** Render Users **/
+			$('#users').html('');
+			for(var i = 0; i < self.users.length; i++) {
+				self.renderUser(self.users[i]);
+			}
+		}
 		
 		/** Connections with web services **/
 		/** Gets full room data **/
@@ -122,11 +172,43 @@
 			});
 		};
 
+		self.getUsersData = function(callback){
+			$.ajax({
+				url: '/rooms/get_users/'+ self.id,
+				success: function(data) {
+					console.log(data);
+					self.users = data;
+					callback();
+				}
+			});
+		};
+
 		self.subscribe = function(client) {
 			client.subscribe('/server_messages_'+ self.id, function(message) {
 				self.addMessage(message);
 			});
+			client.subscribe('/server_actions_'+ self.id, function(data) {
+				if(data.action=='update_users') {
+					self.getUsersData(self.renderUsers);
+				}
+			});
 		}
+
+		self.cleanUsers = function() {
+			var timestamp = Math.round(+new Date()/1000);
+			console.log("Checking timeout " + self.id);
+			for( i in self.users_ids ) {
+				if( (timestamp - self.users_ids[i]) > 10) { // Seconds
+					delete self.users_ids[i];
+					console.log(i + " TimedOut on " + self.id );
+				}
+			}
+
+			setTimeout(function(){self.cleanUsers()}, 10000);//Milliseconds
+		}
+		
+		/** Starts the user cleaning iterative process **/
+		self.cleanUsers();
 		return self;
 	};
 

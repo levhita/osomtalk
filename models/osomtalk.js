@@ -53,6 +53,23 @@
 			return self.rooms[room_id];
 		}
 
+		self.getUsersFromRoom = function(room_id) {
+			if (!self.roomExists(room_id)) {
+				return false;
+			}
+			var users=[];
+			var users_ids = self.rooms[room_id].getUsersIds();
+			for (var i=0;i<users_ids.length;i++) {
+				aux = {
+					username: self.users[users_ids[i]].username,
+					type: self.users[users_ids[i]].type,
+					identifier: self.users[users_ids[i]].identifier,
+				}
+				users.push(aux)
+			}
+			return users;
+		}
+
 		/** 
 		 *  Finds out if the user already exists
 		 *  overwrites anonymous users with twitter ones
@@ -61,6 +78,7 @@
 		self.addUser = function(user) {
 			/**	Cleanse the name up to a identifier status **/
 			identifier = utils.createIdentifier(user.username);
+			
 			if ( self.users[identifier]!==undefined && user.type!=="TWITTER") {
 				return false;
 			}
@@ -78,8 +96,8 @@
 			return (self.rooms[room_id]!==undefined);
 		}
 		
-		self.userExists = function(indentifier) {
-			if(indentifier==undefined) {
+		self.userExists = function(identifier) {
+			if(identifier==undefined) {
 				console.log("passing undefined to userExists");
 			}
 			return (self.users[identifier]!==undefined);	
@@ -100,6 +118,18 @@
 				return {error:'BLOCKED_EMPTY'};
 			}
 			return true;
+		}
+
+		self.pingUser = function(room_id, identifier) {
+			if (!self.roomExists(room_id)) {
+				return false;
+			}
+			if (!self.userExists(identifier)) {
+				return false;
+			}
+			console.log(identifier + " pingin " + room_id);
+			self.rooms[room_id].pingUser(identifier);
+			self.users[identifier].ping();
 		}
 
 		self.validateSpam = function (identifier) {
@@ -153,6 +183,22 @@
 			return true;
 		}
 
+		self.cleanUsers = function() {
+			var timestamp = Math.round(+new Date()/1000);
+			console.log("Checking timeout osomtalk");
+			for( i in self.users) {
+				if( (timestamp - self.users[i].lastPing) >  30) {
+					console.log(i + " Timed out totally");
+					delete self.users[i];
+				}
+			}
+			//setTimeout(function(){self.cleanUsers()}, 1800000);
+			setTimeout(function(){self.cleanUsers()}, 30000);
+		}
+
+		/** Starts the user cleaning iterative process **/
+		self.cleanUsers();
+	
 	return self;
 };
 

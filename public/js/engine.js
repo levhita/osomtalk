@@ -9,7 +9,8 @@ $(document).ready(function(){
 		room.renderRoom();
 	});
 	
-	
+	pingBack(room_id);
+
 	/** MarkDown Configuration **/
 	marked.setOptions({
 	  gfm: true,
@@ -48,6 +49,15 @@ $(document).ready(function(){
 	 	activateNotifications();
 	 });
 });
+
+function pingBack(room_id) {
+	$.ajax({
+		url: '/user/ping/'+ room_id,
+		success: function(data) {
+			setTimeout(function() { pingBack(room_id)}, 10000);
+		}
+	});	
+}
 
 function sendMessage() {
 	var room_id = $('#room_id').text();

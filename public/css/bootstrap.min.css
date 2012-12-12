@@ -884,3 +884,23 @@ a.label:hover,a.badge:hover{color:#ffffff;text-decoration:none;cursor:pointer;}
 .message .user {
 	font-weight:bold;
 }
+
+#users .user {
+	padding:10px 10px 10px 20px;
+}
+#users {
+	margin:10px;
+}
+.users_container {
+	margin-top: 20px;
+	padding:0px;
+	background: rgba(50,50,50,0.3);
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+}
+.users_container h3 {
+	margin:10px;
+	padding:0px;
+	line-height: 1em;
+}
