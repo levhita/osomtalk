@@ -119,9 +119,9 @@
 			</div>
 			{{else}}			
 			<div class="span4">
+				<h3>${user.username}</h3>
 				<div id="utility_div">
 						<form class="form-inline">
-							<h3>${user.username}</h3>
 							<textarea rows="5" class="span12" name="message_input" id="message_input" placeholder="Write Your Message"></textarea>
 							<input type="hidden" name="token" id="token" value="${user.token}"/>
 							<input type="hidden" name="identifier" id="identifier" value="${user.identifier}"/>
@@ -150,7 +150,7 @@
 				
 			</div> 
 			
-			<div class="span8">
+			<div class="span8 messages_container">
 				<h3>Messages:</h3>
 				<div id="messages"></div>
 			</div>
