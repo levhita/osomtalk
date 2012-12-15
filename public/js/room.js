@@ -117,10 +117,15 @@
 	
 		self.renderMessage = function (message) {
 			var previewsHTML = utils.getPreviewsHTML(message.text, message.id);
+			
 			var escapedName = message.user.username.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+			
 			var date = new Date(message.time * 1000);
+			
 			var date = utils.getLocaleShortDateString(date) + " " + date.toLocaleTimeString();
+			
 			var string = '';
+			
 			if(message.user.type=='TWITTER') {
 				string = '<div class="message" id="'+message.id+'"><div class="info"><span class="user">' + escapedName + '</span> <a class="muted" target="_BLANK" href="http://twitter.com/'+message.user.username+'">(@'+message.user.username+')</a><div class="time">' + date + '</div></div><div class="text">' + utils.markdown(message.text) +"</div>";	
 			} else if(message.user.type=='OFFICIAL') {
@@ -132,9 +137,9 @@
 				string = '<div class="message" id="'+message.id+'"><div class="info"><span class="user">' + escapedName + '</span> <span class="muted">(Anonymous)</span><div class="time">' + date + '</div></div><div class="text">' + utils.markdown(message.text) +'</div>';
 			}
 			if ( message.user.type!='SYSTEM') {
-				$('#messages').prepend(string);
-			} else {
 				$('#messages').prepend(string + previewsHTML+'</div>');
+			} else {
+				$('#messages').prepend(string);
 			}
 		}
 
