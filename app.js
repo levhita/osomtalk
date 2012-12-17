@@ -7,6 +7,8 @@ var express = require('express')
 , jqtpl     = require("jqtpl")
 , cons      = require('consolidate')
 , OsomTalk  = require('./models/osomtalk.js').OsomTalk
+, fs 		= require('fs')
+
 
 global.frontEndConfig 	= require('./public/js/frontend_config.js').FrontEndConfig;
 global.appConfig 		= require('./app_config.js').AppConfig;
@@ -16,6 +18,17 @@ global.User 			= require('./public/js/user.js').User;
 global.Room 			= require('./public/js/room.js').Room;
 global.utils 			= require('./public/js/utils.js').utils;
 global.osomtalk 		= new OsomTalk();
+
+
+
+fs.readFile('analytics.html', 'utf8', function (err,data) {
+	if (err) {
+		console.log("Couldn't find analytics code, if you wish to use one create the file 'analytics.html'");
+		global.ANALYTICS = "";
+	} else {
+		global.ANALYTICS = data;
+	}
+});
 
 var app = express();
 
@@ -45,17 +58,17 @@ app.configure('development', function(){
 
 
 app.get('/', function(req, res) {
-	res.render('index');
+	res.render('index', {ANALYTICS: global.ANALYTICS});
 });
 
 app.get('/about', function(req, res) {
-	res.render('about');
+	res.render('about', {ANALYTICS: global.ANALYTICS});
 });
 
 app.get('/room/:room_id', function(req, res) {
 	var room_id = req.params.room_id;
 	if ( room = osomtalk.getRoom(room_id) ) {
-		data = {user: false, room: room};
+		data = {user: false, room: room, ANALYTICS: global.ANALYTICS};
 		//In case of logged in user, add it to the template
 		if (req.session.user !== undefined) {
 			if ( !osomtalk.verifyPermission(req.session.user.identifier, req.session.user.token) ){

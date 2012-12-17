@@ -985,3 +985,16 @@ a.label:hover,a.badge:hover{color:#ffffff;text-decoration:none;cursor:pointer;}
 .founders h3, .founders p{
 	margin-left:110px;
 }
+.contact img {
+	clear:both;
+}
+.contact .span4 {
+	height: 100px;
+}
+.contact h2 {
+	margin-top: 10px;
+	margin-left:105px;
+}
+.contact a {
+	color:white;
+}
