@@ -954,3 +954,34 @@ a.label:hover,a.badge:hover{color:#ffffff;text-decoration:none;cursor:pointer;}
 	padding:0px;
 	line-height: 1em;
 }
+
+.declaration {
+	font-style: italic;
+	font-size: larger;
+}
+
+.sub_block {
+	margin:10px 0px;
+	padding:5px 10px 5px 10px;
+	background: rgba(50,50,50,0.3);
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+}
+.smaller{font-size:50%;}
+.founders img{
+	margin-right: 10px;
+	clear:both;
+}
+.founders h3{
+	margin-top:5px;
+	margin-bottom: -5px;
+}
+
+.founders{
+	min-height: 100px;
+}
+
+.founders h3, .founders p{
+	margin-left:110px;
+}

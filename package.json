@@ -1,10 +1,14 @@
 {
-  "name": "osomtalk",
-  "version": "0.0.1-77",
+  "name": "osomtalk.com",
   "subdomain": "osomtalk",
+  "domains": [
+    "osomtalk.com",
+    "www.osomtalk.com"
+  ],
+  "version": "0.0.1-81",
   "private": true,
   "scripts": {
-    "start": "node app.js"
+    "start": "app.js"
   },
   "dependencies": {
     "express": "3.0.3",
@@ -16,5 +20,7 @@
   },
   "engines": {
     "node": "0.8.x"
-  }
+  },
+  "license": "AGPLv3",
+  "author": "Levhita <levhita@levhita.com>"
 }

@@ -46,6 +46,9 @@
 		@media only screen and (max-device-width: 800px), only screen and (device-width: 1024px) and (device-height: 600px), only screen and (width: 1280px) and (orientation: landscape), only screen and (device-width: 800px), only screen and (max-width: 767px) {
 			.flex-video { padding-top: 0; }
 		}
+			.footer {
+		text-align: center;
+	}
 	</style>
 	<script>
 		function takeName() {
@@ -103,6 +106,7 @@
 					<div class="nav-collapse collapse">
 						<ul class="nav">
 							<li><a href="/">Home</a></li>
+							<li><a href="/about">About</a></li>
 						</ul>
 					</div><!--/.nav-collapse -->
 				</div>
@@ -191,8 +195,14 @@
 			</div>
 			{{/if}}
 		</div>
+		<hr/>
+		<div class="row footer">
+			OsomTalk is an <a href="http://www.gnu.org/philosophy/free-sw.html" title="FreeSoftware Fundation">FreeSoftware</a> project availabe as <a href="http://en.wikipedia.org/wiki/Software_as_a_service" title="Wikipedia's definition">SaaS</a> made at <a href="http://hackergarage.mx/" title="HackerGarage Home Page">HackerGarage</a>.<br/>
+
+			<a href="https://github.com/hackergarage/osomtalk" title="OsomTalk Code Repository">Get The Source!</a>
+		</div>
 	</div><!--Container -->
-	
+
 
 
 	<!-- Le Scripts -->

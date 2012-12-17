@@ -48,6 +48,10 @@ app.get('/', function(req, res) {
 	res.render('index');
 });
 
+app.get('/about', function(req, res) {
+	res.render('about');
+});
+
 app.get('/room/:room_id', function(req, res) {
 	var room_id = req.params.room_id;
 	if ( room = osomtalk.getRoom(room_id) ) {
