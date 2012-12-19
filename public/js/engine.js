@@ -25,10 +25,6 @@ $(document).ready(function(){
 		}
 	});
 
-	$('.message .loves').bind('click', function(e) {
-		console.log(e);
-	});
-
 	$('#hide_previews').bind('click', function(e) {
 		$(".toggle_previews").html('<i class="icon-circle-arrow-down icon-white"></i> Show Media');
 		$(".previews").hide();
@@ -71,10 +67,8 @@ $(document).ready(function(){
 	}
 
 	window.editor = new EpicEditor(opts).load(function () {
-		console.log('loaded');
 		$( this.getElement('editor').body ).bind('paste', function() {
-  			console.log("sanitize");
-		    setTimeout(function () {
+			setTimeout(function () {
 		    	window.editor.sanitize();
 		    }, 100);
 		});
@@ -121,6 +115,10 @@ function pingBack(room_id) {
 	});	
 }
 
+function clickedLove(element) {
+	var message_id = $(element).closest('.message').attr('id');
+	loveMessage(message_id);
+}
 function loveMessage(message_id) {
 	var room_id = $('#room_id').text();
 	$.ajax({
@@ -130,9 +128,7 @@ function loveMessage(message_id) {
 			identifier: $('#identifier').val(),
 			token: $('#token').val()
 		},
-		success: function(data) {
-			console.log(data);
-		}
+		success: function(data) {}
 	});
 }
 

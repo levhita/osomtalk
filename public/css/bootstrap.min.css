@@ -1005,3 +1005,6 @@ a.label:hover,a.badge:hover{color:#ffffff;text-decoration:none;cursor:pointer;}
     right:10px;
     display:none;
 }
+.utility{
+	float:right;
+}

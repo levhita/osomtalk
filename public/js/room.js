@@ -183,14 +183,14 @@
 			var string = '';
 			
 			if(message.user.type=='TWITTER') {
-				string = '<div class="message" id="'+message.id+'"><div class="info"><span class="user">' + escapedName + '</span> <a class="muted" target="_BLANK" href="http://twitter.com/'+message.user.username+'">(@'+message.user.username+')</a><div class="time">' + date + '</div></div><div class="utility"><a class="loves">0</a></div><div class="text">' + utils.markdown(message.text) +"</div>";	
+				string = '<div class="message" id="'+message.id+'"><div class="info"><span class="user">' + escapedName + '</span> <a class="muted" target="_BLANK" href="http://twitter.com/'+message.user.username+'">(@'+message.user.username+')</a><div class="time">' + date + '</div></div><div class="utility"><a class="loves btn btn-primary btn-mini" onclick="clickedLove(this)"><i class="icon-heart icon-white"></i> <span class="counter">' + message.loves.length + '</span></a></div><div class="text">' + utils.markdown(message.text) +"</div>";	
 			} else if(message.user.type=='OFFICIAL') {
-				string = '<div class="message" id="'+message.id+'"><div class="info"><span class="user">' + escapedName + '</span> <span class="muted">(Official)</span><div class="time">' + date + '</div></div><div class="text">' + utils.markdown(message.text) +'</div>';
+				string = '<div class="message" id="'+message.id+'"><div class="info"><span class="user">' + escapedName + '</span> <span class="muted">(Official)</span><div class="time">' + date + '</div></div><div class="utility"><a class="loves btn btn-primary btn-mini" onclick="clickedLove(this)"><i class="icon-heart icon-white"></i> <span class="counter">' + message.loves.length + '</span></a></div><div class="text">' + utils.markdown(message.text) +'</div>';
 			} else if(message.user.type=='SYSTEM') {
 				var escapedText = message.text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 				string = '<div class="message system" id="'+message.id+'"><span class="time">' + date + ':</span> ' + escapedText +'</div>';
 			} else {
-				string = '<div class="message" id="'+message.id+'"><div class="info"><span class="user">' + escapedName + '</span> <span class="muted">(Anonymous)</span><div class="time">' + date + '</div></div><div class="text">' + utils.markdown(message.text) +'</div>';
+				string = '<div class="message" id="'+message.id+'"><div class="info"><span class="user">' + escapedName + '</span> <span class="muted">(Anonymous)</span><div class="time">' + date + '</div></div><div class="utility"><a class="loves btn btn-primary btn-mini" onclick="clickedLove(this)"><i class="icon-heart icon-white"></i> <span class="counter">' + message.loves.length + '</span></a></div><div class="text">' + utils.markdown(message.text) +'</div>';
 			}
 			if ( message.user.type!='SYSTEM') {
 				$('#messages').prepend(string + previewsHTML+'</div>');
@@ -264,7 +264,7 @@
 					self.getUsersData(self.renderUsers);
 				}
 				if(data.action=='update_loves') {
-					$("#" + data.message.id + " .loves").html(data.message.loves.length);
+					$("#" + data.message.id + " .loves .counter").html(data.message.loves.length);
 				}
 			});
 		}
