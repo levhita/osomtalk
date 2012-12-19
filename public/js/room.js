@@ -78,7 +78,8 @@
 				time: data.time,
 				text: data.text,
 				user: data.user,
-				identifier: data.identifier
+				identifier: data.identifier,
+				loves: []
 			}
 			self.messages.push(message);
 			if ( typeof window  !== 'undefined' ) {
@@ -103,6 +104,61 @@
 			}
 		};
 
+		/**
+		* @return TRUE in case now he loves it, False in case he doesn't like it undefined
+		*		  if the message doesn't exist.
+		*/
+		self.toogleMessageLove = function(identifier, message_id) {
+			var loves = self.userLoveMessage(identifier, message_id)
+			var index = self.getMessageIndex(message_id);
+			if( loves === false) {
+				if(index !== false) {
+					//Adds it to the loves array
+					self.messages[index].loves.push(identifier);
+					return true
+				}
+			} else if (loves === true) {
+				for (var i = 0; i < self.messages[index].loves.length; i++) {
+    				// Removes it from the loves array
+    				if ( self.messages[index].loves[i] == identifier ) {
+    					self.messages[index].loves.splice(i,1);
+    					return false;
+    				}
+				}
+			}
+			return undefined;
+		}
+
+
+		self.getMessageIndex = function(message_id) {
+			for (var i = 0; i < self.messages.length; i++) {
+    			if(self.messages[i].id==message_id) {
+    				return i;
+    			}
+			}
+			return false;
+		}
+
+		self.getMessage = function(message_id) {
+			var index = self.getMessageIndex(message_id);
+			if (index !== false) {
+				return self.messages[index];
+			}
+			return false;
+		}
+
+		self.userLoveMessage = function(identifier, message_id) {
+			var index = self.getMessageIndex(message_id);
+			if (index !== false ) {
+				for (var i = 0; i < self.messages[index].loves.length; i++) {
+	    			if(self.messages[index].loves[i]==identifier) {
+	    				return true;
+	    			}
+				}
+				return false;
+			}
+		}
+		
 		self.addSystemMessage = function(text) {
 			var timestamp = Math.round(+new Date()/1000);
 			message = {
@@ -127,7 +183,7 @@
 			var string = '';
 			
 			if(message.user.type=='TWITTER') {
-				string = '<div class="message" id="'+message.id+'"><div class="info"><span class="user">' + escapedName + '</span> <a class="muted" target="_BLANK" href="http://twitter.com/'+message.user.username+'">(@'+message.user.username+')</a><div class="time">' + date + '</div></div><div class="text">' + utils.markdown(message.text) +"</div>";	
+				string = '<div class="message" id="'+message.id+'"><div class="info"><span class="user">' + escapedName + '</span> <a class="muted" target="_BLANK" href="http://twitter.com/'+message.user.username+'">(@'+message.user.username+')</a><div class="time">' + date + '</div></div><div class="utility"><a class="loves">0</a></div><div class="text">' + utils.markdown(message.text) +"</div>";	
 			} else if(message.user.type=='OFFICIAL') {
 				string = '<div class="message" id="'+message.id+'"><div class="info"><span class="user">' + escapedName + '</span> <span class="muted">(Official)</span><div class="time">' + date + '</div></div><div class="text">' + utils.markdown(message.text) +'</div>';
 			} else if(message.user.type=='SYSTEM') {
@@ -206,6 +262,9 @@
 			client.subscribe('/server_actions_'+ self.id, function(data) {
 				if(data.action=='update_users') {
 					self.getUsersData(self.renderUsers);
+				}
+				if(data.action=='update_loves') {
+					$("#" + data.message.id + " .loves").html(data.message.loves.length);
 				}
 			});
 		}

@@ -25,6 +25,10 @@ $(document).ready(function(){
 		}
 	});
 
+	$('.message .loves').bind('click', function(e) {
+		console.log(e);
+	});
+
 	$('#hide_previews').bind('click', function(e) {
 		$(".toggle_previews").html('<i class="icon-circle-arrow-down icon-white"></i> Show Media');
 		$(".previews").hide();
@@ -106,6 +110,21 @@ function pingBack(room_id) {
 			setTimeout(function() { pingBack(room_id)}, 60000);
 		}
 	});	
+}
+
+function loveMessage(message_id) {
+	var room_id = $('#room_id').text();
+	$.ajax({
+		type: 'POST',
+		url: '/love_message/' + room_id + '/' + message_id,
+		data: {
+			identifier: $('#identifier').val(),
+			token: $('#token').val()
+		},
+		success: function(data) {
+			console.log(data);
+		}
+	});
 }
 
 function sendMessage(text) {

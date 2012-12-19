@@ -46,6 +46,24 @@
 			return self.rooms[room_id].addUser(self.users[identifier]);
 		}
 
+		self.toogleLove = function(identifier, room_id, message_id){
+			if (!self.roomExists(room_id)) {
+				return false;
+			}
+			if (!self.userExists(identifier)) {
+				return false;
+			}
+			var love = self.rooms[room_id].toogleMessageLove(identifier, message_id);
+			if (love !== undefined) {
+				var data = {
+					action: 'update_loves',
+					message: self.rooms[room_id].getMessage(message_id)
+				};
+				client.publish('/server_actions_' + room_id, data);
+			}
+			return love
+		}
+
 		self.getRoom = function(room_id) {
 			if (!self.roomExists(room_id)) {
 				return false;
