@@ -5,7 +5,7 @@
     "osomtalk.com",
     "www.osomtalk.com"
   ],
-  "version": "0.0.1-87",
+  "version": "0.0.1-89",
   "private": true,
   "scripts": {
     "start": "app.js"
