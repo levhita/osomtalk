@@ -1021,8 +1021,11 @@
 
   EpicEditor.prototype.focus = function (name) {
     var self = this;
-    self.edit();
-    self.editorIframe.focus();
+    this.edit();
+    this.element.focus();
+    this.iframeElement.focus();
+    this.editorIframe.focus();
+    this.editorIframeDocument.body.focus();
     return this;
   }
 
