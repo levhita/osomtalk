@@ -141,9 +141,10 @@
 		}
 
 		self.validateMessage = function(text) {
+			var trimmed_text = utils.trim(text);
 			if (text.length>1024) {
 				return {error:'BLOCKED_LARGE'};
-			} else if (text.length==0) {
+			} else if (trimmed_text.length==0) {
 				return {error:'BLOCKED_EMPTY'};
 			}
 			return true;

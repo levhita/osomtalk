@@ -218,12 +218,13 @@ var faye_server = new faye.NodeAdapter({mount: '/faye'});
 var extension = {
 	incoming : function(message, callback) {
 		if(message.channel.substring(0,10) === '/messages_') {
-			var message_text = utils.trim(message.data.text);
+			var message_text = message.data.text;
 			var token 		 = message.data.token;
 			var identifier   = message.data.identifier;
 			var room_id      = message.channel.substring(10);
 			
 			var block='';
+			
 			if ( !osomtalk.roomExists(room_id) && !osomtalk.userExists(identifier) ) {
 				block = 'NOT_EXIST';
 			} else {

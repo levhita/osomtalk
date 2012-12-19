@@ -18,16 +18,7 @@ $(document).ready(function(){
 	  sanitize: true,
 	});
 	
-	/** 
-	 * Send message when plain enter is pressed, on Shift + Enter
-	 * adds a new line.
-	 **/
-	 $('#message_input').bind('keypress', function(e) {
-	 	if (e.keyCode == 13 && e.shiftKey) {
-	 		sendMessage();
-	 		e.preventDefault();
-	 	}
-	 });
+
 
 	 $('#username').bind('keypress', function(e) {
 	 	if (e.keyCode == 13) {
@@ -48,6 +39,35 @@ $(document).ready(function(){
 	 $('#notifications_button').bind('click', function(e) {
 	 	activateNotifications();
 	 });
+
+
+	var opts = {
+		container: 'epiceditor',
+		basePath: '',
+		clientSideStorage: false,
+		localStorageName: 'epiceditor',
+		parser: marked,
+		file: {
+			name: 'epiceditor',
+			defaultContent: '',
+			autoSave: 100
+		},
+		theme: {
+			base:'/css/epic-themes/base/epiceditor.css',
+			preview:'/css/epic-themes/preview/preview-dark.css',
+			editor:'/css/epic-themes/editor/epic-light.css'
+		},
+		focusOnLoad: true,
+		shortcut: {
+			modifier: 16,
+			fullscreen: 70,
+			preview: 80,
+			edit: 79,
+			send: 13,
+		},
+		send_callback: sendMessage
+	}
+	window.editor = new EpicEditor(opts).load();
 });
 
 function pingBack(room_id) {
@@ -59,9 +79,9 @@ function pingBack(room_id) {
 	});	
 }
 
-function sendMessage() {
+function sendMessage(text) {
 	var room_id = $('#room_id').text();
-	var text = $('#message_input').val();
+	//var text = $('#message_input').val();
 	
 	if (text!=='') {
 		var publication = window.client.publish('/messages_' + room_id, {
@@ -70,9 +90,9 @@ function sendMessage() {
 			token: $('#token').val()
 		});
 		publication.callback(function() {
-  			$('#message_input').val('');
-			$('#message_input').focus();
-		});
+  			window.editor.empty();
+  			window.editor.focus();
+  		});
 		publication.errback(function(error) {
   			if(error.message=="BLOCKED_TYPING") {
   				$('#alert_place_holder').html('<div class="alert"><button type="button" class="close" data-dismiss="alert">×</button><strong>Warning!</strong> Slow down cowboy!, you don\'t want spam everyone do you?</div>');

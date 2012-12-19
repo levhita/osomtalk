@@ -155,11 +155,11 @@
 				<h3>${user.username}</h3>
 				<div id="utility_div">
 						<form class="form-inline">
-							<textarea rows="5" class="span12" name="message_input" id="message_input" placeholder="Write Your Message"></textarea>
 							<input type="hidden" name="token" id="token" value="${user.token}"/>
 							<input type="hidden" name="identifier" id="identifier" value="${user.identifier}"/>
-							<br/><br/>
-							<a href="#" onclick="sendMessage()" class="btn btn-primary btn-block">
+							<label for="epiceditor">Write your Message:</label>
+							<div id="epiceditor"></div>
+							<a href="#" onclick="editor.send();" class="btn btn-primary btn-block">
 								Send Message
 							</a>
 						</form>
@@ -211,7 +211,7 @@
 	<script type="text/javascript" src="/js/xregexp-min.js"></script>
 	<script type="text/javascript" src="/js/utils.js"></script>
 	<script type="text/javascript" src="/js/marked.js"></script>
-
+	<script type="text/javascript" src="/js/epiceditor.js"></script>
 	<!--<script type="text/javascript">var addthis_config = {"data_track_addressbar":true};</script>
 	<script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-4e906de04dcb0610"></script>
 	 AddThis Button END -->
