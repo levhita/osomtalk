@@ -131,7 +131,8 @@
 		</div>
 		
 		<div id="alert_place_holder"></div>
-		
+		<div id="toTop" class="btn btn-primary"><i class="icon-arrow-up icon-white"></i> Back to Top</div>
+
 		<div class="row-fluid clearfix">
 			{{if user == false }}
 			<h2 class="row-fluid offset2 span8">Please login to continue...</h2>
@@ -159,9 +160,7 @@
 							<input type="hidden" name="identifier" id="identifier" value="${user.identifier}"/>
 							<label for="epiceditor">Write your Message:</label>
 							<div id="epiceditor"></div>
-							<a href="#" onclick="editor.send();" class="btn btn-primary btn-block">
-								Send Message
-							</a>
+							<input type="button" href="#" onclick="editor.send();" class="btn btn-primary btn-block" value="Send Message" />
 						</form>
 						<ul>
 							<li><small>Uses <a href="http://daringfireball.net/projects/markdown/syntax" target="_blank">Markdown's syntax</a>.</small>
@@ -214,6 +213,7 @@
 	<script type="text/javascript" src="/js/utils.js"></script>
 	<script type="text/javascript" src="/js/marked.js"></script>
 	<script type="text/javascript" src="/js/epiceditor.js"></script>
+	<script type="text/javascript" src="/js/keymaster.min.js"></script>
 	<!--<script type="text/javascript">var addthis_config = {"data_track_addressbar":true};</script>
 	<script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-4e906de04dcb0610"></script>
 	 AddThis Button END -->

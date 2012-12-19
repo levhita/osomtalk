@@ -998,3 +998,10 @@ a.label:hover,a.badge:hover{color:#ffffff;text-decoration:none;cursor:pointer;}
 .contact a {
 	color:white;
 }
+#toTop {
+	width:100px;
+    position:fixed; /* this is the magic */
+    bottom:10px; /* together with this to put the div at the bottom*/
+    right:10px;
+    display:none;
+}

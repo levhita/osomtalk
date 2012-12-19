@@ -734,14 +734,14 @@
       }
       mousePos = { y: e.pageY, x: e.pageX };
     }
- 
+
     // Add keyboard shortcuts for convenience.
     function shortcutHandler(e) {
       if (e.keyCode == self.settings.shortcut.modifier) { isMod = true } // check for modifier press(default is alt key), save to var
       if (e.keyCode == 17) { isCtrl = true } // check for ctrl/cmnd press, in order to catch ctrl/cmnd + s
 
       // Check for alt+enter and make sure were not in fullscreen - default shortcut to send to callback
-      if (isMod === true && e.keyCode == self.settings.shortcut.send) {
+      if (isMod === true && e.keyCode == self.settings.shortcut.send) { // enter
         e.preventDefault();
         if (self.eeState.fullscreen && document.body.webkitRequestFullScreen) {
           _exitFullscreen(fsElement);
@@ -749,7 +749,7 @@
         self.edit();
         self.send();
       }
-      
+
       // Check for alt+p and make sure were not in fullscreen - default shortcut to switch to preview
       if (isMod === true && e.keyCode == self.settings.shortcut.preview && !self.eeState.fullscreen) {
         e.preventDefault();
@@ -777,6 +777,12 @@
         if (!document.body.webkitRequestFullScreen) {
           _exitFullscreen(fsElement);
         }
+      }
+
+      // When a user presses "esc", revert everything!
+      if (e.keyCode == 27 && !self.eeState.fullscreen) {
+        console.log("Focusing on room");
+        window.parent.focus();
       }
 
       // Check for ctrl + s (since a lot of people do it out of habit) and make it do nothing
@@ -1013,9 +1019,10 @@
     return this;
   }
 
-  EpicEditor.prototype.focus= function (name) {
+  EpicEditor.prototype.focus = function (name) {
     var self = this;
-    self.editorIframeDocument.body.focus();
+    self.edit();
+    self.editorIframe.focus();
     return this;
   }
 
