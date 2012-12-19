@@ -781,7 +781,6 @@
 
       // When a user presses "esc", revert everything!
       if (e.keyCode == 27 && !self.eeState.fullscreen) {
-        console.log("Focusing on room");
         window.parent.focus();
       }
 

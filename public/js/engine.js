@@ -95,7 +95,6 @@ function scrollToTop() {
 }
 
 function newMessage() {
-	console.log("Back to Editor");
 	window.editor.focus();
 	scrollToTop();
 }
