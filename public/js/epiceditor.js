@@ -1044,7 +1044,7 @@
       , isUpdate = false
       , file = self.settings.file.name
       , content = _getText(this.editor);
-
+      
     // This could have been false but since we're manually saving
     // we know it's save to start autoSaving again
     this._canSave = true;
@@ -1074,6 +1074,13 @@
     this.emit('save');
     return this;
   }
+
+  EpicEditor.prototype.sanitize = function () {
+    var self = this
+      , content = _getText(this.editor);
+    _setText(this.editor, content);
+    return self;
+  };
 
   /**
    * Removes a page

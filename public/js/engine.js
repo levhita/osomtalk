@@ -70,8 +70,16 @@ $(document).ready(function(){
 		send_callback: sendMessage
 	}
 
-	window.editor = new EpicEditor(opts).load();
-
+	window.editor = new EpicEditor(opts).load(function () {
+		console.log('loaded');
+		$( this.getElement('editor').body ).bind('paste', function() {
+  			console.log("sanitize");
+		    setTimeout(function () {
+		    	window.editor.sanitize();
+		    }, 100);
+		});
+	});
+	
 	key('n', function() {
 		newMessage();
 	});
@@ -91,8 +99,9 @@ $(document).ready(function(){
 	key('l', function() {
 		loveMessage();
 	});
-
 });
+
+
 
 function scrollToTop() {
 	$('body,html').animate({scrollTop:0},800);
