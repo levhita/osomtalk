@@ -264,7 +264,8 @@
 					self.getUsersData(self.renderUsers);
 				}
 				if(data.action=='update_loves') {
-					$("#" + data.message.id + " .loves .counter").html(data.message.loves.length);
+					escaped_message_id = data.message.id.replace(/([ #;&,.+*~\':"!^$[\]()=>|\/@])/g,'\\$1');
+					$("div[id=" + escaped_message_id + "] .loves .counter").html(data.message.loves.length);
 				}
 			});
 		}
