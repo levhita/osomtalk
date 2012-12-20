@@ -196,19 +196,21 @@
 			var date = utils.getLocaleShortDateString(date) + " " + date.toLocaleTimeString();
 			var string = '';
 			var toggle_preview_button ='';
-			if(previewsHTML !== '') {
-				toggle_preview_button = ' <a class="toggle_previews btn btn-mini btn-inverse" onclick="tooglePreview(\'' + message.id + '\');"><i class="icon-eye-open icon-white"></i></a>';
+			
+			if (previewsHTML !== '') {
+				toggle_preview_button = '<a class="toggle_previews btn btn-mini btn-inverse" onclick="tooglePreview(\'' + message.id + '\');"><i class="icon-eye-open icon-white"></i></a>';
 			}
-
+			delete_button = ' <a class="delete_button btn btn-mini btn-warning" onclick="deleteMessage(\'' + message.id + '\');"><i class="icon-remove icon-white"></i></a>';
+			
 			if(message.user.type=='TWITTER') {
-				string = '<div class="message" id="'+message.id+'"><div class="info"><span class="user">' + escapedName + '</span> <a class="muted" target="_BLANK" href="http://twitter.com/'+message.user.username+'">(@'+message.user.username+')</a><div class="time">' + date + '</div></div><div class="utility"><a class="loves btn btn-primary btn-mini" onclick="clickedLove(this)"><i class="icon-heart icon-white"></i> <span class="counter">' + message.loves.length + '</span></a>' + toggle_preview_button + '</div><div class="text">' + utils.markdown(message.text) +"</div>";	
+				string = '<div class="message" id="'+message.id+'"><div class="info"><span class="user">' + escapedName + '</span> <a class="muted" target="_BLANK" href="http://twitter.com/'+message.user.username+'">(@'+message.user.username+')</a><div class="time">' + date + '</div></div><div class="utility">' + toggle_preview_button + ' <a class="loves btn btn-primary btn-mini" onclick="clickedLove(this)"><i class="icon-heart icon-white"></i> <span class="counter">' + message.loves.length + '</span></a></div><div class="text">' + utils.markdown(message.text) +"</div>";	
 			} else if(message.user.type=='OFFICIAL') {
-				string = '<div class="message" id="'+message.id+'"><div class="info"><span class="user">' + escapedName + '</span> <span class="muted">(Official)</span><div class="time">' + date + '</div></div><div class="utility"><a class="loves btn btn-primary btn-mini" onclick="clickedLove(this)"><i class="icon-heart icon-white"></i> <span class="counter">' + message.loves.length + '</span></a>' + toggle_preview_button + '</div><div class="text">' + utils.markdown(message.text) +'</div>';
+				string = '<div class="message" id="'+message.id+'"><div class="info"><span class="user">' + escapedName + '</span> <span class="muted">(Official)</span><div class="time">' + date + '</div></div><div class="utility">' + toggle_preview_button + ' <a class="loves btn btn-primary btn-mini" onclick="clickedLove(this)"><i class="icon-heart icon-white"></i> <span class="counter">' + message.loves.length + '</span></a></div><div class="text">' + utils.markdown(message.text) +'</div>';
 			} else if(message.user.type=='SYSTEM') {
 				var escapedText = message.text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 				string = '<div class="message system" id="'+message.id+'"><span class="time">' + date + ':</span> ' + escapedText +'</div>';
 			} else {
-				string = '<div class="message" id="'+message.id+'"><div class="info"><span class="user">' + escapedName + '</span> <span class="muted">(Anonymous)</span><div class="time">' + date + '</div></div><div class="utility"><a class="loves btn btn-primary btn-mini" onclick="clickedLove(this)"><i class="icon-heart icon-white"></i> <span class="counter">' + message.loves.length + '</span></a>' + toggle_preview_button + '</div><div class="text">' + utils.markdown(message.text) +'</div>';
+				string = '<div class="message" id="'+message.id+'"><div class="info"><span class="user">' + escapedName + '</span> <span class="muted">(Anonymous)</span><div class="time">' + date + '</div></div><div class="utility">' + toggle_preview_button + ' <a class="loves btn btn-primary btn-mini" onclick="clickedLove(this)"><i class="icon-heart icon-white"></i> <span class="counter">' + message.loves.length + '</span></a></div><div class="text">' + utils.markdown(message.text) +'</div>';
 			}
 			if ( message.user.type!='SYSTEM') {
 				if(previewsHTML !== '') {

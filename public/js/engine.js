@@ -1,15 +1,15 @@
 $(document).ready(function(){
 	window.client = new Faye.Client(FrontEndConfig.url + "/faye");
 	
-	var room_id = $('#room_id').text();
-	room = new Room({id:room_id});
+
+	room = new Room({id:view_config.room_id});
 	room.subscribe(window.client);
 	
 	room.getRoomData(function (){
 		room.renderRoom();
 	});
 	
-	pingBack(room_id);
+	pingBack();
 
 	/** MarkDown Configuration **/
 	marked.setOptions({
@@ -135,11 +135,11 @@ function newMessage() {
 	scrollToTop();
 }
 
-function pingBack(room_id) {
+function pingBack() {
 	$.ajax({
-		url: '/user/ping/'+ room_id,
+		url: '/user/ping/'+ view_config.room_id,
 		success: function(data) {
-			setTimeout(function() { pingBack(room_id)}, 60000);
+			setTimeout(function() { pingBack()}, 60000);
 		}
 	}); 
 }
@@ -149,26 +149,23 @@ function clickedLove(element) {
 	loveMessage(message_id);
 }
 function loveMessage(message_id) {
-	var room_id = $('#room_id').text();
 	$.ajax({
 		type: 'POST',
-		url: '/love_message/' + room_id + '/' + message_id,
+		url: '/love_message/' + view_config.room_id + '/' + message_id,
 		data: {
-			identifier: $('#identifier').val(),
-			token: $('#token').val()
+			identifier: view_config.identifier,
+			token: view_config.token
 		},
 		success: function(data) {}
 	});
 }
 
 function sendMessage(text) {
-	var room_id = $('#room_id').text();
-	
 	if (text!=='') {
-		var publication = window.client.publish('/messages_' + room_id, {
+		var publication = window.client.publish('/messages_' + view_config.room_id, {
 			text: text,
-			identifier: $('#identifier').val(),
-			token: $('#token').val()
+			identifier: view_config.identifier,
+			token: view_config.token
 		});
 		publication.callback(function() {
 			window.editor.empty();
@@ -228,11 +225,6 @@ $(function() {
 	}); 
 });
 
-var view_config = {
-	notifications: false,
-	previews: true
-}
-
 function updateUtility() {
 	if(view_config.notifications) {
 		$('#notifications_button button[value=1]').addClass('active');
@@ -250,3 +242,6 @@ function updateUtility() {
 		$('#previews_button button[value=0]').addClass('active');
 	}
 }
+
+view_config.notifications = false;
+view_config.previews = true;

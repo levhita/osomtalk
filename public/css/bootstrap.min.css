@@ -1035,3 +1035,16 @@ a.label:hover,a.badge:hover{color:#ffffff;text-decoration:none;cursor:pointer;}
 .toggles .group {
 	display:inline-block;
 }
+.preview_container .video_title {
+	margin-bottom:-20px;
+}
+.preview_container .video_thumbnails:hover {
+	text-decoration: none;
+	border-color:#ccc;
+}
+
+.preview_container .video_thumbnails {
+	display:inline-block;
+	border:3px solid #999;
+	padding:7px;
+}

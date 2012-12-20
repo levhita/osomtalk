@@ -2,110 +2,36 @@
 <html lang="en">
 <head>
 	<title>${room.name} - OsomTalk</title>
+	<link rel="shortcut icon" href="/img/favicon.png">
 	<meta name="viewport" content="width = device-width">
 	<link href="/css/bootstrap.min.css" rel="stylesheet">
-	<script type="text/javascript" src="/js/jquery-1.8.3.min.js"></script>
+	<link href="/css/bootstrap-responsive.min.css" rel="stylesheet" media="screen">	
+	<link href="/css/room.css" rel="stylesheet">
 	
-	<style>
-	body {
-		padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
-	}
+	<script type="text/javascript" src="/js/jquery-1.8.3.min.js"></script>
 
-	.previews{
-		text-align: center;
-	}
-	.image_preview{
-		max-height: 100%;
-		overflow: hidden;
-		margin:5px;
-
-	}
-
-	.flex-video {
-		position: relative;
-		padding-top: 25px;
-		padding-bottom: 67.5%;
-		height: 0;
-		margin-bottom: 16px;
-		overflow: hidden;
-	}
-	.message{
-		word-wrap:break-word;
-	}
-
-	.flex-video.widescreen { padding-bottom: 57.25%; }
-	.flex-video.vimeo { padding-top: 0; }
-
-	.flex-video iframe,
-	.flex-video object,
-	.flex-video embed {
-		position: absolute;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
-	}
-	@media only screen and (max-device-width: 800px), only screen and (device-width: 1024px) and (device-height: 600px), only screen and (width: 1280px) and (orientation: landscape), only screen and (device-width: 800px), only screen and (max-width: 767px) {
-		.flex-video { padding-top: 0; }
-	}
-	.footer {
-		text-align: center;
-	}
-	</style>
-
-{{if user == false }}
-	<script>
-		$(document).ready(function(){
-			$('#username').bind('keypress', function(e) {
-				if (e.keyCode == 13) {
-					takeName();
-					e.preventDefault();
-				}
-			});
-		});
-		
-		function takeName() {
-			var username = $("#username").val();
-			$.ajax({
-				url: '/user/take/',
-				data: {username: username},
-				success: function(data) {
-					if(data.error) {
-						if (data.error=="NAME_TAKEN") {
-							$('#alert_place_holder').html('<div class="alert"><button type="button" class="close" data-dismiss="alert">×</button><strong>Warning!</strong> Mmmm...that name is already taken.</div>');
-						} else if(data.error=="TOO_LONG"){
-							$('#alert_place_holder').html('<div class="alert"><button type="button" class="close" data-dismiss="alert">×</button><strong>Warning!</strong> That username is too long, the limit is 20 chars</div>');	
-						} else if(data.error=="EMPTY"){
-							$('#alert_place_holder').html('<div class="alert"><button type="button" class="close" data-dismiss="alert">×</button><strong>Warning!</strong> Your name is empty and you should feel bad</div>');
-						} else if(data.error=="CHEATER"){
-							$('#alert_place_holder').html('<div class="alert"><button type="button" class="close" data-dismiss="alert">×</button><strong>Warning!</strong> I see what you did there</div>');
-						}
-
-						$('#alert_place_holder').fadeIn();
-						setTimeout(function() {
-							$('#alert_place_holder').fadeOut();
-						} , 3000); 
-					} else {
-						location.reload();
-					}	
-				}
-			});
-		};
-	</script>
-{{/if}}
-
-<link href="/css/bootstrap-responsive.min.css" rel="stylesheet" media="screen">
-
-<!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+	{{if user == false }}
+		<script type="text/javascript" src="/js/room_logged_out.js"></script>
+	{{else}}
+		<script>
+			var view_config = {
+				room_id: '${room.id}',
+				token: '${user.token}',
+				identifier: '${user.identifier}',
+				is_mobile: false
+			}
+			if( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) ) {
+ 				view_config.is_mobile = true;
+			}
+		</script>
+	{{/if}}
+	
+	<!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
 	<!--[if lt IE 9]>
 	<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
 	<![endif]-->
-
-	<!-- Fav and touch icons -->
-	<link rel="shortcut icon" href="/img/favicon.png">
 </head>   
 <body>
-	<span class="hide" id="room_id">${room.id}</span>
 	<div class="container">
 		<div class="navbar navbar-inverse navbar-fixed-top">
 			<div class="navbar-inner">
@@ -160,8 +86,6 @@
 				<h3>${user.username}</h3>
 				<div id="utility_div">
 					<form class="form-inline">
-						<input type="hidden" name="token" id="token" value="${user.token}"/>
-						<input type="hidden" name="identifier" id="identifier" value="${user.identifier}"/>
 						<label for="epiceditor">Write your Message:</label>
 						<div id="epiceditor"></div>
 						<input type="button" href="#" onclick="editor.send();" class="btn btn-primary btn-block" value="Send Message" />
@@ -176,7 +100,6 @@
 
 				<div class="row-fluid">
 					<div class="row-fluid toggles">
-						
 						<div class="group">
 							<label>Notifications:</label>
 							<div id="notifications_button" class="btn-group" data-toggle="buttons-radio">						
@@ -191,8 +114,6 @@
 		  						<button type="button" class="btn btn-small btn-inverse" value="0">Off</button>
 							</div>
 						</div>
-						<!--
-						<button id="notifications_button" type="button" class="btn btn-inverse"><i class="icon-exclamation-sign icon-white"></i> Show Notifications</button>-->
 					</div>
 				</div>
 
@@ -287,24 +208,24 @@ use 1 and 2 asterisks to create **Bold** and *Italics* text.
 	</div>
 
 
-	<!-- Le Scripts -->
-	<script type="text/javascript" src="/js/faye-browser-min.js"></script>
+	<!-- External Libraries -->
 	<script type="text/javascript" src="/js/bootstrap.min.js"></script>
-	<script type="text/javascript" src="/js/xregexp-min.js"></script>
-	<script type="text/javascript" src="/js/utils.js"></script>
-	<script type="text/javascript" src="/js/marked.js"></script>
-	<script type="text/javascript" src="/js/epiceditor.js"></script>
-	<script type="text/javascript" src="/js/keymaster.min.js"></script>
-	<!--<script type="text/javascript">var addthis_config = {"data_track_addressbar":true};</script>
-	<script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-4e906de04dcb0610"></script>
-	AddThis Button END -->
-	
+	{{if user !== false }}
+		<script type="text/javascript" src="/js/faye-browser-min.js"></script>
+		<script type="text/javascript" src="/js/xregexp-min.js"></script>
+		<script type="text/javascript" src="/js/utils.js"></script>
+		<script type="text/javascript" src="/js/marked.js"></script>
+		<script type="text/javascript" src="/js/epiceditor.js"></script>
+		<script type="text/javascript" src="/js/keymaster.min.js"></script>	
+	{{/if}}
+		
 	<!-- Our Libraries -->
 	<script type="text/javascript" src="/js/frontend_config.js"></script>
 	{{if user !== false }}
-	<script type="text/javascript" src="/js/engine.js"></script>
+		<script type="text/javascript" src="/js/room.js"></script>
+		<script type="text/javascript" src="/js/engine.js"></script>
 	{{/if}}
-	<script type="text/javascript" src="/js/room.js"></script>
+		
 	{{html ANALYTICS}}
 </body>
 </html>

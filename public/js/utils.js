@@ -58,9 +58,18 @@ var Utils = function() {
 					if (id_matchs[2].length==11){
 					   video_id = id_matchs[2];
 					}
-					preview = '<div class="flex-video"><iframe id="ytplayer" type="text/html" src="http://www.youtube.com/embed/' + video_id + '?autoplay=0&origin=http://osomtalk.com" frameborder="0"/></div>';
-
-					//Turn Youtubes into Embeddeds
+					if(view_config.is_mobile) {
+						preview = '<h3 class="video_title"><span></span> <small class="video_duration muted"></small></h3><br/><a class="video_thumbnails" href="https://youtu.be/' + video_id + '" target="_blank"><img src="http://img.youtube.com/vi/' + video_id + '/1.jpg"/> <img src="http://img.youtube.com/vi/' + video_id + '/2.jpg"/> <img src="http://img.youtube.com/vi/' + video_id + '/3.jpg"/></a>';
+						$.ajax({
+							url: 'https://gdata.youtube.com/feeds/api/videos/'+video_id+'?v=2&alt=json',
+							success: function(data) {
+						       $("#" + message_id).find('.video_title span').html(data.entry.title.$t);
+						       $("#" + message_id).find('.video_duration').html(' (' + Math.floor(data.entry.media$group.yt$duration.seconds / 60) + ':' + (data.entry.media$group.yt$duration.seconds % 60) + ')' );
+    						}
+    					});
+					} else {
+						preview = '<div class="flex-video"><iframe id="ytplayer" type="text/html" src="http://www.youtube.com/embed/' + video_id + '?autoplay=0&origin=http://osomtalk.com" frameborder="0"/></div>';
+					}
 					previews.unshift(preview);
 				}
 			});
