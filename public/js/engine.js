@@ -195,12 +195,13 @@ function sendMessage(text) {
 }
 
 function tooglePreview(message_id){
-	if ( $("#" + message_id).children('.preview_container').html() == '' ) {
-		$("#" + message_id).children('.preview_container').html( room.getPreview(message_id));
-		$("#" + message_id).find('.toggle_previews').html('<i class="icon-eye-open icon-white"></i>');
+	escaped_message_id = message_id.replace(/([ #;&,.+*~\':"!^$[\]()=>|\/@])/g,'\\$1');
+	if ( $("#" + escaped_message_id).children('.preview_container').html() == '' ) {
+		$("#" + escaped_message_id).children('.preview_container').html( room.getPreview(message_id));
+		$("#" + escaped_message_id).find('.toggle_previews').html('<i class="icon-eye-open icon-white"></i>');
 	} else {
-	 	$("#" + message_id).children('.preview_container').html('');
-		$("#" + message_id).find('.toggle_previews').html('<i class="icon-eye-close icon-white"></i>');
+	 	$("#" + escaped_message_id).children('.preview_container').html('');
+		$("#" + escaped_message_id).find('.toggle_previews').html('<i class="icon-eye-close icon-white"></i>');
 	}
 }
 function hideAllPreviews() {

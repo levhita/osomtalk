@@ -151,7 +151,8 @@
 			for (var i = 0; i < self.messages.length; i++) {
     			var previewsHTML = utils.getPreviewsHTML(self.messages[i].text, self.messages[i].id);
     			if ( previewsHTML !== '') {
-    				$("#" + self.messages[i].id).children(".preview_container").html(previewsHTML);	
+    				escaped_message_id = self.messages[i].id.replace(/([ #;&,.+*~\':"!^$[\]()=>|\/@])/g,'\\$1');
+    				$("#" + escaped_message_id).children(".preview_container").html(previewsHTML);	
     			}
 			}
 		}
