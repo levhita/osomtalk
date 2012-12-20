@@ -1008,3 +1008,19 @@ a.label:hover,a.badge:hover{color:#ffffff;text-decoration:none;cursor:pointer;}
 .utility{
 	float:right;
 }
+
+.toggles {
+	text-align: center;
+}
+.toggles label{
+	display:inline-block;
+	text-align: right;
+	width:87px;
+	margin-right:2px;
+	font-family: Raleway;
+	font-weight: bold;
+}
+
+.toggles .group {
+	display:inline-block;
+}

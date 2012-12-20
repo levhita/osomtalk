@@ -18,26 +18,47 @@ $(document).ready(function(){
 		sanitize: true,
 	});
 	
-	$('#username').bind('keypress', function(e) {
-		if (e.keyCode == 13) {
-			takeName();
-			e.preventDefault();
+	$("#previews_button button").bind('click', function() {
+		if(this.value==0) {
+			view_config.previews = false;
+			hideAllPreviews();
+		} else {
+			view_config.previews = true;
+			showAllPreviews();
 		}
 	});
 
-	$('#hide_previews').bind('click', function(e) {
-		$(".toggle_previews").html('<i class="icon-circle-arrow-down icon-white"></i> Show Media');
-		$(".previews").hide();
+	$("#notifications_button button").bind('click', function() {
+		if(this.value==0) {
+			view_config.notifications = false;
+		} else {
+			if (window.webkitNotifications) {
+				if (window.webkitNotifications.checkPermission() == 0) { // 0 is PERMISSION_ALLOWED
+					view_config.notifications = true;
+				} else {
+					window.webkitNotifications.requestPermission( function(){
+						if (window.webkitNotifications.checkPermission() == 0) {
+							view_config.notifications = true;
+						} else {
+							$('#alert_place_holder').html('<div class="alert"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> You have previously blocked notifications from OsomTalk.</div>');
+							$('#alert_place_holder').fadeIn();
+							setTimeout(function() {
+								$('#alert_place_holder').fadeOut();
+							} , 10000); 
+							view_config.notifications = false;
+						}
+						updateUtility();
+					});
+				}
+			} else {
+				$('#alert_place_holder').html('<div class="alert"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> Your Browser doesn\'t support notifications.</div>');
+				$('#alert_place_holder').fadeIn();
+				setTimeout(function() {
+					$('#alert_place_holder').fadeOut();
+				} , 3000); 
+			}
+		}
 	});
-
-	$('#show_previews').bind('click', function(e) {
-		$(".toggle_previews").html('<i class="icon-circle-arrow-up icon-white"></i> Hide Media');
-		$(".previews").show();
-	});
-	$('#notifications_button').bind('click', function(e) {
-		activateNotifications();
-	});
-
 
 	var opts = {
 		container: 'epiceditor',
@@ -69,11 +90,11 @@ $(document).ready(function(){
 	window.editor = new EpicEditor(opts).load(function () {
 		$( this.getElement('editor').body ).bind('paste', function() {
 			setTimeout(function () {
-		    	window.editor.sanitize();
-		    }, 100);
+				window.editor.sanitize();
+			}, 100);
 		});
 	});
-	
+
 	key('n', function() {
 		newMessage();
 	});
@@ -93,6 +114,14 @@ $(document).ready(function(){
 	key('l', function() {
 		loveMessage();
 	});
+
+
+	if (window.webkitNotifications) {
+		if (window.webkitNotifications.checkPermission() == 0) {
+			view_config.notifications = true;
+		}
+	}
+	updateUtility();
 });
 
 
@@ -112,7 +141,7 @@ function pingBack(room_id) {
 		success: function(data) {
 			setTimeout(function() { pingBack(room_id)}, 60000);
 		}
-	});	
+	}); 
 }
 
 function clickedLove(element) {
@@ -165,50 +194,58 @@ function sendMessage(text) {
 	}
 }
 
-function activateNotifications () {
-	if (window.webkitNotifications) {
-  		if (window.webkitNotifications.checkPermission() == 0) { // 0 is PERMISSION_ALLOWED
-  			var notification = window.webkitNotifications.createNotification(
-  				'/img/favicon.png', 'OsomTalk', 'Notifications are already active');
-  			notification.ondisplay = function() {
-  				setTimeout(function() {
-  					notification.cancel();
-  				}, 5000);
-  			};
-  			notification.show();
-  		} else {
-  			window.webkitNotifications.requestPermission();
-  		}
-  	} else {
-  		$('#alert_place_holder').html('<div class="alert"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> Your Browser doesn\'t support notifications.</div>');
-  		$('#alert_place_holder').fadeIn();
-  		setTimeout(function() {
-  			$('#alert_place_holder').fadeOut();
-  		} , 3000); 
-  	}
-  };
+function tooglePreview(message_id){
+	if ( $("#" + message_id).children('.preview_container').html() == '' ) {
+		$("#" + message_id).children('.preview_container').html( room.getPreview(message_id));
+		$("#" + message_id).find('.toggle_previews').html('<i class="icon-eye-open icon-white"></i>');
+	} else {
+	 	$("#" + message_id).children('.preview_container').html('');
+		$("#" + message_id).find('.toggle_previews').html('<i class="icon-eye-close icon-white"></i>');
+	}
+}
+function hideAllPreviews() {
+	$(".toggle_previews").html('<i class="icon-eye-close icon-white"></i>');
+	$(".preview_container").html('');
+}
 
-  function tooglePreview(element){
-  	var div = $(element).parent();
-  	if ( $(element).html() === '<i class="icon-circle-arrow-up icon-white"></i> Hide Media') {
-  		div.children(".previews").hide();	
-  		$(element).html('<i class="icon-circle-arrow-down icon-white"></i> Show Media');
-  	} else {
-  		div.children(".previews").show();	
-  		$(element).html('<i class="icon-circle-arrow-up icon-white"></i> Hide Media');
-  	}
-  }
+function showAllPreviews() {
+	$(".toggle_previews").html('<i class="icon-eye-open icon-white"></i>');
+	room.fillAllPreviews();
+}
 
-  $(function() {
-  	$(window).scroll(function() {
-  		if($(this).scrollTop() != 0) {
-  			$('#toTop').fadeIn();	
-  		} else {
-  			$('#toTop').fadeOut();
-  		}
-  	});
+$(function() {
+	$(window).scroll(function() {
+		if($(this).scrollTop() != 0) {
+			$('#toTop').fadeIn();   
+		} else {
+			$('#toTop').fadeOut();
+		}
+	});
 
-  	$('#toTop').click(function() {
-  		scrollToTop();
-  	});	
-  });
+	$('#toTop').click(function() {
+		scrollToTop();
+	}); 
+});
+
+var view_config = {
+	notifications: false,
+	previews: true
+}
+
+function updateUtility() {
+	if(view_config.notifications) {
+		$('#notifications_button button[value=1]').addClass('active');
+		$('#notifications_button button[value=0]').removeClass('active');
+	}else {
+		$('#notifications_button button[value=1]').removeClass('active');
+		$('#notifications_button button[value=0]').addClass('active');
+	}
+
+	if(view_config.previews) {
+		$('#previews_button button[value=1]').addClass('active');
+		$('#previews_button button[value=0]').removeClass('active');
+	}else {
+		$('#previews_button button[value=1]').removeClass('active');
+		$('#previews_button button[value=0]').addClass('active');
+	}
+}

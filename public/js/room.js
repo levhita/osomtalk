@@ -84,7 +84,7 @@
 			self.messages.push(message);
 			if ( typeof window  !== 'undefined' ) {
 				self.renderMessage(message);
-				if (window.webkitNotifications.checkPermission() == 0) { // 0 is PERMISSION_ALLOWED
+				if (view_config.notifications == true) { // Notifications active
 					var text = (message.text >30)? message.text.substring(0,20) + '...': message.text;
 					var notification = window.webkitNotifications.createNotification(
 						'/img/favicon.png', self.name, message.user.username +": " + text);
@@ -98,8 +98,7 @@
 			} else {
 				client.publish('/server_messages_' + self.id, message);
 				if ( self.messages.length > 100 ) {
-					//Maximum of 100 messages in memory for each chat on the server chat
-					console.log('deleting extra message', self.messages.shift());
+					self.messages.shift();
 				}
 			}
 		};
@@ -139,6 +138,24 @@
 			return false;
 		}
 
+		self.getPreview = function(message_id) {
+			var index = self.getMessageIndex(message_id);
+			if (index !== false) {
+				text = self.messages[index].text;
+				var previewsHTML = utils.getPreviewsHTML(text, message_id);
+			}
+			return previewsHTML;
+		}
+
+		self.fillAllPreviews = function() {
+			for (var i = 0; i < self.messages.length; i++) {
+    			var previewsHTML = utils.getPreviewsHTML(self.messages[i].text, self.messages[i].id);
+    			if ( previewsHTML !== '') {
+    				$("#" + self.messages[i].id).children(".preview_container").html(previewsHTML);	
+    			}
+			}
+		}
+
 		self.getMessage = function(message_id) {
 			var index = self.getMessageIndex(message_id);
 			if (index !== false) {
@@ -173,27 +190,37 @@
 	
 		self.renderMessage = function (message) {
 			var previewsHTML = utils.getPreviewsHTML(message.text, message.id);
-			
 			var escapedName = message.user.username.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-			
 			var date = new Date(message.time * 1000);
-			
 			var date = utils.getLocaleShortDateString(date) + " " + date.toLocaleTimeString();
-			
 			var string = '';
-			
+			var toggle_preview_button ='';
+			if(previewsHTML !== '') {
+				toggle_preview_button = '<button type="button" class="toggle_previews btn btn-smaller btn-inverse" onclick="tooglePreview(\'' + message.id + '\');"><i class="icon-eye-open icon-white"></i></button>';
+			}
+
 			if(message.user.type=='TWITTER') {
-				string = '<div class="message" id="'+message.id+'"><div class="info"><span class="user">' + escapedName + '</span> <a class="muted" target="_BLANK" href="http://twitter.com/'+message.user.username+'">(@'+message.user.username+')</a><div class="time">' + date + '</div></div><div class="utility"><a class="loves btn btn-primary btn-mini" onclick="clickedLove(this)"><i class="icon-heart icon-white"></i> <span class="counter">' + message.loves.length + '</span></a></div><div class="text">' + utils.markdown(message.text) +"</div>";	
+				string = '<div class="message" id="'+message.id+'"><div class="info"><span class="user">' + escapedName + '</span> <a class="muted" target="_BLANK" href="http://twitter.com/'+message.user.username+'">(@'+message.user.username+')</a><div class="time">' + date + '</div></div><div class="utility"><a class="loves btn btn-primary btn-mini" onclick="clickedLove(this)"><i class="icon-heart icon-white"></i> <span class="counter">' + message.loves.length + '</span></a>' + toggle_preview_button + '</div><div class="text">' + utils.markdown(message.text) +"</div>";	
 			} else if(message.user.type=='OFFICIAL') {
-				string = '<div class="message" id="'+message.id+'"><div class="info"><span class="user">' + escapedName + '</span> <span class="muted">(Official)</span><div class="time">' + date + '</div></div><div class="utility"><a class="loves btn btn-primary btn-mini" onclick="clickedLove(this)"><i class="icon-heart icon-white"></i> <span class="counter">' + message.loves.length + '</span></a></div><div class="text">' + utils.markdown(message.text) +'</div>';
+				string = '<div class="message" id="'+message.id+'"><div class="info"><span class="user">' + escapedName + '</span> <span class="muted">(Official)</span><div class="time">' + date + '</div></div><div class="utility"><a class="loves btn btn-primary btn-mini" onclick="clickedLove(this)"><i class="icon-heart icon-white"></i> <span class="counter">' + message.loves.length + '</span></a>' + toggle_preview_button + '</div><div class="text">' + utils.markdown(message.text) +'</div>';
 			} else if(message.user.type=='SYSTEM') {
 				var escapedText = message.text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 				string = '<div class="message system" id="'+message.id+'"><span class="time">' + date + ':</span> ' + escapedText +'</div>';
 			} else {
-				string = '<div class="message" id="'+message.id+'"><div class="info"><span class="user">' + escapedName + '</span> <span class="muted">(Anonymous)</span><div class="time">' + date + '</div></div><div class="utility"><a class="loves btn btn-primary btn-mini" onclick="clickedLove(this)"><i class="icon-heart icon-white"></i> <span class="counter">' + message.loves.length + '</span></a></div><div class="text">' + utils.markdown(message.text) +'</div>';
+				string = '<div class="message" id="'+message.id+'"><div class="info"><span class="user">' + escapedName + '</span> <span class="muted">(Anonymous)</span><div class="time">' + date + '</div></div><div class="utility"><a class="loves btn btn-primary btn-mini" onclick="clickedLove(this)"><i class="icon-heart icon-white"></i> <span class="counter">' + message.loves.length + '</span></a>' + toggle_preview_button + '</div><div class="text">' + utils.markdown(message.text) +'</div>';
 			}
 			if ( message.user.type!='SYSTEM') {
-				$('#messages').prepend(string + previewsHTML+'</div>');
+				if(previewsHTML !== '') {
+					string += '<div class="preview_container">';
+				}
+				if(view_config.previews) {
+					string += previewsHTML;
+				} 
+				if(previewsHTML !== '') {
+					string += '</div>';
+				}
+				string += '</div>';
+				$('#messages').prepend(string);
 			} else {
 				$('#messages').prepend(string);
 			}
