@@ -160,6 +160,18 @@ function loveMessage(message_id) {
 	});
 }
 
+function deleteMessage(message_id) {
+	$.ajax({
+		type: 'POST',
+		url: '/delete_message/' + view_config.room_id + '/' + message_id,
+		data: {
+			identifier: view_config.identifier,
+			token: view_config.token
+		},
+		success: function(data) {}
+	});
+}
+
 function sendMessage(text) {
 	if (text!=='') {
 		var publication = window.client.publish('/messages_' + view_config.room_id, {

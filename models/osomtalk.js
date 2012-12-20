@@ -64,6 +64,24 @@
 			return love
 		}
 
+		self.deleteMessage = function(room_id, message_id){
+			if (!self.roomExists(room_id)) {
+				return false;
+			}
+			if (!self.userExists(identifier)) {
+				return false;
+			}
+			var deleted = self.rooms[room_id].deleteMessage(message_id);
+			if (deleted !== undefined) {
+				var data = {
+					action: 'delete_message',
+					message_id: message_id
+				};
+				client.publish('/server_actions_' + room_id, data);
+			}
+			return deleted
+		}
+
 		self.getRoom = function(room_id) {
 			if (!self.roomExists(room_id)) {
 				return false;
