@@ -196,7 +196,7 @@
 			var string = '';
 			var toggle_preview_button ='';
 			if(previewsHTML !== '') {
-				toggle_preview_button = '<button type="button" class="toggle_previews btn btn-smaller btn-inverse" onclick="tooglePreview(\'' + message.id + '\');"><i class="icon-eye-open icon-white"></i></button>';
+				toggle_preview_button = ' <a class="toggle_previews btn btn-mini btn-inverse" onclick="tooglePreview(\'' + message.id + '\');"><i class="icon-eye-open icon-white"></i></a>';
 			}
 
 			if(message.user.type=='TWITTER') {

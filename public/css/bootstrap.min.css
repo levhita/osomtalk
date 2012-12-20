@@ -1006,11 +1006,19 @@ a.label:hover,a.badge:hover{color:#ffffff;text-decoration:none;cursor:pointer;}
     display:none;
 }
 .utility{
-	float:right;
+	text-align: right;
+	float: right;
+	width: 80px;
+	line-height: 2em;
+}
+
+.message .text {
+	margin-right: 90px;
 }
 
 .toggles {
 	text-align: center;
+	line-height: 2em;
 }
 .toggles label{
 	display:inline-block;
@@ -1020,7 +1028,10 @@ a.label:hover,a.badge:hover{color:#ffffff;text-decoration:none;cursor:pointer;}
 	font-family: Raleway;
 	font-weight: bold;
 }
-
+.preview_container {
+	text-align: center;
+	clear:both;
+}
 .toggles .group {
 	display:inline-block;
 }
