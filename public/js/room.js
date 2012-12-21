@@ -58,7 +58,7 @@
 			if ( typeof window  === 'undefined' ) {
 				var type = '';
 				if (user.type == 'TWITTER') {
-					type= '@' + user.identifier;
+					type= '@' + user.username;
 				} else {
 					type= 'Anonymous';
 				}
@@ -118,11 +118,11 @@
 				}
 			} else if (loves === true) {
 				for (var i = 0; i < self.messages[index].loves.length; i++) {
-    				// Removes it from the loves array
-    				if ( self.messages[index].loves[i] == identifier ) {
-    					self.messages[index].loves.splice(i,1);
-    					return false;
-    				}
+					// Removes it from the loves array
+					if ( self.messages[index].loves[i] == identifier ) {
+						self.messages[index].loves.splice(i,1);
+						return false;
+					}
 				}
 			}
 			return undefined;
@@ -131,9 +131,9 @@
 
 		self.getMessageIndex = function(message_id) {
 			for (var i = 0; i < self.messages.length; i++) {
-    			if(self.messages[i].id==message_id) {
-    				return i;
-    			}
+				if(self.messages[i].id==message_id) {
+					return i;
+				}
 			}
 			return false;
 		}
@@ -158,11 +158,11 @@
 
 		self.fillAllPreviews = function() {
 			for (var i = 0; i < self.messages.length; i++) {
-    			var previewsHTML = utils.getPreviewsHTML(self.messages[i].text, self.messages[i].id);
-    			if ( previewsHTML !== '') {
-    				escaped_message_id = self.messages[i].id.replace(/([ #;&,.+*~\':"!^$[\]()=>|\/@])/g,'\\$1');
-    				$("#" + escaped_message_id).children(".preview_container").html(previewsHTML);	
-    			}
+				var previewsHTML = utils.getPreviewsHTML(self.messages[i].text, self.messages[i].id);
+				if ( previewsHTML !== '') {
+					escaped_message_id = self.messages[i].id.replace(/([ #;&,.+*~\':"!^$[\]()=>|\/@])/g,'\\$1');
+					$("#" + escaped_message_id).children(".preview_container").html(previewsHTML);	
+				}
 			}
 		}
 
@@ -178,9 +178,9 @@
 			var index = self.getMessageIndex(message_id);
 			if (index !== false ) {
 				for (var i = 0; i < self.messages[index].loves.length; i++) {
-	    			if(self.messages[index].loves[i]==identifier) {
-	    				return true;
-	    			}
+					if(self.messages[index].loves[i]==identifier) {
+						return true;
+					}
 				}
 				return false;
 			}
@@ -312,9 +312,8 @@
 				}
 				if(data.action=='delete_message') {
 					escaped_message_id = data.message_id.replace(/([ #;&,.+*~\':"!^$[\]()=>|\/@])/g,'\\$1');
-					
 					$("div[id=" + escaped_message_id + "]").remove();
-					room.removeMessage(data.message.id);
+					room.deleteMessage(data.message_id);
 				}
 			});
 		}

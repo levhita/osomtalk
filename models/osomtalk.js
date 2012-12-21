@@ -68,9 +68,6 @@
 			if (!self.roomExists(room_id)) {
 				return false;
 			}
-			if (!self.userExists(identifier)) {
-				return false;
-			}
 			var deleted = self.rooms[room_id].deleteMessage(message_id);
 			if (deleted !== undefined) {
 				var data = {
@@ -96,12 +93,16 @@
 			var users=[];
 			var users_ids = self.rooms[room_id].getUsersIds();
 			for (var i=0;i<users_ids.length;i++) {
-				aux = {
-					username: self.users[users_ids[i]].username,
-					type: self.users[users_ids[i]].type,
-					identifier: self.users[users_ids[i]].identifier,
+				if( typeof self.users[users_ids[i]] !== 'undefined') {
+					aux = {
+						username: self.users[users_ids[i]].username,
+						type: self.users[users_ids[i]].type,
+						identifier: self.users[users_ids[i]].identifier,
+					}
+					users.push(aux)
+				} else {
+					self.rooms[room_id].users_ids.splice(i,1);
 				}
-				users.push(aux)
 			}
 			return users;
 		}
@@ -112,22 +113,26 @@
 		 *  @todo think about a better bussiness logic to allow FB login
 		 **/
 		self.addUser = function(user) {
-			/**	Cleanse the name up to a identifier status **/
-			identifier = utils.createIdentifier(user.username);
-			
-			if ( self.users[identifier]!==undefined ) {
-				if ( user.type!=="TWITTER" ) {
-					return false;
-				} else {
-					delete self.users[identifier];
-				}
+			var identifier  = utils.makeId(7)
+			  , uniquer	= utils.createIdentifier(user.username);
+
+			for (var i in self.users) {
+				if(self.users[i].uniquer==uniquer) {
+	    			if (user.type!=="TWITTER") {
+						return false;
+					} else if (user.type === self.users[i].type) {
+						return self.users[i];
+					} else {
+						delete self.users[i];
+						break;
+					}
+    			}
 			}
-			
 			user.username = user.username.trim();
 			user.identifier= identifier;
 			user = new User(user);
 			self.users[identifier] = user;
-			return self.users[identifier];
+			return user;
 		}
 		
 		

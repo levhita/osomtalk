@@ -4,10 +4,11 @@
 		config = config || {};
 		var self = {};
 
+		self.identifier = config.identifier || '';
+		self.uniquer	= utils.createIdentifier(config.username);
 		self.username	= config.username || '';
 		self.type 		= config.type || "ANONYMOUS";
 		self.token		= config.token || '';
-		self.identifier = config.identifier || '';
 		self.lastPing	= Math.round(+new Date()/1000);
 		
 		var hmac = crypto.createHmac('sha256', utils.makeId(20));
