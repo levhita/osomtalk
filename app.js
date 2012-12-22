@@ -157,7 +157,7 @@ app.post('/delete_message/:room_id/:message_id', function(req, res){
 	var token = req.body.token;
 	
 	if(osomtalk.verifyPermission(identifier, token, room_id)) {
-		user_identifier = message_id.substring(10);
+		user_identifier = message_id.substring(11);
 		if (user_identifier === req.session.user.identifier) {	
 			var deleted = osomtalk.deleteMessage(room_id, message_id);
 			if(deleted !== undefined) {
@@ -209,7 +209,7 @@ app.post('/rooms/create', function(req, res){
 	   ].join('\n');
 	var timestamp = Math.round(+new Date()/1000);
 	room.addMessage({
-		id: timestamp + "OSOM",
+		id: timestamp + "-OSOM",
 		time: timestamp,
 		text: welcomeMessage,
 		user: {username: 'OsomTalk Bot', type: 'OFFICIAL'},
@@ -301,7 +301,7 @@ var extension = {
 				var user = osomtalk.getUser(identifier);
 				var timestamp = Math.round(+new Date()/1000);
 				var data = {
-					id: timestamp + identifier,
+					id: timestamp + "-" + identifier,
 					time: timestamp,
 					text: message_text,
 					user: {username:user.username, type:user.type},

@@ -83,7 +83,7 @@
 				text: data.text,
 				user: data.user,
 				identifier: data.identifier,
-				loves: [],
+				bookmarks: [],
 				replies: []
 			}
 			self.messages.push(message);
@@ -112,7 +112,7 @@
 		* @return TRUE in case now he loves it, False in case he doesn't like it undefined
 		*		  if the message doesn't exist.
 		*/
-		self.toogleMessageLove = function(identifier, message_id) {
+		/*self.toogleBookmark = function(identifier, message_id) {
 			var loves = self.userLoveMessage(identifier, message_id)
 			var index = self.getMessageIndex(message_id);
 			if( loves === false) {
@@ -131,12 +131,21 @@
 				}
 			}
 			return undefined;
-		}
+		}*/
 
 
 		self.getMessageIndex = function(message_id) {
 			for (var i = 0; i < self.messages.length; i++) {
 				if(self.messages[i].id==message_id) {
+					return i;
+				}
+			}
+			return false;
+		}
+
+		self.getUserIndex = function(identifier) {
+			for (var i = 0; i < self.users.length; i++) {
+				if(self.users[i].id==identifier) {
 					return i;
 				}
 			}
@@ -155,14 +164,20 @@
 		self.replyMessage = function(message_id, identifier, text) {
 			var index = self.getMessageIndex(message_id);
 			var timestamp = Math.round(+new Date()/1000);
+			
 			if (index !== false) {
+				var user = osomtalk.getUser(identifier);
 				var reply = {
-					id: timestamp + identifier,
+					id: timestamp + "-" + identifier,
 					timestamp: timestamp,
-					identifier: identifier,
+					user:{
+						identifier: identifier,
+						username: user.username,
+						type: user.type
+					} ,
 					text: text
 				}
-				self.messages[index].replies.unshift(reply);
+				self.messages[index].replies.push(reply);
 				return true;
 			}
 			return false;
@@ -227,25 +242,26 @@
 			var string = '';
 			var toggle_preview_button ='';
 			var delete_button = '';
+			
 			if (previewsHTML !== '') {
 				toggle_preview_button = '<a class="toggle_previews btn btn-mini btn-inverse" onclick="tooglePreview(\'' + message.id + '\');"><i class="icon-eye-open icon-white"></i></a>';
 			}
 			
-			var user_identifier = message.id.substring(10);
+			var user_identifier = message.id.substring(11);
 			if (user_identifier === view_config.identifier) {
 				delete_button = ' <a class="delete_button btn btn-mini btn-inverse" onclick="deleteMessage(\'' + message.id + '\');"><i class="icon-remove icon-white"></i></a>';
 			}
 			var reply_button = ' <a class="reply_button btn btn-mini btn-inverse" onclick="openReplyMessage(\'' + message.id + '\');"><i class="icon-comment icon-white"></i></a>';
 
 			if(message.user.type=='TWITTER') {
-				string = '<div class="message" id="'+message.id+'"><div class="info"><span class="user">' + escapedName + '</span> <a class="muted" target="_BLANK" href="http://twitter.com/'+message.user.username+'">(@'+message.user.username+')</a><div class="time">' + date + '</div></div><div class="utility">' + toggle_preview_button + delete_button + reply_button + ' <a class="loves btn btn-primary btn-mini" onclick="clickedLove(this)"><i class="icon-heart icon-white"></i> <span class="counter">' + message.loves.length + '</span></a></div><div class="text">' + utils.markdown(message.text) +"</div>";	
+				string = '<div class="message" id="'+message.id+'"><div class="info"><span class="user">' + escapedName + '</span> <a class="muted" target="_BLANK" href="http://twitter.com/'+message.user.username+'">(@'+message.user.username+')</a><div class="time">' + date + '</div></div><div class="utility">' + toggle_preview_button + delete_button + reply_button + '</div><div class="text">' + utils.markdown(message.text) +"</div>";	
 			} else if(message.user.type=='OFFICIAL') {
-				string = '<div class="message" id="'+message.id+'"><div class="info"><span class="user">' + escapedName + '</span> <span class="muted">(Official)</span><div class="time">' + date + '</div></div><div class="utility">' + toggle_preview_button + ' <a class="loves btn btn-primary btn-mini" onclick="clickedLove(this)"><i class="icon-heart icon-white"></i> <span class="counter">' + message.loves.length + '</span></a></div><div class="text">' + utils.markdown(message.text) +'</div>';
+				string = '<div class="message" id="'+message.id+'"><div class="info"><span class="user">' + escapedName + '</span> <span class="muted">(Official)</span><div class="time">' + date + '</div></div><div class="utility">' + toggle_preview_button + '</div><div class="text">' + utils.markdown(message.text) +'</div>';
 			} else if(message.user.type=='SYSTEM') {
 				var escapedText = message.text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 				string = '<div class="message system" id="'+message.id+'"><span class="time">' + date + ':</span> ' + escapedText +'</div>';
 			} else {
-				string = '<div class="message" id="'+message.id+'"><div class="info"><span class="user">' + escapedName + '</span> <span class="muted">(Anonymous)</span><div class="time">' + date + '</div></div><div class="utility">' + toggle_preview_button + delete_button + ' <a class="loves btn btn-primary btn-mini" onclick="clickedLove(this)"><i class="icon-heart icon-white"></i> <span class="counter">' + message.loves.length + '</span></a></div><div class="text">' + utils.markdown(message.text) +'</div>';
+				string = '<div class="message" id="'+message.id+'"><div class="info"><span class="user">' + escapedName + '</span> <span class="muted">(Anonymous)</span><div class="time">' + date + '</div></div><div class="utility">' + toggle_preview_button + delete_button + '</div><div class="text">' + utils.markdown(message.text) +'</div>';
 			}
 			if ( message.user.type!='SYSTEM') {
 				if(previewsHTML !== '') {
@@ -286,10 +302,15 @@
 			var text = '';
 			/** Render Replies **/
 			for(var i = 0; i < replies.length; i++) {
-				text += '<div class="reply">'
+				var user_text = (replies[i].user.type==="TWITTER")? "@"+replies[i].user.username:replies[i].user.username + '<span class="muted">(Anonymous)</span>';
+				user_text = user_text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+				var date = new Date(replies[i].timestamp * 1000);
+				date = utils.getLocaleShortDateString(date) + " " + date.toLocaleTimeString();
+
+				text += '<div class="reply" id="reply-'+replies[i].id+'">'
 					  + replies[i].text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-					  + '<span class="user">'+replies[i].identifier+'</span> '
-					  + '<span class="time">'+replies[i].timestamp+'</span>'
+					  + ' <div class="reply-info"><span class="reply-user">' + user_text + '</span>'
+					  + ' <span class="reply-time">' + date + '</span></div>'
 					  + '</div>';
 			}	
 			return text;

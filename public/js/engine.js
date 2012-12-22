@@ -201,6 +201,7 @@ function replyMessage() {
 			text: text
 		},
 		success: function(data) {
+			$('#reply_input').val('');
 			$("#replyModal").modal('hide');
 		}
 	});
