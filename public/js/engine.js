@@ -122,6 +122,17 @@ $(document).ready(function(){
 		}
 	}
 	updateUtility();
+
+	$('#replyModal').on('shown', function () {
+  		$('#reply_input').focus();
+	});
+
+	$('#reply_input').bind('keypress', function(e) {
+		if (e.keyCode == 13) {
+			replyMessage();
+			e.preventDefault();
+		}
+	});
 });
 
 
@@ -189,7 +200,9 @@ function replyMessage() {
 			token: view_config.token,
 			text: text
 		},
-		success: function(data) {}
+		success: function(data) {
+			$("#replyModal").modal('hide');
+		}
 	});
 }
 
@@ -279,3 +292,4 @@ function updateUtility() {
 
 view_config.notifications = false;
 view_config.previews = true;
+
