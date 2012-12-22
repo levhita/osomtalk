@@ -207,6 +207,22 @@ use 1 and 2 asterisks to create **Bold** and *Italics* text.
 		</div>
 	</div>
 
+		<!-- markdown Modal -->
+	<div id="replyModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+			<h3 id="myModalLabel">Reply</h3>
+		</div>
+		<div class="modal-body">
+			<input type="text" name="message_id_input" id="message_id_input" value=""/>
+			<input type="text" name="reply_input" id="reply_input" value=""/>
+		</div>
+		<div class="modal-footer">
+			<button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+			<button class="btn btn-primary" onclick="replyMessage();">Send Reply</button>
+		</div>
+	</div>
+
 
 	<!-- External Libraries -->
 	<script type="text/javascript" src="/js/bootstrap.min.js"></script>

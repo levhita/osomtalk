@@ -27,6 +27,10 @@
 			self.messages = messages;
 		}
 
+		self.setReplies = function(replies) {
+			self.replies = replies;
+		}
+
 		self.userExists = function(identifier) {
 			return (self.users_ids[identifier]!==undefined);
 		}
@@ -79,7 +83,8 @@
 				text: data.text,
 				user: data.user,
 				identifier: data.identifier,
-				loves: []
+				loves: [],
+				replies: []
 			}
 			self.messages.push(message);
 			if ( typeof window  !== 'undefined' ) {
@@ -142,6 +147,22 @@
 			var index = self.getMessageIndex(message_id);
 			if (index !== false) {
 				self.messages.splice(index, 1);
+				return true;
+			}
+			return false;
+		}
+
+		self.replyMessage = function(message_id, identifier, text) {
+			var index = self.getMessageIndex(message_id);
+			var timestamp = Math.round(+new Date()/1000);
+			if (index !== false) {
+				var reply = {
+					id: timestamp + identifier,
+					timestamp: timestamp,
+					identifier: identifier,
+					text: text
+				}
+				self.messages[index].replies.unshift(reply);
 				return true;
 			}
 			return false;
@@ -210,13 +231,14 @@
 				toggle_preview_button = '<a class="toggle_previews btn btn-mini btn-inverse" onclick="tooglePreview(\'' + message.id + '\');"><i class="icon-eye-open icon-white"></i></a>';
 			}
 			
-			user_identifier = message.id.substring(10);
+			var user_identifier = message.id.substring(10);
 			if (user_identifier === view_config.identifier) {
-				delete_button = ' <a class="delete_button btn btn-mini btn-warning" onclick="deleteMessage(\'' + message.id + '\');"><i class="icon-remove icon-white"></i></a>';
+				delete_button = ' <a class="delete_button btn btn-mini btn-inverse" onclick="deleteMessage(\'' + message.id + '\');"><i class="icon-remove icon-white"></i></a>';
 			}
-						
+			var reply_button = ' <a class="reply_button btn btn-mini btn-inverse" onclick="openReplyMessage(\'' + message.id + '\');"><i class="icon-comment icon-white"></i></a>';
+
 			if(message.user.type=='TWITTER') {
-				string = '<div class="message" id="'+message.id+'"><div class="info"><span class="user">' + escapedName + '</span> <a class="muted" target="_BLANK" href="http://twitter.com/'+message.user.username+'">(@'+message.user.username+')</a><div class="time">' + date + '</div></div><div class="utility">' + toggle_preview_button + delete_button + ' <a class="loves btn btn-primary btn-mini" onclick="clickedLove(this)"><i class="icon-heart icon-white"></i> <span class="counter">' + message.loves.length + '</span></a></div><div class="text">' + utils.markdown(message.text) +"</div>";	
+				string = '<div class="message" id="'+message.id+'"><div class="info"><span class="user">' + escapedName + '</span> <a class="muted" target="_BLANK" href="http://twitter.com/'+message.user.username+'">(@'+message.user.username+')</a><div class="time">' + date + '</div></div><div class="utility">' + toggle_preview_button + delete_button + reply_button + ' <a class="loves btn btn-primary btn-mini" onclick="clickedLove(this)"><i class="icon-heart icon-white"></i> <span class="counter">' + message.loves.length + '</span></a></div><div class="text">' + utils.markdown(message.text) +"</div>";	
 			} else if(message.user.type=='OFFICIAL') {
 				string = '<div class="message" id="'+message.id+'"><div class="info"><span class="user">' + escapedName + '</span> <span class="muted">(Official)</span><div class="time">' + date + '</div></div><div class="utility">' + toggle_preview_button + ' <a class="loves btn btn-primary btn-mini" onclick="clickedLove(this)"><i class="icon-heart icon-white"></i> <span class="counter">' + message.loves.length + '</span></a></div><div class="text">' + utils.markdown(message.text) +'</div>';
 			} else if(message.user.type=='SYSTEM') {
@@ -235,7 +257,14 @@
 				if(previewsHTML !== '') {
 					string += '</div>';
 				}
+				string += '<div class="replies">';
+				if(message.replies.length > 0 ) {
+					string += self.renderReplies(message.replies);
+				}
 				string += '</div>';
+				
+				string += '</div>';
+				
 				$('#messages').prepend(string);
 			} else {
 				$('#messages').prepend(string);
@@ -251,6 +280,19 @@
 				type = ' <span class="muted">(Anonymous)</span>';
 			}
 			$('#users').prepend('<div class="user" id="user_' + user.identifier + '">' + escapedName + type + '</div>');
+		}
+
+		self.renderReplies = function (replies) {
+			var text = '';
+			/** Render Replies **/
+			for(var i = 0; i < replies.length; i++) {
+				text += '<div class="reply">'
+					  + replies[i].text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+					  + '<span class="user">'+replies[i].identifier+'</span> '
+					  + '<span class="time">'+replies[i].timestamp+'</span>'
+					  + '</div>';
+			}	
+			return text;
 		}
 		
 		/** renders the chat **/
@@ -307,11 +349,15 @@
 					self.getUsersData(self.renderUsers);
 				}
 				if(data.action=='update_loves') {
-					escaped_message_id = data.message.id.replace(/([ #;&,.+*~\':"!^$[\]()=>|\/@])/g,'\\$1');
+					escaped_message_id = data.message.id;
 					$("div[id=" + escaped_message_id + "] .loves .counter").html(data.message.loves.length);
 				}
+				if(data.action=='update_message_replies') {
+					var repliesHtml = room.renderReplies(data.replies);
+					$("div[id=" + data.message_id + "] .replies").html(repliesHtml);
+				}
 				if(data.action=='delete_message') {
-					escaped_message_id = data.message_id.replace(/([ #;&,.+*~\':"!^$[\]()=>|\/@])/g,'\\$1');
+					escaped_message_id = data.message_id;
 					$("div[id=" + escaped_message_id + "]").remove();
 					room.deleteMessage(data.message_id);
 				}

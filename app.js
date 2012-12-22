@@ -169,6 +169,24 @@ app.post('/delete_message/:room_id/:message_id', function(req, res){
 	res.send({error: 'NO_PERMISSION'});
 });
 
+/** Reply Message **/
+app.post('/reply_message/:room_id/:message_id', function(req, res){
+	var room_id = req.params.room_id;
+	var message_id = req.params.message_id;
+	var identifier = req.body.identifier;
+	var token = req.body.token;
+	var text = req.body.text;
+	
+	if(osomtalk.verifyPermission(identifier, token, room_id)) {
+		var replied = osomtalk.replyMessage(room_id, message_id, identifier, text);
+		if(replied !== undefined) {
+			res.send({result: replied});
+			return;
+		}
+	}
+	res.send({error: 'NO_PERMISSION'});
+});
+
 /** creates a new room and then returns the generated id. **/
 app.post('/rooms/create', function(req, res){
 	if(req.body.name.length > 20) {

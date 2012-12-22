@@ -79,6 +79,24 @@
 			return deleted
 		}
 
+		self.replyMessage = function(room_id, message_id, identifier, text){
+			if (!self.roomExists(room_id)) {
+				return false;
+			}
+			var replied = self.rooms[room_id].replyMessage(message_id, identifier, text);
+			
+			if (replied !== undefined) {
+				var index = self.rooms[room_id].getMessageIndex(message_id);
+				var data = {
+					action: 'update_message_replies',
+					message_id: message_id,
+					replies: self.rooms[room_id].messages[index].replies
+				};
+				client.publish('/server_actions_' + room_id, data);
+			}
+			return replied;
+		}
+
 		self.getRoom = function(room_id) {
 			if (!self.roomExists(room_id)) {
 				return false;

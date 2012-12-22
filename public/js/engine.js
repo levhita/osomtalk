@@ -172,6 +172,28 @@ function deleteMessage(message_id) {
 	});
 }
 
+function openReplyMessage(message_id) {
+	$("#replyModal").modal('show');
+	$("#message_id_input").val(message_id);
+}
+
+function replyMessage() {
+	var message_id  = $("#message_id_input").val();
+	var text 		= $("#reply_input").val();
+	
+	$.ajax({
+		type: 'POST',
+		url: '/reply_message/' + view_config.room_id + '/' + message_id,
+		data: {
+			identifier: view_config.identifier,
+			token: view_config.token,
+			text: text
+		},
+		success: function(data) {}
+	});
+}
+
+
 function sendMessage(text) {
 	if (text!=='') {
 		var publication = window.client.publish('/messages_' + view_config.room_id, {
