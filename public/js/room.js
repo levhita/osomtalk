@@ -221,7 +221,7 @@
 				return false;
 			}
 		}
-		
+
 		self.addSystemMessage = function(text) {
 			var timestamp = Math.round(+new Date()/1000);
 			message = {

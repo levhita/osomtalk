@@ -214,7 +214,7 @@ function nextMessage() {
 		return;
 	}
 	var past=window.selected_index;
-	for(var i = window.selected_index-1; i >= 0; i--) {
+	for(var i = window.selected_index+1; i < room.messages.length; i++) {
 		if(room.messages[i].user.type == "TWITTER" || room.messages[i].user.type == "ANONYMOUS") {
 			$('#'+room.messages[i].id).addClass('selected');
 			$('html, body').animate({scrollTop: $('#'+room.messages[i].id).offset().top- 150}, 200);
@@ -233,7 +233,7 @@ function previousMessage() {
 		return;
 	}
 	var past=window.selected_index;
-	for(var i = window.selected_index+1; i < room.messages.length; i++) {
+	for(var i = window.selected_index-1; i >= 0; i--) {
 		if(room.messages[i].user.type == "TWITTER" || room.messages[i].user.type == "ANONYMOUS") {
 			$('#'+room.messages[i].id).addClass('selected');
 			$('html, body').animate({scrollTop: $('#'+room.messages[i].id).offset().top- 150}, 200);
