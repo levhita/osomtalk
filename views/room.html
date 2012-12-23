@@ -86,9 +86,8 @@
 				<h3>${user.username}</h3>
 				<div id="utility_div">
 					<form class="form-inline">
-						<label for="epiceditor">Write your Message:</label>
-						<div id="epiceditor"></div>
-						<input type="button" href="#" onclick="editor.send();" class="btn btn-primary btn-block" value="Send Message" />
+						<textarea class="span12" name="message_text" id="message_text" placeholder="Compose your message..." rows="5"></textarea><br/>
+						<input type="button" href="#" onclick="sendMessageBody();" class="btn btn-primary btn-block" value="Send Message" />
 					</form>
 					<ul>
 						<li><small><code>CTRL+ENTER</code> to send your message.</small></li>
@@ -153,6 +152,7 @@
 				<li><code>T</code> to <strong>Jump to and Select</strong> the top message.</small></li>
 				<li><code>J</code> and <code>K</code> to <strong>Jump to and Select</strong> Previous and Next message.</li>
 				<li><code>B</code> and <code>R</code> to <strong>Bookmark</strong> and <strong>Reply</strong> the selected message.</li>
+				<li><code>H</code> and <code>L</code> to <strong>Jump to and Select</strong> Previous and Next Bookmark.</li>
 			</ul>
 		</div>
 		<div class="modal-footer">
@@ -213,6 +213,22 @@ use 1 and 2 asterisks to create **Bold** and *Italics* text.
 		</div>
 	</div>
 
+	<!-- New Message Modal -->
+	<div id="newMessageModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+			<h3 id="myModalLabel">New Message</h3>
+		</div>
+		<div class="modal-body" style="text-align:center">
+
+			<textarea style="width:95%" name="message_text_modal" id="message_text_modal" placeholder="Compose your message..." rows="10"></textarea>
+		</div>
+		<div class="modal-footer">
+			<button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+			<button class="btn btn-primary" onclick="sendMessageModal();">Send Message</button>
+		</div>
+	</div>
+
 
 	<!-- External Libraries -->
 	<script type="text/javascript" src="/js/bootstrap.min.js"></script>
@@ -221,7 +237,6 @@ use 1 and 2 asterisks to create **Bold** and *Italics* text.
 		<script type="text/javascript" src="/js/xregexp-min.js"></script>
 		<script type="text/javascript" src="/js/utils.js"></script>
 		<script type="text/javascript" src="/js/marked.js"></script>
-		<script type="text/javascript" src="/js/epiceditor.js"></script>
 		<script type="text/javascript" src="/js/keymaster.min.js"></script>	
 	{{/if}}
 		

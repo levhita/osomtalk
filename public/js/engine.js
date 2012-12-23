@@ -87,16 +87,14 @@ $(document).ready(function(){
 		send_callback: sendMessage
 	}
 
-	window.editor = new EpicEditor(opts).load(function () {
-		$( this.getElement('editor').body ).bind('paste', function() {
-			setTimeout(function () {
-				window.editor.sanitize();
-			}, 100);
-		});
+	key('n', function(e) {
+		openNewMessage();
+		e.preventDefault();
 	});
 
-	key('n', function() {
-		newMessage();
+	key('c', function(e) {
+		jumpToCompose();
+		e.preventDefault();
 	});
 
 	key('t', function() {
@@ -111,8 +109,12 @@ $(document).ready(function(){
 		nextMessage();
 	});
 
+	key('h', function() {
+		previousBookmark();
+	});
+
 	key('l', function() {
-		loveMessage();
+		nextBookmark();
 	});
 
 
@@ -127,22 +129,69 @@ $(document).ready(function(){
   		$('#reply_input').focus();
 	});
 
+	$('#newMessageModal').on('shown', function () {
+  		$('#message_text_modal').focus();
+	});
+
 	$('#reply_input').bind('keypress', function(e) {
 		if (e.keyCode == 13) {
 			replyMessage();
 			e.preventDefault();
 		}
 	});
+
+	$('#message_text').bind('keypress', function(e) {
+		if (e.keyCode === 10 || e.keyCode == 13 && e.ctrlKey) { // CTRL + ENTER
+			sendMessageBody();
+			e.preventDefault();
+		}
+	});
+
+	$('#message_text').bind('keyup', function(e) {
+		if ( e.keyCode === 27 ) { // ESC
+			$('#message_text').blur();
+			e.preventDefault();
+		}
+	});
+
+	$('#message_text_modal').bind('keyup', function(e) {
+		if ( e.keyCode === 27 ) { // ESC
+			$('#message_text_modal').blur();
+			e.preventDefault();
+		}
+	});
+
+	$('#message_text_modal').bind('keypress', function(e) {
+		if (e.keyCode === 10 || e.keyCode == 13 && e.ctrlKey) { // CTRL + ENTER
+			sendMessageModal();
+		}
+	});
 });
 
+
+function sendMessageBody() {
+	var text = $('#message_text').val();
+	sendMessage(text, function () {
+		$('#message_text').val('');
+		$('#message_text').focus();
+	});
+}
+function sendMessageModal() {
+	var text = $('#message_text_modal').val();
+	sendMessage(text,function () {
+		$('#newMessageModal').modal('hide');
+		$('#message_text_modal').val('');
+		$('#message_text_modal').blur();
+	});
+}
 
 
 function scrollToTop() {
 	$('body,html').animate({scrollTop:0},800);
 }
 
-function newMessage() {
-	window.editor.focus();
+function jumpToCompose() {
+	$('#message_text').focus();
 	scrollToTop();
 }
 
@@ -155,11 +204,11 @@ function pingBack() {
 	}); 
 }
 
-function clickedLove(element) {
+/*function clickedLove(element) {
 	var message_id = $(element).closest('.message').attr('id');
 	loveMessage(message_id);
-}
-function loveMessage(message_id) {
+}*/
+/*function loveMessage(message_id) {
 	$.ajax({
 		type: 'POST',
 		url: '/love_message/' + view_config.room_id + '/' + message_id,
@@ -169,7 +218,7 @@ function loveMessage(message_id) {
 		},
 		success: function(data) {}
 	});
-}
+}*/
 
 function deleteMessage(message_id) {
 	$.ajax({
@@ -186,6 +235,11 @@ function deleteMessage(message_id) {
 function openReplyMessage(message_id) {
 	$("#replyModal").modal('show');
 	$("#message_id_input").val(message_id);
+}
+
+function openNewMessage() {
+	$("#newMessageModal").modal('show');
+	$("#message_text_modal").focus();
 }
 
 function replyMessage() {
@@ -208,17 +262,14 @@ function replyMessage() {
 }
 
 
-function sendMessage(text) {
+function sendMessage(text, success_callback) {
 	if (text!=='') {
 		var publication = window.client.publish('/messages_' + view_config.room_id, {
 			text: text,
 			identifier: view_config.identifier,
 			token: view_config.token
 		});
-		publication.callback(function() {
-			window.editor.empty();
-			window.editor.focus();
-		});
+		publication.callback(success_callback);
 		publication.errback(function(error) {
 			if(error.message=="BLOCKED_TYPING") {
 				$('#alert_place_holder').html('<div class="alert"><button type="button" class="close" data-dismiss="alert">×</button><strong>Warning!</strong> Slow down cowboy!, you don\'t want spam everyone do you?</div>');
