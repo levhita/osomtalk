@@ -1,0 +1,26 @@
+{
+  "name": "osomtalk.com",
+  "subdomain": "osomtalk",
+  "domains": [
+    "osomtalk.com",
+    "www.osomtalk.com"
+  ],
+  "version": "0.0.1-98",
+  "private": true,
+  "scripts": {
+    "start": "app.js"
+  },
+  "dependencies": {
+    "express": "3.0.3",
+    "consolidate": "*",
+    "jqtpl": ">= 0.0.0",
+    "less-middleware": "*",
+    "faye": "*",
+    "oauth": "~0.9.8"
+  },
+  "engines": {
+    "node": "0.8.x"
+  },
+  "license": "AGPLv3",
+  "author": "Levhita <levhita@levhita.com>"
+}

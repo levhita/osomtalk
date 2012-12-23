@@ -16,3 +16,4 @@ public/js/frontend_config.js
 analytics.html
 app_config.js
 node_modules
+package.json

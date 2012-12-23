@@ -1,11 +1,7 @@
 {
-  "name": "osomtalk.com",
-  "subdomain": "osomtalk",
-  "domains": [
-    "osomtalk.com",
-    "www.osomtalk.com"
-  ],
-  "version": "0.0.1-96",
+  "name": "osomtalkdev",
+  "subdomain": "osomtalkdev",
+  "version": "0.0.1-98",
   "private": true,
   "scripts": {
     "start": "app.js"
