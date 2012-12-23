@@ -101,6 +101,9 @@ $(document).ready(function(){
 		replySelected();
 		e.preventDefault();
 	});
+	key('del', function(e) {
+		deleteSelected();
+	});
 
 	key('t', function() {
 		selectTop();
@@ -109,6 +112,8 @@ $(document).ready(function(){
 	key('j', function() {
 		previousMessage();
 	});
+
+
 
 	key('k', function() {
 		nextMessage();
@@ -287,6 +292,23 @@ function deleteMessage(message_id) {
 		},
 		success: function(data) {}
 	});
+}
+
+function deleteSelected() {
+	if(window.selected_index==-1) {
+		return;
+	}
+	if (typeof room.messages[window.selected_index] == undefined) {
+		return;
+	}
+	var message_id = room.messages[window.selected_index].id
+	var user_identifier = message_id.substring(11);
+	if (user_identifier !== view_config.identifier) {
+		return;
+	}
+	if(confirm('Do you want to delete the selected message?')) {
+		deleteMessage(message_id);	
+	}
 }
 
 function replySelected() {

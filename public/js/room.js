@@ -261,7 +261,7 @@
 				var escapedText = message.text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 				string = '<div class="message system" id="'+message.id+'"><span class="time">' + date + ':</span> ' + escapedText +'</div>';
 			} else {
-				string = '<div class="message" id="'+message.id+'"><div class="info"><span class="user">' + escapedName + '</span> <span class="muted">(Anonymous)</span><div class="time">' + date + '</div></div><div class="utility">' + toggle_preview_button + delete_button + '</div><div class="text">' + utils.markdown(message.text) +'</div>';
+				string = '<div class="message" id="'+message.id+'"><div class="info"><span class="user">' + escapedName + '</span> <span class="muted">(Anonymous)</span><div class="time">' + date + '</div></div><div class="utility">' + toggle_preview_button + delete_button + reply_button + '</div><div class="text">' + utils.markdown(message.text) +'</div>';
 			}
 			if ( message.user.type!='SYSTEM') {
 				if(previewsHTML !== '') {
@@ -302,8 +302,8 @@
 			var text = '';
 			/** Render Replies **/
 			for(var i = 0; i < replies.length; i++) {
-				var user_text = (replies[i].user.type==="TWITTER")? "@"+replies[i].user.username:replies[i].user.username + '<span class="muted">(Anonymous)</span>';
-				user_text = user_text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+				var user_text = replies[i].user.username.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+				user_text = (replies[i].user.type==="TWITTER")? "@"+user_text: user_text + '<span class="muted">(Anonymous)</span>';
 				var date = new Date(replies[i].timestamp * 1000);
 				date = utils.getLocaleShortDateString(date) + " " + date.toLocaleTimeString();
 
