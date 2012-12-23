@@ -1,6 +1,6 @@
 $(document).ready(function(){
 	window.client = new Faye.Client(FrontEndConfig.url + "/faye");
-	
+	window.selected_index = -1;
 
 	room = new Room({id:view_config.room_id});
 	room.subscribe(window.client);
@@ -97,8 +97,13 @@ $(document).ready(function(){
 		e.preventDefault();
 	});
 
+	key('r', function(e) {
+		replySelected();
+		e.preventDefault();
+	});
+
 	key('t', function() {
-		scrollToTop();
+		selectTop();
 	});
 
 	key('j', function() {
@@ -184,11 +189,63 @@ function sendMessageModal() {
 		$('#message_text_modal').blur();
 	});
 }
-
-
 function scrollToTop() {
-	$('body,html').animate({scrollTop:0},800);
+	$('html, body').animate({scrollTop: 0}, 800);
 }
+
+function selectTop() {
+	var past = window.selected_index;
+	for(var i=room.messages.length-1; i >= 0; i--) {
+		if(room.messages[i].user.type == "TWITTER" || room.messages[i].user.type == "ANONYMOUS") {
+			$('#'+room.messages[i].id).addClass('selected');
+			$('html, body').animate({scrollTop: $('#'+room.messages[i].id).offset().top- 200}, 500);
+			window.selected_index = i;
+			break;
+		}
+	}
+	if(window.selected_index !== past && past !== -1) {
+		$('#'+room.messages[past].id).removeClass('selected');
+	}
+}
+
+function nextMessage() {
+	if(window.selected_index==-1) {
+		selectTop();
+		return;
+	}
+	var past=window.selected_index;
+	for(var i = window.selected_index-1; i >= 0; i--) {
+		if(room.messages[i].user.type == "TWITTER" || room.messages[i].user.type == "ANONYMOUS") {
+			$('#'+room.messages[i].id).addClass('selected');
+			$('html, body').animate({scrollTop: $('#'+room.messages[i].id).offset().top- 150}, 200);
+			window.selected_index = i;
+			break;
+		}
+	}
+	if(window.selected_index !== past) {
+		$('#'+room.messages[past].id).removeClass('selected');
+	}
+}
+
+function previousMessage() {
+	if(window.selected_index==-1) {
+		selectTop();
+		return;
+	}
+	var past=window.selected_index;
+	for(var i = window.selected_index+1; i < room.messages.length; i++) {
+		if(room.messages[i].user.type == "TWITTER" || room.messages[i].user.type == "ANONYMOUS") {
+			$('#'+room.messages[i].id).addClass('selected');
+			$('html, body').animate({scrollTop: $('#'+room.messages[i].id).offset().top- 150}, 200);
+			window.selected_index = i;
+			break;
+		}
+	}
+	if(window.selected_index !== past) {
+		$('#'+room.messages[past].id).removeClass('selected');
+	}
+}
+
 
 function jumpToCompose() {
 	$('#message_text').focus();
@@ -232,6 +289,14 @@ function deleteMessage(message_id) {
 	});
 }
 
+function replySelected() {
+	if(window.selected_index==-1) {
+		selectTop();
+		return;
+	}
+	openReplyMessage(room.messages[window.selected_index].id);
+}
+
 function openReplyMessage(message_id) {
 	$("#replyModal").modal('show');
 	$("#message_id_input").val(message_id);
@@ -256,6 +321,7 @@ function replyMessage() {
 		},
 		success: function(data) {
 			$('#reply_input').val('');
+			$('#reply_input').blur();
 			$("#replyModal").modal('hide');
 		}
 	});
@@ -340,6 +406,24 @@ function updateUtility() {
 		$('#previews_button button[value=1]').removeClass('active');
 		$('#previews_button button[value=0]').addClass('active');
 	}
+}
+
+$.fn.scrollTo = function( target, options, callback ){
+  if(typeof options == 'function' && arguments.length == 2){ callback = options; options = target; }
+  var settings = $.extend({
+    scrollTarget  : target,
+    offsetTop     : 50,
+    duration      : 500,
+    easing        : 'swing'
+  }, options);
+  return this.each(function(){
+    var scrollPane = $(this);
+    var scrollTarget = (typeof settings.scrollTarget == "number") ? settings.scrollTarget : $(settings.scrollTarget);
+    var scrollY = (typeof scrollTarget == "number") ? scrollTarget : scrollTarget.offset().top + scrollPane.scrollTop() - parseInt(settings.offsetTop);
+    scrollPane.animate({scrollTop : scrollY }, parseInt(settings.duration), settings.easing, function(){
+      if (typeof callback == 'function') { callback.call(this); }
+    });
+  });
 }
 
 view_config.notifications = false;

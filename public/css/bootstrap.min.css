@@ -907,13 +907,34 @@ a.label:hover,a.badge:hover{color:#ffffff;text-decoration:none;cursor:pointer;}
 }
 
 .message {
-	padding:5px;
+	padding:7px;
 	border-bottom:1px solid #555;
 }
 
+.message.selected{
+	background: rgba(50,50,50,0.3);	
+}
+
+.message.selected .info{
+	border-left:5px solid #f02475;
+	padding-left: 5px;
+}
 .message .info {
 	margin-bottom:7px;
+	margin-left: 0px;
+	padding-left: 10px;
 }
+.message .utility{
+	text-align: right;
+	float: right;
+	width: 80px;
+	line-height: 2em;
+}
+
+.message .text {
+	margin-right: 90px;
+}
+
 .message .text {
 	margin:0px 20px;
 }
@@ -934,6 +955,7 @@ a.label:hover,a.badge:hover{color:#ffffff;text-decoration:none;cursor:pointer;}
 .message .user {
 	font-weight:bold;
 }
+
 
 #users .user {
 	padding:10px 10px 10px 20px;
@@ -1005,16 +1027,7 @@ a.label:hover,a.badge:hover{color:#ffffff;text-decoration:none;cursor:pointer;}
     right:10px;
     display:none;
 }
-.message .utility{
-	text-align: right;
-	float: right;
-	width: 80px;
-	line-height: 2em;
-}
 
-.message .text {
-	margin-right: 90px;
-}
 
 .toggles {
 	text-align: center;
