@@ -251,7 +251,7 @@
 			if (user_identifier === view_config.identifier) {
 				delete_button = ' <a class="delete_button btn btn-mini btn-inverse" onclick="deleteMessage(\'' + message.id + '\');"><i class="icon-remove icon-white"></i></a>';
 			}
-			var reply_button = ' <a class="reply_button btn btn-mini btn-inverse" onclick="openReplyMessage(\'' + message.id + '\');"><i class="icon-comment icon-white"></i></a>';
+			var reply_button = ' <a class="reply_button btn btn-mini btn-inverse" onclick="openReplyMessage(\'' + message.id + '\');"><i class="icon-reply icon-white"></i></a>';
 
 			if(message.user.type=='TWITTER') {
 				string = '<div class="message" id="'+message.id+'"><div class="info"><span class="user">' + escapedName + '</span> <a class="muted" target="_BLANK" href="http://twitter.com/'+message.user.username+'">(@'+message.user.username+')</a><div class="time">' + date + '</div></div><div class="utility">' + toggle_preview_button + delete_button + reply_button + '</div><div class="text">' + utils.markdown(message.text) +"</div>";	
