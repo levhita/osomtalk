@@ -396,7 +396,7 @@
 						user = osomtalk.getUser(i);
 						var type = '';
 						if (user.type == 'TWITTER') {
-							type= '@' + user.identifier;
+							type= '@' + user.username;
 						} else {
 							type= 'Anonymous';
 						}

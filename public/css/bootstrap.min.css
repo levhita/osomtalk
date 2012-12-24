@@ -932,12 +932,9 @@ a.label:hover,a.badge:hover{color:#ffffff;text-decoration:none;cursor:pointer;}
 }
 
 .message .text {
-	margin-right: 90px;
+	margin: 0px 20px;
 }
 
-.message .text {
-	margin:0px 20px;
-}
 .message .info .time {
 	display:block;
 	float:right;
@@ -958,10 +955,10 @@ a.label:hover,a.badge:hover{color:#ffffff;text-decoration:none;cursor:pointer;}
 
 
 #users .user {
-	padding:10px 10px 10px 20px;
+	padding:5px;
 }
 #users {
-	margin:10px;
+	/*margin:10px;*/
 }
 .users_container {
 	margin-top: 20px;
@@ -1020,14 +1017,13 @@ a.label:hover,a.badge:hover{color:#ffffff;text-decoration:none;cursor:pointer;}
 .contact a {
 	color:white;
 }
-#toTop {
-	width:20px;
+#float_utils{
+	width:90px;
     position:fixed; /* this is the magic */
     bottom:10px; /* together with this to put the div at the bottom*/
-    right:10px;
+    left:10px;
     display:none;
 }
-
 
 .toggles {
 	text-align: center;
@@ -1048,18 +1044,18 @@ a.label:hover,a.badge:hover{color:#ffffff;text-decoration:none;cursor:pointer;}
 .toggles .group {
 	display:inline-block;
 }
+
 .preview_container .video_title {
-	margin-bottom:-20px;
-}
-.preview_container .video_thumbnails:hover {
-	text-decoration: none;
-	border-color:#ccc;
+	background: rgba(150,150,150,0.3);
+	margin:0px 10px;
+	padding: 10px 10px 5px 10px;
 }
 
 .preview_container .video_thumbnails {
-	display:inline-block;
-	border:3px solid #999;
+	display:block;
+	background: rgba(100,100,100,0.3);
 	padding:7px;
+	margin:0px 10px 10px 10px;
 }
 
 .replies {
@@ -1075,10 +1071,30 @@ a.label:hover,a.badge:hover{color:#ffffff;text-decoration:none;cursor:pointer;}
 }
 
 .reply-info{
-	float:right;
+	/*float:right;*/
 	text-align: right;
  	font-weight: normal;
 	font-style: italic;
 	color: #bbb;
 	font-size: smaller;
+}
+
+.accordion-group, .accordion-inner {
+ border:1px solid #333;
+}
+
+.accordion-heading .accordion-toggle{
+	padding: 3px 3px 3px 10px;
+}
+.navbar-form .share_label {
+	display:inline-block;
+	line-height: 5px;
+	margin-right:5px;
+}
+.outlined {
+ /*outline: 1px solid red;*/
+}
+h3.dawrfed {
+	margin-top: -20px;
+	margin-bottom: 0px;
 }

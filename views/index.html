@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 	<title>OsomTalk</title>
-	<meta name="viewport" content="width = device-width">
+	<meta name="viewport" content="width = device-width, initial-scale=1, user-scalable=0">
 	<script type="text/javascript" src="/js/jquery-1.8.3.min.js"></script>
 	<script type="text/javascript">
 	$(document).ready(function() {
@@ -38,18 +38,6 @@
 	};
 
 	</script>
-	
-
-	<link href="/css/bootstrap.min.css" rel="stylesheet">
-	<style>
-	body {
-		padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
-	}
-	</style>
-	
-	
-	<link href="/css/bootstrap-responsive.min.css" rel="stylesheet" media="screen">
-
 	<!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
 	<!--[if lt IE 9]>
 	<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
@@ -100,6 +88,8 @@
 		text-align: center;
 	}
 	</style>
+	<link href="/css/bootstrap.min.css" rel="stylesheet">
+	<link href="/css/bootstrap-responsive.min.css" rel="stylesheet" media="screen">
 </head>	
 <body>
 	<div class="container">
@@ -123,41 +113,37 @@
 		</div>
 
 		<div class="hero-unit">
-			
 			<img class="header-img" src="/img/logo-header.png"/>
 			<p class="lead">OsomTalk is an awesome chat site for your awesome team, event or LOL eaters.</p>
 			<p class="lead">No XMMP, No IRC, Just a couple of clicks and you have your very own personal TimeLine.</p>
-			
+			<p><button class="btn btn-primary btn-large" onclick="createChat();">Start a new Chat Room!</button></p>
 		</div>
 
 		<div class="row-fluid marketing">
 			<div class="span6">
 				<h3>Free Version</h3>
 				<h4>Fast</h4>
-				<p>Start a chat room for your team or event with a couple of clicks.</p>
-
-				<!--<h4>Secure</h4>
-				<p>Private rooms that can only be accessed by the invited ones.</p>-->
+				<p>Start a chat room for your team or event with a <strong>couple of clicks</strong>.</p>
 
 				<h4>No Hassle</h4>
-				<p>No need to login unless you are entering a private chat.</p>
+				<p><strong>No need to login</strong> unless you are entering a private chat.</p>
 
 				<h4>Fun</h4>
-				<p>Preview of images, videos and most of all, GIFS!</p>
+				<p>Videos and Images are <strong>Shown Directly</strong> in the TimeLine, including animated GIF's.</p>
 				<br/>
-				<a href="#newChatModal" role="button" class="btn btn-large btn-primary" data-toggle="modal">Start a New Chat!</a>
+				<a href="#newChatModal" role="button" class="btn btn-large btn-primary" data-toggle="modal">Start a new Chat Room!</a>
 			</div>
 
 			<div class="span6">
 				<h3>Enterprise</h3>
 				<h4>Secure</h4>
-				<p>Access can be limited to users with your company's email accounts.</p>
+				<p><strong>Access can be limited</strong> to users with your company's email accounts.</p>
 
 				<h4>Flexible</h4>
-				<p>Employees can create their own private rooms for self organization.</p>
+				<p>Employees can create their own private rooms for <strong>self organization</strong>.</p>
 
 				<h4>Productive</h4>
-				<p>Share documents easily among employees.</p>
+				<p><strong>Share documents</strong> easily among employees and <strong>Assign tasks</strong> based in conversation threads.</p>
 				<br/>
 				<a href="#enterpriseModal" role="button" class="btn btn-large btn-info" data-toggle="modal">Create Enterprise Account!</a>
 			</div>
@@ -179,7 +165,7 @@
 		</div>
 		<div class="modal-body">
 			<form class="validate form-inline">
-				<label>Name:</label> <input type="text" name="name" id="name" placeholder="My awesome chat room name" required/>
+				<label>Room Name:</label> <input type="text" name="name" id="name" placeholder="My awesome chat room name" required/>
 				<span class="muted">20 Characters Max.</span>
 			</form>
 			<p>We are on beta, soo chats doesn't have persistence beyond 100 messages, and they can be deleted anytime along with the chat.</p>

@@ -3,10 +3,10 @@
 <head>
 	<title>${room.name} - OsomTalk</title>
 	<link rel="shortcut icon" href="/img/favicon.png">
-	<meta name="viewport" content="width = device-width">
+	<meta name="viewport" content="width = device-width, initial-scale=1, user-scalable=0">
 	<link href="/css/bootstrap.min.css" rel="stylesheet">
-	<link href="/css/bootstrap-responsive.min.css" rel="stylesheet" media="screen">	
 	<link href="/css/room.css" rel="stylesheet">
+	<link href="/css/bootstrap-responsive.min.css" rel="stylesheet" media="screen">	
 	
 	<script type="text/javascript" src="/js/jquery-1.8.3.min.js"></script>
 
@@ -26,6 +26,8 @@
 		</script>
 	{{/if}}
 	
+
+
 	<!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
 	<!--[if lt IE 9]>
 	<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
@@ -41,28 +43,31 @@
 						<span class="icon-bar"></span>
 						<span class="icon-bar"></span>
 					</a>
-					<a class="brand" href="/">OsomTalk</a>
-					<div class="nav-collapse collapse">
+					<a class="brand" href="/">${room.name} - OsomTalk</a>
+					<div class="nav-collapse collapse no-transition">
 						<ul class="nav">
 							<li><a href="/">Home</a></li>
 							<li><a href="/about">About</a></li>
+							
 						</ul>
-						<a class="pull-right btn btn-primary" href="#" onclick="openNewMessage();"><i class="icon-edit icon-white"></i> New Message</a>
+						{{if user !== false }}
+							<form class="navbar-form pull-right outlined">
+								<span class="share_label outlined">Share this link to invite your friends:</span>
+								<input type="text" name="share_text" value="${frontEndConfig.url}/room/${room.id}"onclick="this.select();"/>
+							</form>
+						{{/if}}
 					</div><!--/.nav-collapse -->
 				</div>
 			</div>
 		</div>
 		
-		<div class="room-header row">
-			<h1 class="span5 pull-left">${room.name}</h1>
-			<form  class="sharing span5 pull-right" style="text-align:right">
-				Give your friends this link to invite them to this room:<br/>
-				<input  class="input-xlarge" style="font-size:30px; height:1.1em" type="text" value="${frontEndConfig.url}/room/${room.id}" onclick="this.select();"/>
-			</form>
-		</div>
-		
 		<div id="alert_place_holder"></div>
-		<div id="toTop" class="btn"><i class="icon-arrow-up"></i></div>
+
+		
+		<div id="float_utils">
+			<button class="btn btn-primary" onclick="openNewMessage();"><i class="icon-edit icon-white"></i></button>
+			<button class="btn btn-inverse" onclick="scrollToTop();"><i class="icon-arrow-up icon-white"></i></button>
+		</div>
 
 		<div class="row-fluid clearfix">
 			{{if user == false }}
@@ -84,23 +89,39 @@
 			</div>
 			{{else}}			
 			<div class="span4">
-				<h3>${user.username}</h3>
+				<h3 class="dawrfed outlined">${user.username}</h3>
 				<div id="utility_div">
 					<form class="form-inline">
 						<textarea class="span12" name="message_text" id="message_text" placeholder="Compose your message..." rows="5"></textarea><br/>
 						<input type="button" href="#" onclick="sendMessageBody();" class="btn btn-primary btn-block" value="Send Message" />
 					</form>
-					<ul>
-						<li><small><code>CTRL+ENTER</code> to send your message.</small></li>
+				</div>
+				<div class="accordion" id="accordion2">
+				  <div class="accordion-group">
+				    <div class="accordion-heading">
+				      <a class="accordion-toggle btn-inverse" data-toggle="collapse" data-parent="#accordion2" href="#collapseOne">
+				        Help
+				      </a>
+				    </div>
+				    <div id="collapseOne" class="accordion-body collapse no-transition">
+				      <div class="accordion-inner">
+				        <li><small><code>CTRL+ENTER</code> to send your message.</small></li>
 						<li><small>Try some more <a href="#shortcutsModal" role="button" data-toggle="modal">shortcuts</a> to chat like a boss.</small></li>
 						<li><small>Uses <a href="#markdownModal" role="button" data-toggle="modal">Markdown's Syntax</a>.</small></li>
 						<li><small>Want to share an image from your computer?, try <a target="_blank" href="http://imgur.com">imgur.com</a>.</small></li>
-					</ul>
-				</div>
-
-				<div class="row-fluid">
-					<div class="row-fluid toggles">
-						<div class="group">
+				      </div>
+				    </div>
+				  </div>
+				  
+				  <div class="accordion-group">
+				    <div class="accordion-heading">
+				      <a class="accordion-toggle  btn-inverse" data-toggle="collapse" data-parent="#accordion2" href="#collapseTwo">
+				        Config
+				      </a>
+				    </div>
+				    <div id="collapseTwo" class="accordion-body collapse no-transition">
+				      <div class="accordion-inner">
+				        <div class="group">
 							<label>Notifications:</label>
 							<div id="notifications_button" class="btn-group" data-toggle="buttons-radio">						
 		  						<button type="button" class="btn btn-small btn-success" value="1">On</button>
@@ -114,19 +135,27 @@
 		  						<button type="button" class="btn btn-small btn-inverse" value="0">Off</button>
 							</div>
 						</div>
-					</div>
+				      </div>
+				    </div>
+				  </div>
+
+				  <div class="accordion-group">
+				    <div class="accordion-heading">
+				      <a class="accordion-toggle btn-inverse" data-toggle="collapse" data-parent="#accordion2" href="#collapsetThree">
+				        Connected Users
+				      </a>
+				    </div>
+				    <div id="collapsetThree" class="accordion-body collapse no-transition">
+				      <div class="accordion-inner">
+				        <div id="users"></div>
+				      </div>
+				    </div>
+				  </div>
 				</div>
-
-				<div class="row-fluid users_container">
-
-					<h3>Connected Users:</h3>
-					<div id="users"></div>
-				</div>
-
 			</div> 
 
 			<div class="span8 messages_container">
-				<h3>Messages:</h3>
+				<h3  class="dawrfed outlined" >Messages:</h3>
 				<div id="messages"></div>
 			</div>
 			{{/if}}
@@ -153,6 +182,7 @@
 				<li><code>T</code> to <strong>Jump to and Select</strong> the top message.</small></li>
 				<li><code>J</code> and <code>K</code> to <strong>Jump to and Select</strong> Previous and Next message.</li>
 				<li><code>R</code> to <strong>Reply</strong> the selected message.</li>
+				<li><code>DEL</code> to <strong>Delete</strong> the selected message.</li>
 				<!--<li><code>B</code> and <code>R</code> to <strong>Bookmark</strong> and <strong>Reply</strong> the selected message.</li>
 				<li><code>H</code> and <code>L</code> to <strong>Jump to and Select</strong> Previous and Next Bookmark.</li>-->
 			</ul>

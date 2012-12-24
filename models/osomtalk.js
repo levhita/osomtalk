@@ -275,12 +275,12 @@
 		self.cleanUsers = function() {
 			var timestamp = Math.round(+new Date()/1000);
 			for( i in self.users) {
-				if( (timestamp - self.users[i].lastPing) >  1800) {//Seconds
+				if( (timestamp - self.users[i].lastPing) >  7200) {//Seconds
 					//console.log(i + " Timed out totally");
 					delete self.users[i];
 				}
 			}
-			setTimeout(function(){self.cleanUsers()}, 1800*1000);//Milliseconds
+			setTimeout(function(){self.cleanUsers()}, 7200*1000);//Milliseconds
 		}
 
 		/** Starts the user cleaning iterative process **/

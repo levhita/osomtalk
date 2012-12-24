@@ -60,6 +60,15 @@ $(document).ready(function(){
 		}
 	});
 
+	if ( view_config.is_mobile ) {
+		$("<link/>", {
+   			rel: "stylesheet",
+   			type: "text/css",
+   			href: "/css/mobile_hacks.css"
+		}).appendTo("head");
+		$(".modal.fade").removeClass('fade');
+	}
+
 	var opts = {
 		container: 'epiceditor',
 		basePath: '',
@@ -327,6 +336,7 @@ function openReplyMessage(message_id) {
 function openNewMessage() {
 	$("#newMessageModal").modal('show');
 	$("#message_text_modal").focus();
+	return false;
 }
 
 function replyMessage() {
@@ -401,15 +411,11 @@ function showAllPreviews() {
 $(function() {
 	$(window).scroll(function() {
 		if($(this).scrollTop() != 0) {
-			$('#toTop').fadeIn();   
+			$('#float_utils').fadeIn();   
 		} else {
-			$('#toTop').fadeOut();
+			$('#float_utils').fadeOut();
 		}
 	});
-
-	$('#toTop').click(function() {
-		scrollToTop();
-	}); 
 });
 
 function updateUtility() {
@@ -428,24 +434,6 @@ function updateUtility() {
 		$('#previews_button button[value=1]').removeClass('active');
 		$('#previews_button button[value=0]').addClass('active');
 	}
-}
-
-$.fn.scrollTo = function( target, options, callback ){
-  if(typeof options == 'function' && arguments.length == 2){ callback = options; options = target; }
-  var settings = $.extend({
-    scrollTarget  : target,
-    offsetTop     : 50,
-    duration      : 500,
-    easing        : 'swing'
-  }, options);
-  return this.each(function(){
-    var scrollPane = $(this);
-    var scrollTarget = (typeof settings.scrollTarget == "number") ? settings.scrollTarget : $(settings.scrollTarget);
-    var scrollY = (typeof scrollTarget == "number") ? scrollTarget : scrollTarget.offset().top + scrollPane.scrollTop() - parseInt(settings.offsetTop);
-    scrollPane.animate({scrollTop : scrollY }, parseInt(settings.duration), settings.easing, function(){
-      if (typeof callback == 'function') { callback.call(this); }
-    });
-  });
 }
 
 view_config.notifications = false;

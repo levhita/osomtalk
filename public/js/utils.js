@@ -59,7 +59,7 @@ var Utils = function() {
 					   video_id = id_matchs[2];
 					}
 					if(view_config.is_mobile) {
-						preview = '<h3 class="video_title"><span></span> <small class="video_duration muted"></small></h3><br/><a class="video_thumbnails" href="https://youtu.be/' + video_id + '" target="_blank"><img src="http://img.youtube.com/vi/' + video_id + '/1.jpg"/> <img src="http://img.youtube.com/vi/' + video_id + '/2.jpg"/> <img src="http://img.youtube.com/vi/' + video_id + '/3.jpg"/></a>';
+						preview = '<div class="video_title"><span></span> <small class="video_duration muted"></small></div><a class="video_thumbnails"href="https://youtu.be/' + video_id + '" target="_blank"><img src="http://img.youtube.com/vi/' + video_id + '/1.jpg"/> <img src="http://img.youtube.com/vi/' + video_id + '/2.jpg"/> <img src="http://img.youtube.com/vi/' + video_id + '/3.jpg"/></a>';
 						$.ajax({
 							url: 'https://gdata.youtube.com/feeds/api/videos/'+video_id+'?v=2&alt=json',
 							success: function(data) {
