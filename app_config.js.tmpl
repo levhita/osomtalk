@@ -2,7 +2,9 @@
 	global.AppConfig = {
 		consumer_key: "your_consumer_key",
 		consumer_secret: "your_consumer_secret",
-		port: 3000,
-		cookiesecret: "something very secret"
+		cookie_secret: "something very secret",
+		osomtalk_chat: "your_connection_string",
+		osomtalk_session: "your_connection_string",
+		port: 3000
 	}
 }(typeof window  === 'undefined' ? exports : window));

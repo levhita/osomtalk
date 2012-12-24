@@ -8,7 +8,9 @@ var express = require('express')
 , cons      = require('consolidate')
 , OsomTalk  = require('./models/osomtalk.js').OsomTalk
 , fs 		= require('fs')
-
+, url 		= require('url')
+, RedisStore = require('connect-redis')(express)
+, redis = require('redis');
 
 global.frontEndConfig 	= require('./public/js/frontend_config.js').FrontEndConfig;
 global.appConfig 		= require('./app_config.js').AppConfig;
@@ -19,6 +21,19 @@ global.Room 			= require('./public/js/room.js').Room;
 global.utils 			= require('./public/js/utils.js').utils;
 global.osomtalk 		= new OsomTalk();
 
+
+var redisUrl = url.parse(appConfig.osomtalk_session);
+var redisAuth = redisUrl.auth.split(':');
+
+/** This Connection is made using Iris Couch kind of strange convention...**/
+global.redis_client = redis.createClient(redisUrl.port, redisUrl.hostname);
+global.redis_client.auth(redisUrl.hostname + ":" + redisAuth[1] ,
+	function (err) {
+		if (err) {
+			throw err;
+		}
+	}
+);
 
 
 fs.readFile('analytics.html', 'utf8', function (err,data) {
@@ -31,22 +46,24 @@ fs.readFile('analytics.html', 'utf8', function (err,data) {
 });
 
 var app = express();
-
 app.configure ( function(){
 	app.set('port', process.env.PORT || 3000);
 	app.engine('html', cons.jqtpl);
 
 	app.set('view engine', 'html');
 	app.set('views', __dirname + '/views');
-
-	//app.use(express.favicon());
-	//app.use(express.logger('dev'));
-	//app.use(express.methodOverride());
-	//app.use(app.router);
 	app.use(express.bodyParser());
-	app.use(express.cookieParser(appConfig.cookiesecret));
-	app.use(express.session());
+	app.use(express.cookieParser());
 	
+	var redisUrl = url.parse(appConfig.osomtalk_session);
+	app.use(
+  		express.session({
+	  		store: new RedisStore({
+	  			client: global.redis_client
+	  		}),
+	  		secret: appConfig.cookie_secret
+	  	})
+	 );
 
 	app.use(require('less-middleware')({ src: __dirname + '/public' }));
 	app.use(express.static(path.join(__dirname, 'public')));
