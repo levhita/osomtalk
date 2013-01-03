@@ -22,7 +22,6 @@ global.Room 			= require('./public/js/room.js').Room;
 global.utils 			= require('./public/js/utils.js').utils;
 global.osomtalk 		= new OsomTalk();
 
-
 /** Add the analytics code if the file is present **/
 fs.readFile('analytics.html', 'utf8', function (err,data) {
 	if (err) {
@@ -200,7 +199,7 @@ app.post('/rooms/create', function(req, res){
 		return false;
 	}
 	
-	var room = new osomtalk.addRoom({name:req.body.name});
+	var room_id = osomtalk.addRoom({name:req.body.name});
 	var welcomeMessage = 
 	   ['#Welcome to OsomTalk',
 		'OsomTalk isn\'t like any other chat out there, here you can.',
@@ -213,17 +212,16 @@ app.post('/rooms/create', function(req, res){
 		'',
 		'PD: This Message was written directly in OsomTalk, isn\'t that OSOM.'
 	   ].join('\n');
-	var timestamp = Math.round(+new Date()/1000);
-	room.addMessage({
-		id: timestamp + "-OSOM",
-		time: timestamp,
+	
+	osomtalk.addMessageToRoom(room_id, {
+		_id: new osomtalk.ObjectID(),
 		text: welcomeMessage,
 		user: {username: 'OsomTalk Bot', type: 'OFFICIAL'},
 		identifier: 'OSOM'
 	});
 
-	console.log('Room Created: ' + room.id + '(' + room.name + ')');
-	res.send({id:room.id});
+	console.log('Room Created: ' + room_id + '(' + req.body.name + ')');
+	res.send({id:room_id});
 });
 
 /** Start's the oAuth Dance (is much more natural in node by the way) **/
@@ -330,7 +328,3 @@ faye_server.attach(server);
 console.log("Express server listening on port " + osomtalk.port);
 
 client = new faye.Client(osomtalk.url + '/faye');
-
-osomtalk.addRoom({room_id:'ibgdl', name:'IBGDL'});
-osomtalk.addRoom({room_id:'osombeta', name:'OsomTalk Beta'});
-osomtalk.addRoom({room_id:'hackergarage', name:'HackerGarage'});

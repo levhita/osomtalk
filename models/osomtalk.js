@@ -26,6 +26,7 @@
 					db.createCollection('messages', function(err, collection){
 						self.messages = collection;
 					});
+					self.ObjectID = self.db.bson_serializer.ObjectID;
 				} else {
 					console.log(err);
 					process.exit(1);
@@ -40,22 +41,26 @@
 			"HMAC-SHA1"
 		);
 		
+		self.addMessageToRoom = function(room_id, message) {
+			osomtalk.messages.insert({
+				_id: new osomtalk.ObjectID(),
+				room_id: room_id,
+				identifier: message.identifier,
+				text: message.text,
+				user: message.user
+			}, {w:1}, function(err, results){});
+
+		}
+
 		/** Generates an unused room id  and then store the room in it **/
 		self.addRoom = function(room){
-			if(room.room_id == undefined) {
-				do {
-					room_id = utils.makeId(7);    
-				} while (self.roomExists(room_id) );
-			} else {
-				room_id = room.room_id;
-				if(self.roomExists(room_id)){
-					console.log ('Room id already taken: ' + room_id);
-					return false;
-				}
-			}
-			
-			room = new Room({id:room_id, name:room.name, type:'PUBLIC'});
-			return self.rooms[room_id] = room;
+			var room = new Room({
+				_id: new self.ObjectID(),
+				name:room.name,
+				type:'PUBLIC'
+			});
+			self.rooms.insert(room.getData(), {w:1}, function(err, results){});
+			return room._id;
 		}
 
 		self.addUserToRoom = function(identifier, room_id){

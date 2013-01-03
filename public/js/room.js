@@ -4,18 +4,34 @@
 		config = config || {};
 		var self = {};
 
-		self.id			= config.id;
+		self._id			= config._id;
 		self.name		= config.name || '';
+		self.type 		= config.type || 'PUBLIC';
+		self.admins		= config.admins || [];
 		self.users  	= config.users || [];
 		self.users_ids 	= config.users_ids || [];
 		self.messages 	= config.messages || [];
 
+		/** Try to remove this one **/
 		self.getRoom = function () {
 			return {
-				id:self.id,
-				name:self.name,
-				messages:self.messages,
-				users: osomtalk.getUsersFromRoom(self.id)
+				_id: 		self._id,
+				name: 		self.name,
+				type: 		self.type,
+				admins:  	self.admins,
+				users_ids: 	self.users_ids,
+				users: 		osomtalk.getUsersFromRoom(self.id)
+			}
+		};
+
+		/** This one should be the one **/
+		self.getData = function () {
+			return {
+				_id: 		self._id,
+				name: 		self.name,
+				type: 		self.type,
+				admins:  	self.admins,
+				users_ids:  self.users_ids
 			}
 		};
 
@@ -78,7 +94,8 @@
 
 		self.addMessage = function(data) {
 			var message = {
-				id: data.id,
+				_id: data._id,
+				room_id: self._id,
 				time: data.time,
 				text: data.text,
 				user: data.user,
@@ -86,7 +103,9 @@
 				bookmarks: [],
 				replies: []
 			}
+			
 			self.messages.push(message);
+			
 			if ( typeof window  !== 'undefined' ) {
 				self.renderMessage(message);
 				if (view_config.notifications == true) { // Notifications active
