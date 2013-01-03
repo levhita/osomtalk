@@ -4,7 +4,12 @@
 		consumer_secret: "your_consumer_secret",
 		cookie_secret: "something very secret",
 		osomtalk_chat: "your_connection_string",
-		osomtalk_session: "your_connection_string",
+		osomtalk_session: {
+			string: "redis://nodejitsu:l56k56kj57lk@nodejitsudb345344545.redis.irstack.com:5433",
+			host: "nodejitsudb345344545.redis.irstack.com",
+			pass: "nodejitsudb345344545.redis.irstack.com:l56k56kj57lk",
+			port: 5433
+		},
 		port: 3000
 	}
 }(typeof window  === 'undefined' ? exports : window));

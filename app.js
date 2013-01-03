@@ -16,26 +16,14 @@ global.frontEndConfig 	= require('./public/js/frontend_config.js').FrontEndConfi
 global.appConfig 		= require('./app_config.js').AppConfig;
 global.crypto 			= require('crypto');
 global.OAuth 			= require('oauth').OAuth;
+global.MongoClient 		= require('mongodb').MongoClient;
 global.User 			= require('./public/js/user.js').User;
 global.Room 			= require('./public/js/room.js').Room;
 global.utils 			= require('./public/js/utils.js').utils;
 global.osomtalk 		= new OsomTalk();
 
 
-var redisUrl = url.parse(appConfig.osomtalk_session);
-var redisAuth = redisUrl.auth.split(':');
-
-/** This Connection is made using Iris Couch kind of strange convention...**/
-global.redis_client = redis.createClient(redisUrl.port, redisUrl.hostname);
-global.redis_client.auth(redisUrl.hostname + ":" + redisAuth[1] ,
-	function (err) {
-		if (err) {
-			throw err;
-		}
-	}
-);
-
-
+/** Add the analytics code if the file is present **/
 fs.readFile('analytics.html', 'utf8', function (err,data) {
 	if (err) {
 		console.log("Couldn't find analytics code, if you wish to use one create the file 'analytics.html'");
@@ -55,11 +43,12 @@ app.configure ( function(){
 	app.use(express.bodyParser());
 	app.use(express.cookieParser());
 	
-	var redisUrl = url.parse(appConfig.osomtalk_session);
 	app.use(
   		express.session({
 	  		store: new RedisStore({
-	  			client: global.redis_client
+	  			host: appConfig.osomtalk_session.host,
+				pass: appConfig.osomtalk_session.pass,
+				port: appConfig.osomtalk_session.port
 	  		}),
 	  		secret: appConfig.cookie_secret
 	  	})

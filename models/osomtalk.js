@@ -10,6 +10,28 @@
 		self.users 			= config.users || [];
 		self.spam_filter	= [];
 		
+		MongoClient.connect(appConfig.osomtalk_chat,
+			function(err, db) {
+				console.log('Connecting');	
+				if(!err) {
+					console.log('Connected');
+					self.db = db;
+					/** Create the collections if they doesn't exist yet**/
+					db.createCollection('rooms', function(err, collection){
+						self.rooms = collection;
+					});
+					db.createCollection('users', function(err, collection){
+						self.users= collection;
+					});
+					db.createCollection('messages', function(err, collection){
+						self.messages = collection;
+					});
+				} else {
+					console.log(err);
+					process.exit(1);
+				}
+			});
+
 		self.oa = new OAuth (
 			"https://api.twitter.com/oauth/request_token",
 			"https://api.twitter.com/oauth/access_token",
