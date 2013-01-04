@@ -6,20 +6,26 @@ var express = require('express')
 , faye      = require('faye')
 , jqtpl     = require("jqtpl")
 , cons      = require('consolidate')
-, OsomTalk  = require('./models/osomtalk.js').OsomTalk
 , fs 		= require('fs')
 , url 		= require('url')
 , RedisStore = require('connect-redis')(express)
-, redis = require('redis');
+, redis = require('redis')
+, OsomTalk  = require('./models/osomtalk.js').OsomTalk;
 
+/** Configurations **/
 global.frontEndConfig 	= require('./public/js/frontend_config.js').FrontEndConfig;
 global.appConfig 		= require('./app_config.js').AppConfig;
+
+/** Global Libraries **/
 global.crypto 			= require('crypto');
 global.OAuth 			= require('oauth').OAuth;
 global.MongoClient 		= require('mongodb').MongoClient;
+
+/** Global OsomTalk Classes **/
 global.User 			= require('./public/js/user.js').User;
-global.Room 			= require('./public/js/room.js').Room;
+global.Room 			= require('./models/room_model.js').Room;
 global.utils 			= require('./public/js/utils.js').utils;
+
 global.osomtalk 		= new OsomTalk();
 
 /** Add the analytics code if the file is present **/
@@ -72,30 +78,58 @@ app.get('/about', function(req, res) {
 
 app.get('/room/:room_id', function(req, res) {
 	var room_id = req.params.room_id;
-	if ( room = osomtalk.getRoom(room_id) ) {
-		data = {user: false, room: room, ANALYTICS: global.ANALYTICS};
-		//In case of logged in user, add it to the template
-		if (req.session.user !== undefined) {
-			if ( !osomtalk.verifyPermission(req.session.user.identifier, req.session.user.token) ){
-				req.session.destroy();
+	
+	osomtalk.getRoom(room_id, function (room) {
+		if ( typeof room !== "undefined" ) {
+			data = {
+				user: false,
+				room: room,
+				ANALYTICS: global.ANALYTICS
+			};
+			
+			//In case of logged in user, add it to the template
+			if (req.session.user !== undefined) {
+				osomtalk.verifyPermission(req.session.user.identifier,	req.session.user.token, room_id,
+					function(has_permission) {
+						if (has_permission ) {
+							data.user = req.session.user;
+							osomtalk.addUserToRoom(data.user.identifier, room_id);
+						} else {
+							req.session.destroy();	
+						}
+						res.render('room', data);
+					});	
 			} else {
-				data.user = req.session.user;
-				osomtalk.addUserToRoom(data.user.identifier, room_id);
+				res.render('room', data);
 			}
-		} 
-		res.render('room', data);
-	} else {
-		//Chat room doesn't exists
-		res.redirect('/');
-	}
+		} else {
+			//Chat room doesn't exists
+			res.redirect('/');
+		}
+	});
 });
 
 /** Get all the room data **/
 app.get('/rooms/get/:room_id', function(req, res){
 	var room_id = req.params.room_id;
-	if( room = osomtalk.getRoom(room_id)) {
-		res.send(room.getRoom());
-	}
+	osomtalk.getRoom(room_id, function (room) {
+		if ( typeof room !== "undefined" ) {
+			res.send(room.getData());
+		}
+	});
+});
+
+/** Get all the room data **/
+app.get('/rooms/get_messages/:room_id', function(req, res){
+	var room_id = req.params.room_id;
+	
+	osomtalk.getMessages(room_id, function (messages) {
+		if ( typeof messages !== "undefined" ) {
+			console.log(messages);
+			res.send(messages);
+		}
+	});
+
 });
 
 /** Get all the users from room **/

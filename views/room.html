@@ -15,7 +15,7 @@
 	{{else}}
 		<script>
 			var view_config = {
-				room_id: '${room.id}',
+				room_id: '${room._id}',
 				token: '${user.token}',
 				identifier: '${user.identifier}',
 				is_mobile: false
@@ -53,7 +53,7 @@
 						{{if user !== false }}
 							<form class="navbar-form pull-right outlined">
 								<span class="share_label outlined">Share this link to invite your friends:</span>
-								<input type="text" name="share_text" value="${frontEndConfig.url}/room/${room.id}"onclick="this.select();"/>
+								<input type="text" name="share_text" value="${frontEndConfig.url}/room/${room._id}"onclick="this.select();"/>
 							</form>
 						{{/if}}
 					</div><!--/.nav-collapse -->

@@ -12,18 +12,6 @@
 		self.users_ids 	= config.users_ids || [];
 		self.messages 	= config.messages || [];
 
-		/** Try to remove this one **/
-		self.getRoom = function () {
-			return {
-				_id: 		self._id,
-				name: 		self.name,
-				type: 		self.type,
-				admins:  	self.admins,
-				users_ids: 	self.users_ids,
-				users: 		osomtalk.getUsersFromRoom(self.id)
-			}
-		};
-
 		/** This one should be the one **/
 		self.getData = function () {
 			return {
@@ -350,21 +338,30 @@
 
 		self.renderUsers = function() {
 			/** Render Users **/
-			$('#users').html('');
+			/*$('#users').html('');
 			for(var i = 0; i < self.users.length; i++) {
 				self.renderUser(self.users[i]);
-			}
+			}*/
 		}
 		
 		/** Connections with web services **/
 		/** Gets full room data **/
 		self.getRoomData = function(callback){
 			$.ajax({
-				url: '/rooms/get/'+ self.id,
+				url: '/rooms/get/'+ self._id,
 				success: function(data) {
 					self.name = data.name;
 					self.users = data.users;
-					self.messages = data.messages;
+					callback();
+				}
+			});
+		};
+		
+		self.getMessagesData = function(callback){
+			$.ajax({
+				url: '/rooms/get_messages/'+ self._id,
+				success: function(data) {
+					self.messages = data;
 					callback();
 				}
 			});
@@ -372,7 +369,7 @@
 
 		self.getUsersData = function(callback){
 			$.ajax({
-				url: '/rooms/get_users/'+ self.id,
+				url: '/rooms/get_users/'+ self._id,
 				success: function(data) {
 					self.users = data;
 					callback();
@@ -381,15 +378,15 @@
 		};
 
 		self.subscribe = function(client) {
-			client.subscribe('/server_messages_'+ self.id, function(message) {
+			client.subscribe('/server_messages_'+ self._id, function(message) {
 				self.addMessage(message);
 			});
-			client.subscribe('/server_actions_'+ self.id, function(data) {
+			client.subscribe('/server_actions_'+ self._id, function(data) {
 				if(data.action=='update_users') {
 					self.getUsersData(self.renderUsers);
 				}
 				if(data.action=='update_loves') {
-					escaped_message_id = data.message.id;
+					escaped_message_id = data.message._id;
 					$("div[id=" + escaped_message_id + "] .loves .counter").html(data.message.loves.length);
 				}
 				if(data.action=='update_message_replies') {
@@ -432,7 +429,7 @@
 		}
 		
 		/** Starts the user cleaning iterative process **/
-		self.cleanUsers();
+		//self.cleanUsers();
 		return self;
 	};
 

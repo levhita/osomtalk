@@ -20,11 +20,14 @@
 					db.createCollection('rooms', function(err, collection){
 						self.rooms = collection;
 					});
-					db.createCollection('users', function(err, collection){
+					/*db.createCollection('users', function(err, collection){
 						self.users= collection;
-					});
+					});*/
 					db.createCollection('messages', function(err, collection){
 						self.messages = collection;
+						collection.ensureIndex("room_id",function(){
+
+						})
 					});
 					self.ObjectID = self.db.bson_serializer.ObjectID;
 				} else {
@@ -39,7 +42,7 @@
 			appConfig.consumer_key, appConfig.consumer_secret,
 			"1.0", self.url + "/auth/twitter/callback",
 			"HMAC-SHA1"
-		);
+			);
 		
 		self.addMessageToRoom = function(room_id, message) {
 			osomtalk.messages.insert({
@@ -50,6 +53,16 @@
 				user: message.user
 			}, {w:1}, function(err, results){});
 
+		}
+
+		self.addUserToRoom = function(identifier, room_id){
+			if (!self.roomExists(room_id)) {
+				return false;
+			}
+			if (!self.userExists(identifier)) {
+				return false;
+			}
+			return self.rooms[room_id].addUser(self.users[identifier]);
 		}
 
 		/** Generates an unused room id  and then store the room in it **/
@@ -63,15 +76,7 @@
 			return room._id;
 		}
 
-		self.addUserToRoom = function(identifier, room_id){
-			if (!self.roomExists(room_id)) {
-				return false;
-			}
-			if (!self.userExists(identifier)) {
-				return false;
-			}
-			return self.rooms[room_id].addUser(self.users[identifier]);
-		}
+
 
 		self.toogleLove = function(identifier, room_id, message_id){
 			if (!self.roomExists(room_id)) {
@@ -124,12 +129,33 @@
 			return replied;
 		}
 
-		self.getRoom = function(room_id) {
-			if (!self.roomExists(room_id)) {
-				return false;
-			}
-			return self.rooms[room_id];
+		self.getRoom = function(room_id, callback) {
+			osomtalk.rooms.findOne({_id: osomtalk.ObjectID(room_id)},
+				function(err, results) {
+					var room = new Room(results);
+					callback(room);
+				}); 
 		}
+
+		self.getMessages = function(room_id, callback) {
+			self.messages.find({room_id: osomtalk.ObjectID(room_id)},
+			function(err, messages) {
+				messages.each(function(err, customer) {
+	                console.log(customer);
+	                if(customer != null){
+	                    console.log(customer);
+	                } else{
+	                    
+	                }
+            	});
+			});
+			
+
+			//cursor.forEach(printjson);
+			/*cursor.nextObject(function(err, item) {
+        		console.log(item);
+        	});*/
+		};
 
 		self.getUsersFromRoom = function(room_id) {
 			if (!self.roomExists(room_id)) {
@@ -157,41 +183,41 @@
 		 *  overwrites anonymous users with twitter ones
 		 *  @todo think about a better bussiness logic to allow FB login
 		 **/
-		self.addUser = function(user) {
-			var identifier  = utils.makeId(7)
-			  , uniquer	= utils.createIdentifier(user.username);
+		 self.addUser = function(user) {
+		 	var identifier  = utils.makeId(7)
+		 	, uniquer	= utils.createIdentifier(user.username);
 
-			for (var i in self.users) {
-				if(self.users[i].uniquer==uniquer) {
-	    			if (user.type!=="TWITTER") {
-						return false;
-					} else if (user.type === self.users[i].type) {
-						return self.users[i];
-					} else {
-						delete self.users[i];
-						break;
-					}
-    			}
-			}
-			user.username = user.username.trim();
-			user.identifier= identifier;
-			user = new User(user);
-			self.users[identifier] = user;
-			return user;
-		}
-		
-		
-		self.verifyPermission = function(identifier, token, room_id) {
-			if ( !self.userExists(identifier) ) {
+		 	for (var i in self.users) {
+		 		if(self.users[i].uniquer==uniquer) {
+		 			if (user.type!=="TWITTER") {
+		 				return false;
+		 			} else if (user.type === self.users[i].type) {
+		 				return self.users[i];
+		 			} else {
+		 				delete self.users[i];
+		 				break;
+		 			}
+		 		}
+		 	}
+		 	user.username = user.username.trim();
+		 	user.identifier= identifier;
+		 	user = new User(user);
+		 	self.users[identifier] = user;
+		 	return user;
+		 }
+
+
+		 self.verifyPermission = function(identifier, token, room_id, callback) {
+			/*if ( !self.userExists(identifier) ) {
 				//console.log("User doesn't exists: " + identifier);
-				return false;
+				callback(false);
 			}
 			if (self.users[identifier].token !== token) {
 				//console.log("Wrong Token: " + token);
-				return false;
-			}
+				callback(false);
+			}*/
 			
-			if(room_id !== undefined) {
+			/*if(room_id !== undefined) {
 				if ( !self.roomExists(room_id) ) {
 					//console.log("Room doesn't exists");
 					return false;
@@ -200,8 +226,8 @@
 					//console.log("User doesn't belong to room");
 					return false;
 				}
-			}
-			return true;
+			}*/
+			callback(true);
 		}
 		
 		self.roomExists = function (room_id) {
@@ -311,10 +337,10 @@
 		}
 
 		/** Starts the user cleaning iterative process **/
-		self.cleanUsers();
-	
-	return self;
-};
+		//self.cleanUsers();
 
-global.OsomTalk = OsomTalk;
+		return self;
+	};
+
+	global.OsomTalk = OsomTalk;
 }(typeof window  === 'undefined' ? exports : window));

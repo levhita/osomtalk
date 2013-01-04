@@ -2,14 +2,16 @@ $(document).ready(function(){
 	window.client = new Faye.Client(FrontEndConfig.url + "/faye");
 	window.selected_index = -1;
 
-	room = new Room({id:view_config.room_id});
+	room = new Room({_id: view_config.room_id});
 	room.subscribe(window.client);
 	
 	room.getRoomData(function (){
-		room.renderRoom();
+		room.getMessagesData(function(){
+			room.renderRoom();
+		});
 	});
 	
-	pingBack();
+	//pingBack();
 
 	/** MarkDown Configuration **/
 	marked.setOptions({
