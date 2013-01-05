@@ -125,7 +125,6 @@ app.get('/rooms/get_messages/:room_id', function(req, res){
 	
 	osomtalk.getMessages(room_id, function (messages) {
 		if ( typeof messages !== "undefined" ) {
-			console.log(messages);
 			res.send(messages);
 		}
 	});
@@ -251,7 +250,8 @@ app.post('/rooms/create', function(req, res){
 		_id: new osomtalk.ObjectID(),
 		text: welcomeMessage,
 		user: {username: 'OsomTalk Bot', type: 'OFFICIAL'},
-		identifier: 'OSOM'
+		identifier: 'OSOM',
+		replies: []
 	});
 
 	console.log('Room Created: ' + room_id + '(' + req.body.name + ')');
@@ -315,15 +315,14 @@ var extension = {
 			var token 		 = message.data.token;
 			var identifier   = message.data.identifier;
 			var room_id      = message.channel.substring(10);
-			
+
 			var block='';
-			
-			if ( !osomtalk.roomExists(room_id) && !osomtalk.userExists(identifier) ) {
+			/*if ( !osomtalk.roomExists(room_id) && !osomtalk.userExists(identifier) ) {
 				block = 'NOT_EXIST';
 			} else {
 				if ( !osomtalk.verifyPermission(identifier, token, room_id) ) {
 					block = "NO_PERMISSION";
-				} else {
+				} else {*/
 					result = osomtalk.validateMessage(message_text);
 					if (result.error !==undefined) {
 						block = result.error; //EMPTY & TOO_LONG
@@ -333,20 +332,19 @@ var extension = {
 							block = result.error; //TYPING & FLOODING
 						}
 					}
-				}
-			}
+				/*}
+			}*/
 			if (!block) {
 				var user = osomtalk.getUser(identifier);
-				var timestamp = Math.round(+new Date()/1000);
+				console.log(user);
 				var data = {
-					id: timestamp + "-" + identifier,
-					time: timestamp,
+					_id: osomtalk.ObjectID(),
 					text: message_text,
-					user: {username:user.username, type:user.type},
+					user: {username:'asdf', type: 'ANONYMOUS'},	
 					identifier: identifier,
 				}
-				osomtalk.rooms[room_id].addMessage(data);    
-				
+				//user: {username:'asdf'username:user.username, type:user.type},
+				osomtalk.addMessageToRoom(room_id, data);    
 			} else {
 				message.error = block;
 			}

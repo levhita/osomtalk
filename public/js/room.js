@@ -74,7 +74,7 @@
 				
 				self.addSystemMessage(join_message); 
 				var data = {action: 'update_users'};
-				client.publish('/server_actions_' + self.id, data);
+				client.publish('/server_actions_' + self._id, data);
 			}
 
 			return true;
@@ -108,7 +108,7 @@
 					notification.show();
 				}			
 			} else {
-				client.publish('/server_messages_' + self.id, message);
+				client.publish('/server_messages_' + self._id, message);
 				if ( self.messages.length > 100 ) {
 					self.messages.shift();
 				}
@@ -143,7 +143,7 @@
 
 		self.getMessageIndex = function(message_id) {
 			for (var i = 0; i < self.messages.length; i++) {
-				if(self.messages[i].id==message_id) {
+				if(self.messages[i]._id==message_id) {
 					return i;
 				}
 			}
@@ -201,9 +201,9 @@
 
 		self.fillAllPreviews = function() {
 			for (var i = 0; i < self.messages.length; i++) {
-				var previewsHTML = utils.getPreviewsHTML(self.messages[i].text, self.messages[i].id);
+				var previewsHTML = utils.getPreviewsHTML(self.messages[i].text, self.messages[i]._id);
 				if ( previewsHTML !== '') {
-					escaped_message_id = self.messages[i].id.replace(/([ #;&,.+*~\':"!^$[\]()=>|\/@])/g,'\\$1');
+					escaped_message_id = self.messages[i]._id.replace(/([ #;&,.+*~\':"!^$[\]()=>|\/@])/g,'\\$1');
 					$("#" + escaped_message_id).children(".preview_container").html(previewsHTML);	
 				}
 			}
@@ -242,7 +242,7 @@
 		};
 	
 		self.renderMessage = function (message) {
-			var previewsHTML = utils.getPreviewsHTML(message.text, message.id);
+			var previewsHTML = utils.getPreviewsHTML(message.text, message._id);
 			var escapedName = message.user.username.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 			var date = new Date(message.time * 1000);
 			var date = utils.getLocaleShortDateString(date) + " " + date.toLocaleTimeString();
@@ -251,24 +251,24 @@
 			var delete_button = '';
 			
 			if (previewsHTML !== '') {
-				toggle_preview_button = '<a class="toggle_previews btn btn-mini btn-inverse" onclick="tooglePreview(\'' + message.id + '\');"><i class="icon-eye-open icon-white"></i></a>';
+				toggle_preview_button = '<a class="toggle_previews btn btn-mini btn-inverse" onclick="tooglePreview(\'' + message._id + '\');"><i class="icon-eye-open icon-white"></i></a>';
 			}
 			
-			var user_identifier = message.id.substring(11);
+			var user_identifier = message.identifier;
 			if (user_identifier === view_config.identifier) {
-				delete_button = ' <a class="delete_button btn btn-mini btn-inverse" onclick="deleteMessage(\'' + message.id + '\');"><i class="icon-remove icon-white"></i></a>';
+				delete_button = ' <a class="delete_button btn btn-mini btn-inverse" onclick="deleteMessage(\'' + message._id + '\');"><i class="icon-remove icon-white"></i></a>';
 			}
-			var reply_button = ' <a class="reply_button btn btn-mini btn-inverse" onclick="openReplyMessage(\'' + message.id + '\');"><i class="icon-reply icon-white"></i></a>';
+			var reply_button = ' <a class="reply_button btn btn-mini btn-inverse" onclick="openReplyMessage(\'' + message._id + '\');"><i class="icon-reply icon-white"></i></a>';
 
 			if(message.user.type=='TWITTER') {
-				string = '<div class="message" id="'+message.id+'"><div class="info"><span class="user">' + escapedName + '</span> <a class="muted" target="_BLANK" href="http://twitter.com/'+message.user.username+'">(@'+message.user.username+')</a><div class="time">' + date + '</div></div><div class="utility">' + toggle_preview_button + delete_button + reply_button + '</div><div class="text">' + utils.markdown(message.text) +"</div>";	
+				string = '<div class="message" id="'+message._id+'"><div class="info"><span class="user">' + escapedName + '</span> <a class="muted" target="_BLANK" href="http://twitter.com/'+message.user.username+'">(@'+message.user.username+')</a><div class="time">' + date + '</div></div><div class="utility">' + toggle_preview_button + delete_button + reply_button + '</div><div class="text">' + utils.markdown(message.text) +"</div>";	
 			} else if(message.user.type=='OFFICIAL') {
-				string = '<div class="message" id="'+message.id+'"><div class="info"><span class="user">' + escapedName + '</span> <span class="muted">(Official)</span><div class="time">' + date + '</div></div><div class="utility">' + toggle_preview_button + '</div><div class="text">' + utils.markdown(message.text) +'</div>';
+				string = '<div class="message" id="'+message._id+'"><div class="info"><span class="user">' + escapedName + '</span> <span class="muted">(Official)</span><div class="time">' + date + '</div></div><div class="utility">' + toggle_preview_button + '</div><div class="text">' + utils.markdown(message.text) +'</div>';
 			} else if(message.user.type=='SYSTEM') {
 				var escapedText = message.text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-				string = '<div class="message system" id="'+message.id+'"><span class="time">' + date + ':</span> ' + escapedText +'</div>';
+				string = '<div class="message system" id="'+message._id+'"><span class="time">' + date + ':</span> ' + escapedText +'</div>';
 			} else {
-				string = '<div class="message" id="'+message.id+'"><div class="info"><span class="user">' + escapedName + '</span> <span class="muted">(Anonymous)</span><div class="time">' + date + '</div></div><div class="utility">' + toggle_preview_button + delete_button + reply_button + '</div><div class="text">' + utils.markdown(message.text) +'</div>';
+				string = '<div class="message" id="'+message._id+'"><div class="info"><span class="user">' + escapedName + '</span> <span class="muted">(Anonymous)</span><div class="time">' + date + '</div></div><div class="utility">' + toggle_preview_button + delete_button + reply_button + '</div><div class="text">' + utils.markdown(message.text) +'</div>';
 			}
 			if ( message.user.type!='SYSTEM') {
 				if(previewsHTML !== '') {
@@ -280,10 +280,10 @@
 				if(previewsHTML !== '') {
 					string += '</div>';
 				}
-				string += '<div class="replies">';
+				/*string += '<div class="replies">';
 				if(message.replies.length > 0 ) {
 					string += self.renderReplies(message.replies);
-				}
+				}*/
 				string += '</div>';
 				
 				string += '</div>';
@@ -314,7 +314,7 @@
 				var date = new Date(replies[i].timestamp * 1000);
 				date = utils.getLocaleShortDateString(date) + " " + date.toLocaleTimeString();
 
-				text += '<div class="reply" id="reply-'+replies[i].id+'">'
+				text += '<div class="reply" id="reply-'+replies[i]._id+'">'
 					  + replies[i].text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 					  + ' <div class="reply-info"><span class="reply-user">' + user_text + '</span>'
 					  + ' <span class="reply-time">' + date + '</span></div>'
@@ -420,7 +420,7 @@
 						self.addSystemMessage(leave_message);
 						
 						var data = {action: 'update_users'};
-						client.publish('/server_actions_' + self.id, data);
+						client.publish('/server_actions_' + self._id, data);
 					}
 				}
 			}

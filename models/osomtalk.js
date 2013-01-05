@@ -12,10 +12,9 @@
 		
 		MongoClient.connect(appConfig.osomtalk_chat,
 			function(err, db) {
-				console.log('Connecting');	
 				if(!err) {
-					console.log('Connected');
 					self.db = db;
+					
 					/** Create the collections if they doesn't exist yet**/
 					db.createCollection('rooms', function(err, collection){
 						self.rooms = collection;
@@ -56,13 +55,16 @@
 		}
 
 		self.addUserToRoom = function(identifier, room_id){
-			if (!self.roomExists(room_id)) {
+			/*if (!self.roomExists(room_id)) {
 				return false;
-			}
+			}*/
 			if (!self.userExists(identifier)) {
 				return false;
 			}
-			return self.rooms[room_id].addUser(self.users[identifier]);
+			self.rooms.findOne({room_id: room_id}, function(err, room_data) {
+				var room = new Room(room_data);
+				room.addUser(self.users[identifier]);
+			});
 		}
 
 		/** Generates an unused room id  and then store the room in it **/
@@ -73,10 +75,8 @@
 				type:'PUBLIC'
 			});
 			self.rooms.insert(room.getData(), {w:1}, function(err, results){});
-			return room._id;
+			return room._id.toHexString();
 		}
-
-
 
 		self.toogleLove = function(identifier, room_id, message_id){
 			if (!self.roomExists(room_id)) {
@@ -138,23 +138,17 @@
 		}
 
 		self.getMessages = function(room_id, callback) {
-			self.messages.find({room_id: osomtalk.ObjectID(room_id)},
+			var data = [];
+			self.messages.find({room_id: room_id},
 			function(err, messages) {
-				messages.each(function(err, customer) {
-	                console.log(customer);
-	                if(customer != null){
-	                    console.log(customer);
-	                } else{
-	                    
+				messages.each(function(err, message) {
+	                if(message !== null){
+	                	data.push(message)
+	                } else {
+	                	callback(data);
 	                }
             	});
 			});
-			
-
-			//cursor.forEach(printjson);
-			/*cursor.nextObject(function(err, item) {
-        		console.log(item);
-        	});*/
 		};
 
 		self.getUsersFromRoom = function(room_id) {

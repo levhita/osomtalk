@@ -73,7 +73,7 @@
 				
 				self.addSystemMessage(join_message); 
 				var data = {action: 'update_users'};
-				client.publish('/server_actions_' + self.id, data);
+				client.publish('/server_actions_' + self._id, data);
 			}
 
 			return true;

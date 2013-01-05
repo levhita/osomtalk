@@ -71,33 +71,6 @@ $(document).ready(function(){
 		$(".modal.fade").removeClass('fade');
 	}
 
-	var opts = {
-		container: 'epiceditor',
-		basePath: '',
-		clientSideStorage: false,
-		localStorageName: 'epiceditor',
-		parser: marked,
-		file: {
-			name: 'epiceditor',
-			defaultContent: '',
-			autoSave: 100
-		},
-		theme: {
-			base:'/css/epic-themes/base/epiceditor.css',
-			preview:'/css/epic-themes/preview/preview-dark.css',
-			editor:'/css/epic-themes/editor/epic-light.css'
-		},
-		focusOnLoad: true,
-		shortcut: {
-			modifier: 18,
-			fullscreen: 70,
-			preview: 80,
-			edit: 79,
-			send: 13,
-		},
-		send_callback: sendMessage
-	}
-
 	key('n', function(e) {
 		openNewMessage();
 		e.preventDefault();
@@ -213,14 +186,14 @@ function selectTop() {
 	var past = window.selected_index;
 	for(var i=room.messages.length-1; i >= 0; i--) {
 		if(room.messages[i].user.type == "TWITTER" || room.messages[i].user.type == "ANONYMOUS") {
-			$('#'+room.messages[i].id).addClass('selected');
-			$('html, body').animate({scrollTop: $('#'+room.messages[i].id).offset().top- 200}, 500);
+			$('#'+room.messages[i]._id).addClass('selected');
+			$('html, body').animate({scrollTop: $('#'+room.messages[i]._id).offset().top- 200}, 500);
 			window.selected_index = i;
 			break;
 		}
 	}
 	if(window.selected_index !== past && past !== -1) {
-		$('#'+room.messages[past].id).removeClass('selected');
+		$('#'+room.messages[past]._id).removeClass('selected');
 	}
 }
 
@@ -232,14 +205,14 @@ function nextMessage() {
 	var past=window.selected_index;
 	for(var i = window.selected_index+1; i < room.messages.length; i++) {
 		if(room.messages[i].user.type == "TWITTER" || room.messages[i].user.type == "ANONYMOUS") {
-			$('#'+room.messages[i].id).addClass('selected');
-			$('html, body').animate({scrollTop: $('#'+room.messages[i].id).offset().top- 150}, 200);
+			$('#'+room.messages[i]._id).addClass('selected');
+			$('html, body').animate({scrollTop: $('#'+room.messages[i]._id).offset().top- 150}, 200);
 			window.selected_index = i;
 			break;
 		}
 	}
 	if(window.selected_index !== past) {
-		$('#'+room.messages[past].id).removeClass('selected');
+		$('#'+room.messages[past]._id).removeClass('selected');
 	}
 }
 
@@ -251,14 +224,14 @@ function previousMessage() {
 	var past=window.selected_index;
 	for(var i = window.selected_index-1; i >= 0; i--) {
 		if(room.messages[i].user.type == "TWITTER" || room.messages[i].user.type == "ANONYMOUS") {
-			$('#'+room.messages[i].id).addClass('selected');
-			$('html, body').animate({scrollTop: $('#'+room.messages[i].id).offset().top- 150}, 200);
+			$('#'+room.messages[i]._id).addClass('selected');
+			$('html, body').animate({scrollTop: $('#'+room.messages[i]._id).offset().top- 150}, 200);
 			window.selected_index = i;
 			break;
 		}
 	}
 	if(window.selected_index !== past) {
-		$('#'+room.messages[past].id).removeClass('selected');
+		$('#'+room.messages[past]._id).removeClass('selected');
 	}
 }
 
@@ -312,7 +285,7 @@ function deleteSelected() {
 	if (typeof room.messages[window.selected_index] == undefined) {
 		return;
 	}
-	var message_id = room.messages[window.selected_index].id
+	var message_id = room.messages[window.selected_index]._id
 	var user_identifier = message_id.substring(11);
 	if (user_identifier !== view_config.identifier) {
 		return;
@@ -327,7 +300,7 @@ function replySelected() {
 		selectTop();
 		return;
 	}
-	openReplyMessage(room.messages[window.selected_index].id);
+	openReplyMessage(room.messages[window.selected_index]._id);
 }
 
 function openReplyMessage(message_id) {
