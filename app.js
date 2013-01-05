@@ -194,16 +194,13 @@ app.post('/delete_message/:room_id/:message_id', function(req, res){
 	var identifier = req.body.identifier;
 	var token = req.body.token;
 	
-	if(osomtalk.verifyPermission(identifier, token, room_id)) {
-		user_identifier = message_id.substring(11);
+	//if(osomtalk.verifyPermission(identifier, token, room_id)) {
+		user_identifier = identifier;
 		if (user_identifier === req.session.user.identifier) {	
-			var deleted = osomtalk.deleteMessage(room_id, message_id);
-			if(deleted !== undefined) {
-				res.send({result: deleted});
-				return;
-			}
+			osomtalk.deleteMessage(room_id, message_id);
+			res.send();
 		}
-	}
+	//}
 	res.send({error: 'NO_PERMISSION'});
 });
 
@@ -312,10 +309,10 @@ var extension = {
 	incoming : function(message, callback) {
 		if(message.channel.substring(0,10) === '/messages_') {
 			var message_text = message.data.text;
-			var token 		 = message.data.token;
 			var identifier   = message.data.identifier;
+			var token 		 = message.data.token;
 			var room_id      = message.channel.substring(10);
-
+			
 			var block='';
 			/*if ( !osomtalk.roomExists(room_id) && !osomtalk.userExists(identifier) ) {
 				block = 'NOT_EXIST';
@@ -335,15 +332,11 @@ var extension = {
 				/*}
 			}*/
 			if (!block) {
-				var user = osomtalk.getUser(identifier);
-				console.log(user);
 				var data = {
-					_id: osomtalk.ObjectID(),
 					text: message_text,
-					user: {username:'asdf', type: 'ANONYMOUS'},	
 					identifier: identifier,
+					type: 'USER'
 				}
-				//user: {username:'asdf'username:user.username, type:user.type},
 				osomtalk.addMessageToRoom(room_id, data);    
 			} else {
 				message.error = block;

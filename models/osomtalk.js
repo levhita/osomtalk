@@ -22,18 +22,18 @@
 					/*db.createCollection('users', function(err, collection){
 						self.users= collection;
 					});*/
-					db.createCollection('messages', function(err, collection){
-						self.messages = collection;
-						collection.ensureIndex("room_id",function(){
+		db.createCollection('messages', function(err, collection){
+			self.messages = collection;
+			collection.ensureIndex("room_id",function(){
 
-						})
-					});
-					self.ObjectID = self.db.bson_serializer.ObjectID;
-				} else {
-					console.log(err);
-					process.exit(1);
-				}
-			});
+			})
+		});
+		self.ObjectID = self.db.bson_serializer.ObjectID;
+	} else {
+		console.log(err);
+		process.exit(1);
+	}
+});
 
 		self.oa = new OAuth (
 			"https://api.twitter.com/oauth/request_token",
@@ -43,21 +43,26 @@
 			"HMAC-SHA1"
 			);
 		
-		self.addMessageToRoom = function(room_id, message) {
-			osomtalk.messages.insert({
-				_id: new osomtalk.ObjectID(),
-				room_id: room_id,
-				identifier: message.identifier,
-				text: message.text,
-				user: message.user
-			}, {w:1}, function(err, results){});
-
+		/** @todo: ¿Have the rooms in redis to check for existence faster maybe? **/
+		self.addMessageToRoom = function(room_id, data) {
+			self.rooms.findOne({_id: osomtalk.ObjectID(room_id)}, function(err, room_data){
+				if(!err && room_data != null) {
+					var message = {
+						_id: 		self.ObjectID(),
+						room_id: 	room_id,
+						text: 		data.text,
+						identifier: data.identifier,
+						type: 		data.type,
+						bookmarks: 	[],
+						replies: 	[]
+					}
+					self.messages.insert(message, {w:0});
+					client.publish('/server_messages_' + room_data._id,  message);
+				}	
+			});
 		}
 
 		self.addUserToRoom = function(identifier, room_id){
-			/*if (!self.roomExists(room_id)) {
-				return false;
-			}*/
 			if (!self.userExists(identifier)) {
 				return false;
 			}
@@ -78,37 +83,18 @@
 			return room._id.toHexString();
 		}
 
-		self.toogleLove = function(identifier, room_id, message_id){
-			if (!self.roomExists(room_id)) {
-				return false;
-			}
-			if (!self.userExists(identifier)) {
-				return false;
-			}
-			var love = self.rooms[room_id].toogleMessageLove(identifier, message_id);
-			if (love !== undefined) {
-				var data = {
-					action: 'update_loves',
-					message: self.rooms[room_id].getMessage(message_id)
-				};
-				client.publish('/server_actions_' + room_id, data);
-			}
-			return love
-		}
-
-		self.deleteMessage = function(room_id, message_id){
-			if (!self.roomExists(room_id)) {
-				return false;
-			}
-			var deleted = self.rooms[room_id].deleteMessage(message_id);
-			if (deleted !== undefined) {
-				var data = {
-					action: 'delete_message',
-					message_id: message_id
-				};
-				client.publish('/server_actions_' + room_id, data);
-			}
-			return deleted
+		self.deleteMessage = function(room_id, message_id) {
+			self.rooms.findOne({room_id: self.ObjectID(room_id)}, function(err, room_data) {
+				self.messages.remove({_id: self.ObjectID(message_id)},{w:1}, function(err, result) {
+					if(!err) {
+						var data = {
+							action: 'delete_message',
+							message_id: message_id
+						};
+						client.publish('/server_actions_' + room_id, data);
+					}
+				});
+			});
 		}
 
 		self.replyMessage = function(room_id, message_id, identifier, text){
@@ -116,7 +102,7 @@
 				return false;
 			}
 			var replied = self.rooms[room_id].replyMessage(message_id, identifier, text);
-			
+
 			if (replied !== undefined) {
 				var index = self.rooms[room_id].getMessageIndex(message_id);
 				var data = {
@@ -140,15 +126,15 @@
 		self.getMessages = function(room_id, callback) {
 			var data = [];
 			self.messages.find({room_id: room_id},
-			function(err, messages) {
-				messages.each(function(err, message) {
-	                if(message !== null){
-	                	data.push(message)
-	                } else {
-	                	callback(data);
-	                }
-            	});
-			});
+				function(err, messages) {
+					messages.each(function(err, message) {
+						if(message !== null){
+							data.push(message)
+						} else {
+							callback(data);
+						}
+					});
+				});
 		};
 
 		self.getUsersFromRoom = function(room_id) {

@@ -84,7 +84,6 @@
 			var message = {
 				_id: data._id,
 				room_id: self._id,
-				time: data.time,
 				text: data.text,
 				user: data.user,
 				identifier: data.identifier,
@@ -94,25 +93,18 @@
 			
 			self.messages.push(message);
 			
-			if ( typeof window  !== 'undefined' ) {
-				self.renderMessage(message);
-				if (view_config.notifications == true) { // Notifications active
-					var text = (message.text >30)? message.text.substring(0,20) + '...': message.text;
-					var notification = window.webkitNotifications.createNotification(
-						'/img/favicon.png', self.name, message.user.username +": " + text);
-					notification.ondisplay = function() {
-						setTimeout(function() {
-							notification.cancel();
-						}, 5000);
-					};
-					notification.show();
-				}			
-			} else {
-				client.publish('/server_messages_' + self._id, message);
-				if ( self.messages.length > 100 ) {
-					self.messages.shift();
-				}
-			}
+			self.renderMessage(message);
+			if (view_config.notifications == true) { // Notifications active
+				var text = (message.text >30)? message.text.substring(0,20) + '...': message.text;
+				var notification = window.webkitNotifications.createNotification(
+					'/img/favicon.png', self.name, message.user.username +": " + text);
+				notification.ondisplay = function() {
+					setTimeout(function() {
+						notification.cancel();
+					}, 5000);
+				};
+				notification.show();
+			}			
 		};
 
 		/**
@@ -243,7 +235,7 @@
 	
 		self.renderMessage = function (message) {
 			var previewsHTML = utils.getPreviewsHTML(message.text, message._id);
-			var escapedName = message.user.username.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+			var escapedName = 'test';//message.user.username.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 			var date = new Date(message.time * 1000);
 			var date = utils.getLocaleShortDateString(date) + " " + date.toLocaleTimeString();
 			var string = '';
@@ -260,7 +252,10 @@
 			}
 			var reply_button = ' <a class="reply_button btn btn-mini btn-inverse" onclick="openReplyMessage(\'' + message._id + '\');"><i class="icon-reply icon-white"></i></a>';
 
-			if(message.user.type=='TWITTER') {
+			//if(message.user.type=='USER') {
+			if (true) {
+				string = '<div class="message" id="'+message._id+'"><div class="info"><span class="user">' + escapedName + '</span> <span class="muted">(Anonymous)</span><div class="time">' + date + '</div></div><div class="utility">' + toggle_preview_button + delete_button + reply_button + '</div><div class="text">' + utils.markdown(message.text) +'</div>';
+			} else if(message.user.type=='TWITTER') {
 				string = '<div class="message" id="'+message._id+'"><div class="info"><span class="user">' + escapedName + '</span> <a class="muted" target="_BLANK" href="http://twitter.com/'+message.user.username+'">(@'+message.user.username+')</a><div class="time">' + date + '</div></div><div class="utility">' + toggle_preview_button + delete_button + reply_button + '</div><div class="text">' + utils.markdown(message.text) +"</div>";	
 			} else if(message.user.type=='OFFICIAL') {
 				string = '<div class="message" id="'+message._id+'"><div class="info"><span class="user">' + escapedName + '</span> <span class="muted">(Official)</span><div class="time">' + date + '</div></div><div class="utility">' + toggle_preview_button + '</div><div class="text">' + utils.markdown(message.text) +'</div>';
@@ -270,7 +265,8 @@
 			} else {
 				string = '<div class="message" id="'+message._id+'"><div class="info"><span class="user">' + escapedName + '</span> <span class="muted">(Anonymous)</span><div class="time">' + date + '</div></div><div class="utility">' + toggle_preview_button + delete_button + reply_button + '</div><div class="text">' + utils.markdown(message.text) +'</div>';
 			}
-			if ( message.user.type!='SYSTEM') {
+			//if ( message.user.type!='SYSTEM') {
+			if (true) {
 				if(previewsHTML !== '') {
 					string += '<div class="preview_container">';
 				}
@@ -401,35 +397,6 @@
 			});
 		}
 
-		self.cleanUsers = function() {
-			var timestamp = Math.round(+new Date()/1000);
-			//console.log("Checking timeout " + self.id);
-			for( i in self.users_ids ) {
-				if( (timestamp - self.users_ids[i]) >120) { // Seconds
-					delete self.users_ids[i];
-					
-					if ( typeof window  === 'undefined' ) {
-						user = osomtalk.getUser(i);
-						var type = '';
-						if (user.type == 'TWITTER') {
-							type= '@' + user.username;
-						} else {
-							type= 'Anonymous';
-						}
-						var leave_message = 'User ' + user.username +' ('+type+') left the room.';
-						self.addSystemMessage(leave_message);
-						
-						var data = {action: 'update_users'};
-						client.publish('/server_actions_' + self._id, data);
-					}
-				}
-			}
-
-			setTimeout(function(){self.cleanUsers()}, 120*1000);//Milliseconds
-		}
-		
-		/** Starts the user cleaning iterative process **/
-		//self.cleanUsers();
 		return self;
 	};
 

@@ -83,35 +83,17 @@
 			var message = {
 				_id: data._id,
 				room_id: self._id,
-				time: data.time,
 				text: data.text,
 				user: data.user,
 				identifier: data.identifier,
 				bookmarks: [],
 				replies: []
 			}
-			
-			self.messages.push(message);
-			
-			if ( typeof window  !== 'undefined' ) {
-				self.renderMessage(message);
-				if (view_config.notifications == true) { // Notifications active
-					var text = (message.text >30)? message.text.substring(0,20) + '...': message.text;
-					var notification = window.webkitNotifications.createNotification(
-						'/img/favicon.png', self.name, message.user.username +": " + text);
-					notification.ondisplay = function() {
-						setTimeout(function() {
-							notification.cancel();
-						}, 5000);
-					};
-					notification.show();
-				}			
-			} else {
-				client.publish('/server_messages_' + self.id, message);
-				if ( self.messages.length > 100 ) {
-					self.messages.shift();
-				}
-			}
+						
+			client.publish('/server_messages_' + self._id, message);
+			/*if ( self.messages.length > 100 ) {
+				self.messages.shift();
+			}*/
 		};
 
 		/**
