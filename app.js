@@ -79,6 +79,10 @@ app.get('/about', function(req, res) {
 app.get('/room/:room_id', function(req, res) {
 	var room_id = req.params.room_id;
 	
+	if(room_id.length != 24) {
+		res.redirect('/');
+	}
+	
 	osomtalk.getRoom(room_id, function (room) {
 		if ( typeof room !== "undefined" ) {
 			data = {
@@ -89,11 +93,11 @@ app.get('/room/:room_id', function(req, res) {
 			
 			//In case of logged in user, add it to the template
 			if (req.session.user !== undefined) {
-				osomtalk.verifyPermission(req.session.user.identifier,	req.session.user.token, room_id,
+				osomtalk.verifyPermission(req.session.user._id,	req.session.user.token, room_id,
 					function(has_permission) {
 						if (has_permission ) {
 							data.user = req.session.user;
-							osomtalk.addUserToRoom(data.user.identifier, room_id);
+							osomtalk.addUserToRoom(data.user._id, room_id);
 						} else {
 							req.session.destroy();	
 						}
@@ -134,9 +138,11 @@ app.get('/rooms/get_messages/:room_id', function(req, res){
 /** Get all the users from room **/
 app.get('/rooms/get_users/:room_id', function(req, res){
 	var room_id = req.params.room_id;
-	if( osomtalk.roomExists(room_id)) {
-		res.send(osomtalk.getUsersFromRoom(room_id));
-	}
+	osomtalk.getUsersFromRoom(room_id, function(users){
+		if ( typeof users !== "undefined" ) {
+			res.send(users);
+		}
+	});
 });
 
 
@@ -147,14 +153,15 @@ app.get('/user/take/', function(req, res){
 		res.send({error: response.error });
 		return false;
 	} else {
-		var user = osomtalk.addUser({username: req.query.username})
-		if ( user === false) {
-			res.send({error: 'NAME_TAKEN'});
-			return false;
-		}
+		osomtalk.addUser({username: req.query.username}, function(user){
+			if ( user === false) {
+				res.send({error: 'NAME_TAKEN'});
+				return false;
+			}
+			req.session.user = user;
+			res.send(user);
+		});
 	}
-	req.session.user = user;
-	res.send(user);
 });
 
 /** Checks for username and take it in case is valid. **/
@@ -162,7 +169,7 @@ app.get('/user/ping/:room_id', function(req, res){
 	var room_id = req.params.room_id;
 	if( osomtalk.roomExists(room_id)) {
 		if(req.session.user!==undefined) {
-			osomtalk.pingUser(room_id, req.session.user.identifier);
+			osomtalk.pingUser(room_id, req.session.user.user_id);
 			res.send({response: 'success'});
 		}
 		return true;
@@ -170,33 +177,16 @@ app.get('/user/ping/:room_id', function(req, res){
 	res.send({error: 'UNEXISTANT_ROOM'});
 });
 
-/** Checks for username and take it in case is valid. **/
-app.post('/love_message/:room_id/:message_id', function(req, res){
-	var room_id = req.params.room_id;
-	var message_id = req.params.message_id;
-	var identifier = req.body.identifier;
-	var token = req.body.token;
-	
-	if(osomtalk.verifyPermission(identifier, token, room_id)) {
-		var love = osomtalk.toogleLove(identifier, room_id, message_id);
-		if(love !== undefined) {
-			res.send({result: love});
-			return;
-		}
-	}
-	res.send({error: 'NO_PERMISSION'});
-});
-
 /** Delete Message **/
 app.post('/delete_message/:room_id/:message_id', function(req, res){
 	var room_id = req.params.room_id;
 	var message_id = req.params.message_id;
-	var identifier = req.body.identifier;
+	var message_user_id = req.body.user_id;
 	var token = req.body.token;
 	
-	//if(osomtalk.verifyPermission(identifier, token, room_id)) {
-		user_identifier = identifier;
-		if (user_identifier === req.session.user.identifier) {	
+	//if(osomtalk.verifyPermission(user_id, token, room_id)) {
+		// Verify poster and deleter are the same
+		if (message_user_id=== req.session.user.user_id) {	
 			osomtalk.deleteMessage(room_id, message_id);
 			res.send();
 		}
@@ -208,12 +198,12 @@ app.post('/delete_message/:room_id/:message_id', function(req, res){
 app.post('/reply_message/:room_id/:message_id', function(req, res){
 	var room_id = req.params.room_id;
 	var message_id = req.params.message_id;
-	var identifier = req.body.identifier;
+	var user_id = req.body.user_id;
 	var token = req.body.token;
 	var text = req.body.text;
 	
-	if(osomtalk.verifyPermission(identifier, token, room_id)) {
-		var replied = osomtalk.replyMessage(room_id, message_id, identifier, text);
+	if(osomtalk.verifyPermission(user_id, token, room_id)) {
+		var replied = osomtalk.replyMessage(room_id, message_id, user_id, text);
 		if(replied !== undefined) {
 			res.send({result: replied});
 			return;
@@ -244,11 +234,8 @@ app.post('/rooms/create', function(req, res){
 	   ].join('\n');
 	
 	osomtalk.addMessageToRoom(room_id, {
-		_id: new osomtalk.ObjectID(),
 		text: welcomeMessage,
-		user: {username: 'OsomTalk Bot', type: 'OFFICIAL'},
-		identifier: 'OSOM',
-		replies: []
+		type: 'OFFICIAL',
 	});
 
 	console.log('Room Created: ' + room_id + '(' + req.body.name + ')');
@@ -293,7 +280,7 @@ app.get('/auth/twitter/callback', function(req, res, next){
 						twitter_id: results.user_id,
 						access_token:  oauth_access_token,
 						access_token_secret: oauth_access_token_secret
-					});
+					}, function(){});
 					res.redirect(req.session.oauth.referer);
 				}
 			});
@@ -309,22 +296,22 @@ var extension = {
 	incoming : function(message, callback) {
 		if(message.channel.substring(0,10) === '/messages_') {
 			var message_text = message.data.text;
-			var identifier   = message.data.identifier;
+			var user_id   = message.data.user_id;
 			var token 		 = message.data.token;
 			var room_id      = message.channel.substring(10);
 			
 			var block='';
-			/*if ( !osomtalk.roomExists(room_id) && !osomtalk.userExists(identifier) ) {
+			/*if ( !osomtalk.roomExists(room_id) && !osomtalk.userExists(user_id) ) {
 				block = 'NOT_EXIST';
 			} else {
-				if ( !osomtalk.verifyPermission(identifier, token, room_id) ) {
+				if ( !osomtalk.verifyPermission(user_id, token, room_id) ) {
 					block = "NO_PERMISSION";
 				} else {*/
 					result = osomtalk.validateMessage(message_text);
 					if (result.error !==undefined) {
 						block = result.error; //EMPTY & TOO_LONG
 					} else {
-						result = osomtalk.validateSpam(identifier, room_id)
+						result = osomtalk.validateSpam(user_id, room_id)
 						if (result.error !== undefined) {
 							block = result.error; //TYPING & FLOODING
 						}
@@ -334,7 +321,7 @@ var extension = {
 			if (!block) {
 				var data = {
 					text: message_text,
-					identifier: identifier,
+					user_id: user_id,
 					type: 'USER'
 				}
 				osomtalk.addMessageToRoom(room_id, data);    

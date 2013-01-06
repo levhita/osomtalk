@@ -12,8 +12,7 @@ var Utils = function() {
 		return string.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
 	}
 	
-	self.createIdentifier = function(string) {
-		/** @Todo Here'll be the code to clean the ^1color tags **/
+	self.createUniquer = function(string) {
 		/** trims, lowercase and replace spaces for underscores **/
 		return utils.trim(string).toLowerCase().split(' ').join('_');
 	}
@@ -86,6 +85,10 @@ var Utils = function() {
 	self.makeId = function (length, current){
 		current = current ? current : '';
 		return length ? self.makeId( --length , "0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz".charAt( Math.floor( Math.random() * 60 ) ) + current ) : current;
+	}
+
+	self.getTimestamp = function(){
+		return Math.round(+new Date()/1000);
 	}
 
 	return self;

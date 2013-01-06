@@ -4,36 +4,36 @@
 		config = config || {};
 		var self = {};
 
-		self.url			= frontEndConfig.url;
-		self.port			= appConfig.port || 80;
-		self.rooms			= config.rooms || [];
-		self.users 			= config.users || [];
-		self.spam_filter	= [];
+		self.url            = frontEndConfig.url;
+		self.port           = appConfig.port || 80;
+		self.rooms          = config.rooms || [];
+		self.users          = config.users || [];
+		self.spam_filter    = [];
 		
 		MongoClient.connect(appConfig.osomtalk_chat,
 			function(err, db) {
 				if(!err) {
 					self.db = db;
 					
-					/** Create the collections if they doesn't exist yet**/
 					db.createCollection('rooms', function(err, collection){
 						self.rooms = collection;
 					});
-					/*db.createCollection('users', function(err, collection){
-						self.users= collection;
-					});*/
-		db.createCollection('messages', function(err, collection){
-			self.messages = collection;
-			collection.ensureIndex("room_id",function(){
+					
+					db.createCollection('users', function(err, collection){
+						self.users = collection;
+					});
+					
+					db.createCollection('messages', function(err, collection){
+						self.messages = collection;
+						collection.ensureIndex("room_id",function(){});
+					});
 
-			})
-		});
-		self.ObjectID = self.db.bson_serializer.ObjectID;
-	} else {
-		console.log(err);
-		process.exit(1);
-	}
-});
+					self.ObjectID = self.db.bson_serializer.ObjectID;
+				} else {
+					console.log(err);
+					process.exit(1);
+				}
+			});
 
 		self.oa = new OAuth (
 			"https://api.twitter.com/oauth/request_token",
@@ -48,31 +48,54 @@
 			self.rooms.findOne({_id: osomtalk.ObjectID(room_id)}, function(err, room_data){
 				if(!err && room_data != null) {
 					var message = {
-						_id: 		self.ObjectID(),
-						room_id: 	room_id,
-						text: 		data.text,
-						identifier: data.identifier,
-						type: 		data.type,
-						bookmarks: 	[],
-						replies: 	[]
+						_id:        self.ObjectID(),
+						room_id:    room_id,
+						text:       data.text,
+						user_id:    data.user_id,
+						type:       data.type,
+						bookmarks:  [],
+						replies:    []
 					}
 					self.messages.insert(message, {w:0});
 					client.publish('/server_messages_' + room_data._id,  message);
-				}	
+				}   
 			});
 		}
 
-		self.addUserToRoom = function(identifier, room_id){
-			if (!self.userExists(identifier)) {
-				return false;
-			}
+		self.addUserToRoom = function(user_id, room_id, callback){
 			self.rooms.findOne({room_id: room_id}, function(err, room_data) {
 				var room = new Room(room_data);
-				room.addUser(self.users[identifier]);
+				
+				if ( !room.userExists(user_id) ) {
+					/** Creates last ping timestamp **/
+					osomtalk.users.findOne({_id: self.ObjectID(user_id)}, function(err, user_data){
+						last_ping = Math.round(+new Date()/1000);
+						
+						/*self.rooms.update(
+						{room_id: room_id, 'user_id': user_id},
+						{$set: {'users.$.last_ping': last_ping}}
+						);*/	
+
+						var type = '';
+						if (user.type == 'TWITTER') {
+							type= '@' + user_data.username;
+						} else {
+							type= 'Anonymous';
+						}
+						var join_message = 'User ' + user_data.username +' ('+type+') entered the room.';
+
+						self.addSystemMessage(join_message); 
+						
+						var data = {action: 'update_users'};
+						client.publish('/server_actions_' + room_id, data);
+					});
+					
+					
+					return true;
+				};
 			});
 		}
 
-		/** Generates an unused room id  and then store the room in it **/
 		self.addRoom = function(room){
 			var room = new Room({
 				_id: new self.ObjectID(),
@@ -97,11 +120,11 @@
 			});
 		}
 
-		self.replyMessage = function(room_id, message_id, identifier, text){
+		self.replyMessage = function(room_id, message_id, user_id, text){
 			if (!self.roomExists(room_id)) {
 				return false;
 			}
-			var replied = self.rooms[room_id].replyMessage(message_id, identifier, text);
+			var replied = self.rooms[room_id].replyMessage(message_id, user_id, text);
 
 			if (replied !== undefined) {
 				var index = self.rooms[room_id].getMessageIndex(message_id);
@@ -116,11 +139,15 @@
 		}
 
 		self.getRoom = function(room_id, callback) {
-			osomtalk.rooms.findOne({_id: osomtalk.ObjectID(room_id)},
-				function(err, results) {
-					var room = new Room(results);
-					callback(room);
-				}); 
+			if(room_id.length != 24) {
+				callback(false);
+			} else {
+				osomtalk.rooms.findOne({_id: osomtalk.ObjectID(room_id)},
+					function(err, results) {
+						var room = new Room(results);
+						callback(room);
+					}); 
+			}
 		}
 
 		self.getMessages = function(room_id, callback) {
@@ -137,7 +164,29 @@
 				});
 		};
 
-		self.getUsersFromRoom = function(room_id) {
+		self.getUsersFromRoom = function(room_id, callback) {
+			if(room_id.length != 24) {
+				callback(false);
+			} else {
+				osomtalk.rooms.findOne({_id: osomtalk.ObjectID(room_id)},
+					function(err, results) {
+						var room = new Room(results);
+						callback(room);
+					}); 
+			}
+
+			var data = [];
+			self.messages.find({room_id: room_id},
+				function(err, messages) {
+					messages.each(function(err, message) {
+						if(message !== null){
+							data.push(message)
+						} else {
+							callback(data);
+						}
+					});
+				});
+
 			if (!self.roomExists(room_id)) {
 				return false;
 			}
@@ -148,7 +197,7 @@
 					aux = {
 						username: self.users[users_ids[i]].username,
 						type: self.users[users_ids[i]].type,
-						identifier: self.users[users_ids[i]].identifier,
+						user_id: self.users[users_ids[i]].user_id,
 					}
 					users.push(aux)
 				} else {
@@ -158,41 +207,36 @@
 			return users;
 		}
 
-		/** 
-		 *  Finds out if the user already exists
-		 *  overwrites anonymous users with twitter ones
-		 *  @todo think about a better bussiness logic to allow FB login
-		 **/
-		 self.addUser = function(user) {
-		 	var identifier  = utils.makeId(7)
-		 	, uniquer	= utils.createIdentifier(user.username);
+		self.addUser = function(user, callback) {
+			var uniquer = utils.createUniquer(user.username);
 
-		 	for (var i in self.users) {
-		 		if(self.users[i].uniquer==uniquer) {
-		 			if (user.type!=="TWITTER") {
-		 				return false;
-		 			} else if (user.type === self.users[i].type) {
-		 				return self.users[i];
-		 			} else {
-		 				delete self.users[i];
-		 				break;
-		 			}
-		 		}
-		 	}
-		 	user.username = user.username.trim();
-		 	user.identifier= identifier;
-		 	user = new User(user);
-		 	self.users[identifier] = user;
-		 	return user;
-		 }
+			self.users.findOne({uniquer: uniquer}, function(err, user_data){
+				if(!err) {
+					if( user != null) {
+						if (user.type !== ' TWITTER') {
+							callback(false);
+							return;
+						} else if (user.type === user_data.type ) {
+							callback(user);
+							return;
+						}
+						self.users.remove({_id: user_data._id}, {w:0});
+					}
+					user.username = user.username.trim();
+					user = new User(user);
+					self.users.insert(user.getData());
+					callback(user);
+				}
+			});
+		}
 
-
-		 self.verifyPermission = function(identifier, token, room_id, callback) {
-			/*if ( !self.userExists(identifier) ) {
-				//console.log("User doesn't exists: " + identifier);
+		/** mongodebear **/
+		self.verifyPermission = function(user_id, token, room_id, callback) {
+			/*if ( !self.userExists(user_id) ) {
+				//console.log("User doesn't exists: " + user_id);
 				callback(false);
 			}
-			if (self.users[identifier].token !== token) {
+			if (self.users[user_id].token !== token) {
 				//console.log("Wrong Token: " + token);
 				callback(false);
 			}*/
@@ -202,7 +246,7 @@
 					//console.log("Room doesn't exists");
 					return false;
 				}
-				if (!self.rooms[room_id].userExists(identifier)){
+				if (!self.rooms[room_id].userExists(user_id)){
 					//console.log("User doesn't belong to room");
 					return false;
 				}
@@ -210,26 +254,13 @@
 			callback(true);
 		}
 		
-		self.roomExists = function (room_id) {
-			if(room_id==undefined) {
-				console.log("passing undefined to roomExists");
-			}
-			return (self.rooms[room_id]!==undefined);
-		}
-		
-		self.userExists = function(identifier) {
-			if(identifier==undefined) {
-				console.log("passing undefined to userExists");
-			}
-			return (self.users[identifier]!==undefined);	
-		}
-
-		self.getUser = function(identifier) {
-			/**	Cleanse the name up to a identifier status **/
-			if ( !self.userExists(identifier) ) {
+		/** mongodebear **/
+		self.getUser = function(user_id) {
+			/** Cleanse the name up to a user_id status **/
+			if ( !self.userExists(user_id) ) {
 				return false;
 			}
-			return self.users[identifier];
+			return self.users[user_id];
 		}
 
 		self.validateMessage = function(text) {
@@ -241,45 +272,45 @@
 			}
 			return true;
 		}
-
-		self.pingUser = function(room_id, identifier) {
+		
+		/** mongodebear **/
+		self.pingUser = function(room_id, user_id) {
 			if (!self.roomExists(room_id)) {
 				return false;
 			}
-			if (!self.userExists(identifier)) {
+			if (!self.userExists(user_id)) {
 				return false;
 			}
-			//console.log(identifier + " pingin " + room_id);
-			self.rooms[room_id].pingUser(identifier);
-			self.users[identifier].ping();
+			self.rooms[room_id].pingUser(user_id);
+			self.users[user_id].ping();
 		}
-
-		self.validateSpam = function (identifier) {
+		/** mongodebear redisear**/
+		self.validateSpam = function (user_id) {
 			var current_time = Math.round(+new Date()/1000);
 			var block='';
-			if ( self.spam_filter[identifier] === undefined ) {
-				self.spam_filter[identifier] = {
+			if ( self.spam_filter[user_id] === undefined ) {
+				self.spam_filter[user_id] = {
 					last: 0,
 					times: []
 				};
-			} else if ( (current_time - self.spam_filter[identifier].last) <= 2 ){
+			} else if ( (current_time - self.spam_filter[user_id].last) <= 2 ){
 				/** checks for fast typing**/
-				console.log('Blocking ' + identifier + ' for Fast Typing');
+				console.log('Blocking ' + user_id + ' for Fast Typing');
 				block = 'BLOCKED_TYPING';
 			} else {
 				/** Checks for more than 15 messages in less than a minute **/
 				/*var i_time = 0;
 				do {
-					i_time = self.spam_filter[identifier].times.shift();
+					i_time = self.spam_filter[user_id].times.shift();
 				} while( (current_time - i_time) > 60 );
-				self.spam_filter[identifier].times.unshift(i_time);				
-				if ( self.spam_filter[identifier].times.length > 15) {
-					console.log('Blocking ' + identifier + ' for Flooding');
+				self.spam_filter[user_id].times.unshift(i_time);                
+				if ( self.spam_filter[user_id].times.length > 15) {
+					console.log('Blocking ' + user_id + ' for Flooding');
 					block = 'BLOCKED_FLOODING';
 				}*/
 			}
-			self.spam_filter[identifier].last = current_time;
-			self.spam_filter[identifier].times.push(current_time);
+			self.spam_filter[user_id].last = current_time;
+			self.spam_filter[user_id].times.push(current_time);
 			if(block !='') {
 				return {error:block};
 			}
@@ -305,6 +336,7 @@
 			return true;
 		}
 
+		/** mongodebear **/
 		self.cleanUsers = function() {
 			var timestamp = Math.round(+new Date()/1000);
 			for( i in self.users) {
