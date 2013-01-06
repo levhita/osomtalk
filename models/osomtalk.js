@@ -67,17 +67,19 @@
 				var room = new Room(room_data);
 				
 				if ( !room.userExists(user_id) ) {
-					/** Creates last ping timestamp **/
+
 					osomtalk.users.findOne({_id: self.ObjectID(user_id)}, function(err, user_data){
-						last_ping = Math.round(+new Date()/1000);
-						
-						/*self.rooms.update(
-						{room_id: room_id, 'user_id': user_id},
-						{$set: {'users.$.last_ping': last_ping}}
-						);*/	
+						//Inserts user into room
+						self.rooms.update({room_id: room_id},
+							{$push:
+								{users: {user_id: user_id, last_ping: utils.getTimestamp()}
+							}}, {w:0});
+
+//						revisar que se inserte el usuario completo en db,
+//revisar que se guarde en session
 
 						var type = '';
-						if (user.type == 'TWITTER') {
+						if (user_data.type == 'TWITTER') {
 							type= '@' + user_data.username;
 						} else {
 							type= 'Anonymous';
