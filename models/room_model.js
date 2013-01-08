@@ -22,7 +22,10 @@
 		};
 
 		self.userExists = function(user_id) {
-			for(i in self.users) {
+			console.log("testing: "+ user_id)
+			console.log(self.users);
+			for(var i = 0; i < self.users.length; i++) {
+				console.log(self.users[i].user_id);
 				if( self.users[i].user_id == user_id) {
 					return true;
 				}

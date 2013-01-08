@@ -6,12 +6,14 @@ $(document).ready(function(){
 	room.subscribe(window.client);
 	
 	room.getRoomData(function (){
-		room.getMessagesData(function(){
-			room.renderRoom();
-		});
 		room.getUsersData(function(){
 			room.renderUsers();
+			room.getMessagesData(function(){
+				room.renderMessages();
+			});
 		});
+
+		
 	});
 	
 	//pingBack();

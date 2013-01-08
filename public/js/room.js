@@ -8,8 +8,7 @@
 		self.name		= config.name || '';
 		self.type 		= config.type || 'PUBLIC';
 		self.admins		= config.admins || [];
-		self.users  	= config.users || [];
-		self.users_ids 	= config.users_ids || [];
+		self.users_details  	= config.users_details || [];
 		self.messages 	= config.messages || [];
 
 		/** This one should be the one **/
@@ -19,85 +18,28 @@
 				name: 		self.name,
 				type: 		self.type,
 				admins:  	self.admins,
-				users_ids:  self.users_ids
+				users_details:  	self.users_details
 			}
-		};
-
-		self.getMessages = function () {
-			return self.messages;
-		};
-
-		self.setMessages = function(messages) {
-			self.messages = messages;
-		}
-
-		self.setReplies = function(replies) {
-			self.replies = replies;
-		}
-
-		self.userExists = function(user_id) {
-			return (self.users_ids[user_id]!==undefined);
-		}
-
-		self.getUsersIds = function () {
-			var ids = []
-			for(i in self.users_ids) {
-				ids.unshift(i);
-			}
-			return ids;
-		};
-
-		self.pingUser = function(user_id) {
-			if ( self.users_ids[user_id] == undefined ) {
-				return false;
-			}
-			self.users_ids[user_id] = Math.round(+new Date()/1000);
-			return true;
-		}
-
-		self.addUser = function(user) {
-			if ( self.users_ids[user.user_id] !== undefined ) {
-				return false;
-			}
-			
-			/** Creates last ping **/
-			self.users_ids[user.user_id] = Math.round(+new Date()/1000);
-			
-			if ( typeof window  === 'undefined' ) {
-				var type = '';
-				if (user.type == 'TWITTER') {
-					type= '@' + user.username;
-				} else {
-					type= 'Anonymous';
-				}
-				var join_message = 'User ' + user.username +' ('+type+') entered the room.';
-				
-				self.addSystemMessage(join_message); 
-				var data = {action: 'update_users'};
-				client.publish('/server_actions_' + self._id, data);
-			}
-
-			return true;
 		};
 
 		self.addMessage = function(data) {
 			var message = {
 				_id: data._id,
-				room_id: self._id,
 				text: data.text,
-				user: data.user,
+				type: data.type,
 				user_id: data.user_id,
 				bookmarks: [],
 				replies: []
 			}
 			
 			self.messages.push(message);
-			
 			self.renderMessage(message);
+			
 			if (view_config.notifications == true) { // Notifications active
+				var user_index = self.getUserIndex(message.user_id);
 				var text = (message.text >30)? message.text.substring(0,20) + '...': message.text;
 				var notification = window.webkitNotifications.createNotification(
-					'/img/favicon.png', self.name, message.user.username +": " + text);
+					'/img/favicon.png', self.name, self.users_details[user_index].username +": " + text);
 				notification.ondisplay = function() {
 					setTimeout(function() {
 						notification.cancel();
@@ -106,32 +48,6 @@
 				notification.show();
 			}			
 		};
-
-		/**
-		* @return TRUE in case now he loves it, False in case he doesn't like it undefined
-		*		  if the message doesn't exist.
-		*/
-		/*self.toogleBookmark = function(user_id, message_id) {
-			var loves = self.userLoveMessage(user_id, message_id)
-			var index = self.getMessageIndex(message_id);
-			if( loves === false) {
-				if(index !== false) {
-					//Adds it to the loves array
-					self.messages[index].loves.push(user_id);
-					return true
-				}
-			} else if (loves === true) {
-				for (var i = 0; i < self.messages[index].loves.length; i++) {
-					// Removes it from the loves array
-					if ( self.messages[index].loves[i] == user_id ) {
-						self.messages[index].loves.splice(i,1);
-						return false;
-					}
-				}
-			}
-			return undefined;
-		}*/
-
 
 		self.getMessageIndex = function(message_id) {
 			for (var i = 0; i < self.messages.length; i++) {
@@ -143,8 +59,8 @@
 		}
 
 		self.getUserIndex = function(user_id) {
-			for (var i = 0; i < self.users.length; i++) {
-				if(self.users[i]._id==user_id) {
+			for (var i = 0; i < self.users_details.length; i++) {
+				if(self.users_details[i].user_id==user_id) {
 					return i;
 				}
 			}
@@ -201,43 +117,14 @@
 			}
 		}
 
-		self.getMessage = function(message_id) {
-			var index = self.getMessageIndex(message_id);
-			if (index !== false) {
-				return self.messages[index];
-			}
-			return false;
-		}
-
-		self.userLoveMessage = function(user_id, message_id) {
-			var index = self.getMessageIndex(message_id);
-			if (index !== false ) {
-				for (var i = 0; i < self.messages[index].loves.length; i++) {
-					if(self.messages[index].loves[i]==user_id) {
-						return true;
-					}
-				}
-				return false;
-			}
-		}
-
-		self.addSystemMessage = function(text) {
-			var timestamp = Math.round(+new Date()/1000);
-			message = {
-				id: timestamp + "OSOM",
-				time: timestamp,
-				text: text,
-				user: {username: 'OsomTalk Bot', type: 'SYSTEM'},
-				user_id: 'OSOM'
-			};
-			self.addMessage(message);
-		};
-	
 		self.renderMessage = function (message) {
 			var previewsHTML = utils.getPreviewsHTML(message.text, message._id);
-			var escapedName = 'test';//message.user.username.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-			var date = new Date(message.time * 1000);
+			var date = new Date(parseInt(message._id.toString().slice(0,8), 16) * 1000);
 			var date = utils.getLocaleShortDateString(date) + " " + date.toLocaleTimeString();
+			if(message.type == "USER") {
+				var user = self.users_details[self.getUserIndex(message.user_id)];
+				var escapedName = user.username.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+			}
 			var string = '';
 			var toggle_preview_button ='';
 			var delete_button = '';
@@ -250,22 +137,20 @@
 				delete_button = ' <a class="delete_button btn btn-mini btn-inverse" onclick="deleteMessage(\'' + message._id + '\');"><i class="icon-remove icon-white"></i></a>';
 			}
 			var reply_button = ' <a class="reply_button btn btn-mini btn-inverse" onclick="openReplyMessage(\'' + message._id + '\');"><i class="icon-reply icon-white"></i></a>';
-
-			//if(message.user.type=='USER') {
-			if (true) {
-				string = '<div class="message" id="'+message._id+'"><div class="info"><span class="user">' + escapedName + '</span> <span class="muted">(Anonymous)</span><div class="time">' + date + '</div></div><div class="utility">' + toggle_preview_button + delete_button + reply_button + '</div><div class="text">' + utils.markdown(message.text) +'</div>';
-			} else if(message.user.type=='TWITTER') {
-				string = '<div class="message" id="'+message._id+'"><div class="info"><span class="user">' + escapedName + '</span> <a class="muted" target="_BLANK" href="http://twitter.com/'+message.user.username+'">(@'+message.user.username+')</a><div class="time">' + date + '</div></div><div class="utility">' + toggle_preview_button + delete_button + reply_button + '</div><div class="text">' + utils.markdown(message.text) +"</div>";	
-			} else if(message.user.type=='OFFICIAL') {
-				string = '<div class="message" id="'+message._id+'"><div class="info"><span class="user">' + escapedName + '</span> <span class="muted">(Official)</span><div class="time">' + date + '</div></div><div class="utility">' + toggle_preview_button + '</div><div class="text">' + utils.markdown(message.text) +'</div>';
-			} else if(message.user.type=='SYSTEM') {
+			if(message.type=='USER') {
+				if( user.type == 'ANONYMOUS') {
+					string = '<div class="message" id="'+message._id+'"><div class="info"><span class="user">' + escapedName + '</span> <span class="muted">(Anonymous)</span><div class="time">' + date + '</div></div><div class="utility">' + toggle_preview_button + delete_button + reply_button + '</div><div class="text">' + utils.markdown(message.text) +'</div>';
+				} else if( user.type=='TWITTER') {
+					string = '<div class="message" id="'+message._id+'"><div class="info"><span class="user">' + escapedName + '</span> <a class="muted" target="_BLANK" href="http://twitter.com/'+user.username+'">(twitter)</a><div class="time">' + date + '</div></div><div class="utility">' + toggle_preview_button + delete_button + reply_button + '</div><div class="text">' + utils.markdown(message.text) +"</div>";
+				}
+			} else if(message.type=='OFFICIAL') {
+				string = '<div class="message" id="'+message._id+'"><div class="info"><span class="user">OsomTalk</span> <span class="muted">(Official)</span><div class="time">' + date + '</div></div><div class="utility">' + toggle_preview_button + '</div><div class="text">' + utils.markdown(message.text) +'</div>';
+			} else if(message.type=='SYSTEM') {
 				var escapedText = message.text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 				string = '<div class="message system" id="'+message._id+'"><span class="time">' + date + ':</span> ' + escapedText +'</div>';
-			} else {
-				string = '<div class="message" id="'+message._id+'"><div class="info"><span class="user">' + escapedName + '</span> <span class="muted">(Anonymous)</span><div class="time">' + date + '</div></div><div class="utility">' + toggle_preview_button + delete_button + reply_button + '</div><div class="text">' + utils.markdown(message.text) +'</div>';
 			}
-			//if ( message.user.type!='SYSTEM') {
-			if (true) {
+			
+			if ( message.type!='SYSTEM') {
 				if(previewsHTML !== '') {
 					string += '<div class="preview_container">';
 				}
@@ -318,23 +203,17 @@
 			return text;
 		}
 		
-		/** renders the chat **/
-		self.renderRoom = function() {
-			self.renderMessages();
-		};
 
 		self.renderMessages = function() {
-			/** Render Messages **/
 			for(var i = 0; i < self.messages.length; i++) {
 				self.renderMessage(self.messages[i]);
 			}
 		}
 
 		self.renderUsers = function() {
-			/** Render Users **/
 			$('#users').html('');
-			for(var i = 0; i < self.users.length; i++) {
-				self.renderUser(self.users[i]);
+			for(var i = 0; i < self.users_details.length; i++) {
+				self.renderUser(self.users_details[i]);
 			}
 		}
 		
@@ -345,7 +224,6 @@
 				url: '/rooms/get/'+ self._id,
 				success: function(data) {
 					self.name = data.name;
-					self.users = data.users;
 					callback();
 				}
 			});
@@ -365,7 +243,7 @@
 			$.ajax({
 				url: '/rooms/get_users/'+ self._id,
 				success: function(data) {
-					self.users = data;
+					self.users_details = data;
 					callback();
 				}
 			});

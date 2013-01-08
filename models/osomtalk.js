@@ -71,41 +71,35 @@
 		};
 
 		self.addUserToRoom = function(user_id, room_id, callback){
-			self.rooms.findOne({room_id: room_id}, function(err, room_data) {
-				var room = new Room(room_data);
-				console.log(user_id);
-				if ( !room.userExists(user_id) ) {
-					osomtalk.users.findOne({_id: self.ObjectID(user_id)}, function(err, user_data){
-						if(!err && user_data != null) {
-							//Inserts user into room
-							self.rooms.update({room_id: room_id},
-								{$push:
-									{users: {user_id: user_id, last_ping: utils.getTimestamp()}
-								}}, {safe:true}, function(err) {
-									console.log(err);
-								});
-							
-							var type = '';
-							if (user_data.type == 'TWITTER') {
-								type= '@' + user_data.username;
-							} else {
-								type= 'Anonymous';
-							}
-							var join_message = 'User ' + user_data.username +' ('+type+') entered the room.';
+			self.rooms.findOne({_id: self.ObjectID(room_id)}, function(err, room_data) {
+				if(!err && room_data != null) {
+					var room = new Room(room_data);
+					if ( !room.userExists(user_id) ) {
+						osomtalk.users.findOne({_id: self.ObjectID(user_id)}, function(err, user_data){
+							if(!err && user_data != null) {
+								self.rooms.update({_id: self.ObjectID(room_id)},
+									{$push:{users: {user_id: user_id, last_ping: utils.getTimestamp()}}}, {w:0});
+								
+								var type = '';
+								if (user_data.type == 'TWITTER') {
+									type= '@' + user_data.username;
+								} else {
+									type= 'Anonymous';
+								}
+								var join_message = 'User ' + user_data.username +' ('+type+') entered the room.';
 
-							osomtalk.addSystemMessageToRoom(room_id, join_message); 
-							
-							var data = {action: 'update_users'};
-							client.publish('/server_actions_' + room_id, data);
-						} else {
-							console.log(err);
-							console.log(user_data);
-						}
-					});
-					
-					
-					return true;
-				};
+								osomtalk.addSystemMessageToRoom(room_id, join_message); 
+								
+								var data = {action: 'update_users'};
+								client.publish('/server_actions_' + room_id, data);
+							} else{
+								callback(false);
+							}
+						});
+					};
+				} else {
+					callback(false);
+				}
 			});
 		}
 
@@ -178,12 +172,10 @@
 		};
 
 		self.getUsersFromRoom = function(room_id, callback) {
-			console.log(room_id);
 			if(room_id.length != 24) {
 				callback(false);
 			} else {
 				self.rooms.findOne({_id: self.ObjectID(room_id)}, function(err, room_data) {
-					console.log(room_data);
 					if (!err && room_data != null) {
 						var room = new Room(room_data);
 
@@ -191,8 +183,7 @@
 						for(var i = 0; i < room.users.length; i++) {
 							search.push(self.ObjectID(room.users[i].user_id));
 						}
-						console.log (search);
-
+			
 						var data = [];		
 						self.users.find({_id: {$in: search}}, function(err, users){
 							users.each(function(err, user) {
@@ -218,9 +209,7 @@
 
 		self.addUser = function(user, callback) {
 			var uniquer = utils.createUniquer(user.username);
-			console.log(uniquer);
 			self.users.findOne({uniquer: uniquer}, function(err, user_data){
-				console.log(user_data);
 				if(!err) {
 					if( user_data != null) {
 						if (user_data.type !== ' TWITTER') {

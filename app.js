@@ -7,9 +7,8 @@ var express = require('express')
 , jqtpl     = require("jqtpl")
 , cons      = require('consolidate')
 , fs 		= require('fs')
-, url 		= require('url')
-, RedisStore = require('connect-redis')(express)
-, redis = require('redis')
+//, RedisStore = require('connect-redis')(express)
+//, redis = require('redis')
 , OsomTalk  = require('./models/osomtalk.js').OsomTalk;
 
 /** Configurations **/
@@ -46,8 +45,12 @@ app.configure ( function(){
 	app.set('view engine', 'html');
 	app.set('views', __dirname + '/views');
 	app.use(express.bodyParser());
-	app.use(express.cookieParser());
+
+	app.use(express.cookieParser(appConfig.cookie_secret));
+	app.use(express.session());
 	
+	/*toogle use of redis
+	app.use(express.cookieParser());
 	app.use(
   		express.session({
 	  		store: new RedisStore({
@@ -57,7 +60,7 @@ app.configure ( function(){
 	  		}),
 	  		secret: appConfig.cookie_secret
 	  	})
-	 );
+	 );*/
 
 	app.use(require('less-middleware')({ src: __dirname + '/public' }));
 	app.use(express.static(path.join(__dirname, 'public')));
@@ -144,24 +147,6 @@ app.get('/rooms/get_users/:room_id', function(req, res){
 	});
 });
 
-
-/** Checks for username and take it in case is valid. **/
-app.get('/user/take/', function(req, res){
-	var response = osomtalk.validateUserName(req.query.username);
-	if (  response !== true) {
-		res.send({error: response.error });
-		return false;
-	} else {
-		osomtalk.addUser({username: req.query.username}, function(user){
-			if ( user == false) {
-				res.send({error: 'NAME_TAKEN'});
-				return false;
-			}
-			req.session.user = user;
-			res.send(user);
-		});
-	}
-});
 
 /** Checks for username and take it in case is valid. **/
 app.get('/user/ping/:room_id', function(req, res){
@@ -279,12 +264,33 @@ app.get('/auth/twitter/callback', function(req, res, next){
 						twitter_id: results.user_id,
 						access_token:  oauth_access_token,
 						access_token_secret: oauth_access_token_secret
-					}, function(){});
-					res.redirect(req.session.oauth.referer);
+					}, function(user) {
+						req.session.user= user;
+						res.redirect(req.session.oauth.referer);
+					});
+					
 				}
 			});
 	} else {
 		next(new Error("you're not supposed to be here."));
+	}
+});
+
+/** Checks for username and take it in case is valid. **/
+app.get('/user/take/', function(req, res){
+	var response = osomtalk.validateUserName(req.query.username);
+	if (  response !== true) {
+		res.send({error: response.error });
+		return false;
+	} else {
+		osomtalk.addUser({username: req.query.username, type:'ANONYMOUS'}, function(user){
+			if ( user == false) {
+				res.send({error: 'NAME_TAKEN'});
+				return false;
+			}
+			req.session.user = user;
+			res.send(user);
+		});
 	}
 });
 
