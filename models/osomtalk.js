@@ -1,6 +1,6 @@
 (function (global){
 
-	var OsomTalk = function(config){
+	var OsomTalk = function(config) {
 		config = config || {};
 		var self = {};
 
@@ -62,34 +62,45 @@
 			});
 		}
 
+		self.addSystemMessageToRoom= function(room_id, text) {
+			message = {
+				text: text,
+				type: 'SYSTEM'
+			};
+			self.addMessageToRoom(room_id, message);
+		};
+
 		self.addUserToRoom = function(user_id, room_id, callback){
 			self.rooms.findOne({room_id: room_id}, function(err, room_data) {
 				var room = new Room(room_data);
-				
+				console.log(user_id);
 				if ( !room.userExists(user_id) ) {
-
 					osomtalk.users.findOne({_id: self.ObjectID(user_id)}, function(err, user_data){
-						//Inserts user into room
-						self.rooms.update({room_id: room_id},
-							{$push:
-								{users: {user_id: user_id, last_ping: utils.getTimestamp()}
-							}}, {w:0});
+						if(!err && user_data != null) {
+							//Inserts user into room
+							self.rooms.update({room_id: room_id},
+								{$push:
+									{users: {user_id: user_id, last_ping: utils.getTimestamp()}
+								}}, {safe:true}, function(err) {
+									console.log(err);
+								});
+							
+							var type = '';
+							if (user_data.type == 'TWITTER') {
+								type= '@' + user_data.username;
+							} else {
+								type= 'Anonymous';
+							}
+							var join_message = 'User ' + user_data.username +' ('+type+') entered the room.';
 
-//						revisar que se inserte el usuario completo en db,
-//revisar que se guarde en session
-
-						var type = '';
-						if (user_data.type == 'TWITTER') {
-							type= '@' + user_data.username;
+							osomtalk.addSystemMessageToRoom(room_id, join_message); 
+							
+							var data = {action: 'update_users'};
+							client.publish('/server_actions_' + room_id, data);
 						} else {
-							type= 'Anonymous';
+							console.log(err);
+							console.log(user_data);
 						}
-						var join_message = 'User ' + user_data.username +' ('+type+') entered the room.';
-
-						self.addSystemMessage(join_message); 
-						
-						var data = {action: 'update_users'};
-						client.publish('/server_actions_' + room_id, data);
 					});
 					
 					
@@ -167,55 +178,52 @@
 		};
 
 		self.getUsersFromRoom = function(room_id, callback) {
+			console.log(room_id);
 			if(room_id.length != 24) {
 				callback(false);
 			} else {
-				osomtalk.rooms.findOne({_id: osomtalk.ObjectID(room_id)},
-					function(err, results) {
-						var room = new Room(results);
-						callback(room);
-					}); 
-			}
+				self.rooms.findOne({_id: self.ObjectID(room_id)}, function(err, room_data) {
+					console.log(room_data);
+					if (!err && room_data != null) {
+						var room = new Room(room_data);
 
-			var data = [];
-			self.messages.find({room_id: room_id},
-				function(err, messages) {
-					messages.each(function(err, message) {
-						if(message !== null){
-							data.push(message)
-						} else {
-							callback(data);
+						var search = []; 
+						for(var i = 0; i < room.users.length; i++) {
+							search.push(self.ObjectID(room.users[i].user_id));
 						}
-					});
-				});
+						console.log (search);
 
-			if (!self.roomExists(room_id)) {
-				return false;
-			}
-			var users=[];
-			var users_ids = self.rooms[room_id].getUsersIds();
-			for (var i=0;i<users_ids.length;i++) {
-				if( typeof self.users[users_ids[i]] !== 'undefined') {
-					aux = {
-						username: self.users[users_ids[i]].username,
-						type: self.users[users_ids[i]].type,
-						user_id: self.users[users_ids[i]].user_id,
+						var data = [];		
+						self.users.find({_id: {$in: search}}, function(err, users){
+							users.each(function(err, user) {
+								if(user !== null){
+									aux = {
+										username: user.username,
+										type: user.type,
+										user_id: user._id,
+									}
+									data.push(aux);
+								} else {
+									callback(data);
+								}
+							});
+						});
+					} else {
+						callback(false);
 					}
-					users.push(aux)
-				} else {
-					self.rooms[room_id].users_ids.splice(i,1);
-				}
+				});
 			}
-			return users;
 		}
+
 
 		self.addUser = function(user, callback) {
 			var uniquer = utils.createUniquer(user.username);
-
+			console.log(uniquer);
 			self.users.findOne({uniquer: uniquer}, function(err, user_data){
+				console.log(user_data);
 				if(!err) {
-					if( user != null) {
-						if (user.type !== ' TWITTER') {
+					if( user_data != null) {
+						if (user_data.type !== ' TWITTER') {
 							callback(false);
 							return;
 						} else if (user.type === user_data.type ) {
@@ -225,8 +233,9 @@
 						self.users.remove({_id: user_data._id}, {w:0});
 					}
 					user.username = user.username.trim();
+					user._id = self.ObjectID();
 					user = new User(user);
-					self.users.insert(user.getData());
+					self.users.insert(user.getData(), {w:0});
 					callback(user);
 				}
 			});

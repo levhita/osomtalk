@@ -126,7 +126,6 @@ app.get('/rooms/get/:room_id', function(req, res){
 /** Get all the room data **/
 app.get('/rooms/get_messages/:room_id', function(req, res){
 	var room_id = req.params.room_id;
-	
 	osomtalk.getMessages(room_id, function (messages) {
 		if ( typeof messages !== "undefined" ) {
 			res.send(messages);
@@ -154,7 +153,7 @@ app.get('/user/take/', function(req, res){
 		return false;
 	} else {
 		osomtalk.addUser({username: req.query.username}, function(user){
-			if ( user === false) {
+			if ( user == false) {
 				res.send({error: 'NAME_TAKEN'});
 				return false;
 			}

@@ -35,8 +35,8 @@
 			self.replies = replies;
 		}
 
-		self.userExists = function(identifier) {
-			return (self.users_ids[identifier]!==undefined);
+		self.userExists = function(user_id) {
+			return (self.users_ids[user_id]!==undefined);
 		}
 
 		self.getUsersIds = function () {
@@ -47,21 +47,21 @@
 			return ids;
 		};
 
-		self.pingUser = function(identifier) {
-			if ( self.users_ids[identifier] == undefined ) {
+		self.pingUser = function(user_id) {
+			if ( self.users_ids[user_id] == undefined ) {
 				return false;
 			}
-			self.users_ids[identifier] = Math.round(+new Date()/1000);
+			self.users_ids[user_id] = Math.round(+new Date()/1000);
 			return true;
 		}
 
 		self.addUser = function(user) {
-			if ( self.users_ids[user.identifier] !== undefined ) {
+			if ( self.users_ids[user.user_id] !== undefined ) {
 				return false;
 			}
 			
 			/** Creates last ping **/
-			self.users_ids[user.identifier] = Math.round(+new Date()/1000);
+			self.users_ids[user.user_id] = Math.round(+new Date()/1000);
 			
 			if ( typeof window  === 'undefined' ) {
 				var type = '';
@@ -86,7 +86,7 @@
 				room_id: self._id,
 				text: data.text,
 				user: data.user,
-				identifier: data.identifier,
+				user_id: data.user_id,
 				bookmarks: [],
 				replies: []
 			}
@@ -111,19 +111,19 @@
 		* @return TRUE in case now he loves it, False in case he doesn't like it undefined
 		*		  if the message doesn't exist.
 		*/
-		/*self.toogleBookmark = function(identifier, message_id) {
-			var loves = self.userLoveMessage(identifier, message_id)
+		/*self.toogleBookmark = function(user_id, message_id) {
+			var loves = self.userLoveMessage(user_id, message_id)
 			var index = self.getMessageIndex(message_id);
 			if( loves === false) {
 				if(index !== false) {
 					//Adds it to the loves array
-					self.messages[index].loves.push(identifier);
+					self.messages[index].loves.push(user_id);
 					return true
 				}
 			} else if (loves === true) {
 				for (var i = 0; i < self.messages[index].loves.length; i++) {
 					// Removes it from the loves array
-					if ( self.messages[index].loves[i] == identifier ) {
+					if ( self.messages[index].loves[i] == user_id ) {
 						self.messages[index].loves.splice(i,1);
 						return false;
 					}
@@ -142,9 +142,9 @@
 			return false;
 		}
 
-		self.getUserIndex = function(identifier) {
+		self.getUserIndex = function(user_id) {
 			for (var i = 0; i < self.users.length; i++) {
-				if(self.users[i].id==identifier) {
+				if(self.users[i]._id==user_id) {
 					return i;
 				}
 			}
@@ -160,17 +160,17 @@
 			return false;
 		}
 
-		self.replyMessage = function(message_id, identifier, text) {
+		self.replyMessage = function(message_id, user_id, text) {
 			var index = self.getMessageIndex(message_id);
 			var timestamp = Math.round(+new Date()/1000);
 			
 			if (index !== false) {
-				var user = osomtalk.getUser(identifier);
+				var user = osomtalk.getUser(user_id);
 				var reply = {
-					id: timestamp + "-" + identifier,
+					id: timestamp + "-" + user_id,
 					timestamp: timestamp,
 					user:{
-						identifier: identifier,
+						user_id: user_id,
 						username: user.username,
 						type: user.type
 					} ,
@@ -209,11 +209,11 @@
 			return false;
 		}
 
-		self.userLoveMessage = function(identifier, message_id) {
+		self.userLoveMessage = function(user_id, message_id) {
 			var index = self.getMessageIndex(message_id);
 			if (index !== false ) {
 				for (var i = 0; i < self.messages[index].loves.length; i++) {
-					if(self.messages[index].loves[i]==identifier) {
+					if(self.messages[index].loves[i]==user_id) {
 						return true;
 					}
 				}
@@ -228,7 +228,7 @@
 				time: timestamp,
 				text: text,
 				user: {username: 'OsomTalk Bot', type: 'SYSTEM'},
-				identifier: 'OSOM'
+				user_id: 'OSOM'
 			};
 			self.addMessage(message);
 		};
@@ -246,8 +246,7 @@
 				toggle_preview_button = '<a class="toggle_previews btn btn-mini btn-inverse" onclick="tooglePreview(\'' + message._id + '\');"><i class="icon-eye-open icon-white"></i></a>';
 			}
 			
-			var user_identifier = message.identifier;
-			if (user_identifier === view_config.identifier) {
+			if (message.user_id === view_config.user_id) {
 				delete_button = ' <a class="delete_button btn btn-mini btn-inverse" onclick="deleteMessage(\'' + message._id + '\');"><i class="icon-remove icon-white"></i></a>';
 			}
 			var reply_button = ' <a class="reply_button btn btn-mini btn-inverse" onclick="openReplyMessage(\'' + message._id + '\');"><i class="icon-reply icon-white"></i></a>';
@@ -298,7 +297,7 @@
 			} else {
 				type = ' <span class="muted">(Anonymous)</span>';
 			}
-			$('#users').prepend('<div class="user" id="user_' + user.identifier + '">' + escapedName + type + '</div>');
+			$('#users').prepend('<div class="user" id="user_' + user.user_id + '">' + escapedName + type + '</div>');
 		}
 
 		self.renderReplies = function (replies) {
@@ -322,7 +321,6 @@
 		/** renders the chat **/
 		self.renderRoom = function() {
 			self.renderMessages();
-			self.renderUsers();
 		};
 
 		self.renderMessages = function() {
@@ -334,10 +332,10 @@
 
 		self.renderUsers = function() {
 			/** Render Users **/
-			/*$('#users').html('');
+			$('#users').html('');
 			for(var i = 0; i < self.users.length; i++) {
 				self.renderUser(self.users[i]);
-			}*/
+			}
 		}
 		
 		/** Connections with web services **/

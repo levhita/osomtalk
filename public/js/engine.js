@@ -9,6 +9,9 @@ $(document).ready(function(){
 		room.getMessagesData(function(){
 			room.renderRoom();
 		});
+		room.getUsersData(function(){
+			room.renderUsers();
+		});
 	});
 	
 	//pingBack();
@@ -259,7 +262,7 @@ function pingBack() {
 		type: 'POST',
 		url: '/love_message/' + view_config.room_id + '/' + message_id,
 		data: {
-			identifier: view_config.identifier,
+			user_id: view_config.user_id,
 			token: view_config.token
 		},
 		success: function(data) {}
@@ -271,7 +274,7 @@ function deleteMessage(message_id) {
 		type: 'POST',
 		url: '/delete_message/' + view_config.room_id + '/' + message_id,
 		data: {
-			identifier: view_config.identifier,
+			user_id: view_config.user_id,
 			token: view_config.token
 		},
 		success: function(data) {}
@@ -286,8 +289,8 @@ function deleteSelected() {
 		return;
 	}
 	var message_id = room.messages[window.selected_index]._id
-	var user_identifier = message_id.substring(11);
-	if (user_identifier !== view_config.identifier) {
+	var user_id = room.messages[window.selected_index].user_id;
+	if (user_id !== view_config.user_id) {
 		return;
 	}
 	if(confirm('Do you want to delete the selected message?')) {
@@ -322,7 +325,7 @@ function replyMessage() {
 		type: 'POST',
 		url: '/reply_message/' + view_config.room_id + '/' + message_id,
 		data: {
-			identifier: view_config.identifier,
+			user_id: view_config.user_id,
 			token: view_config.token,
 			text: text
 		},
@@ -339,7 +342,7 @@ function sendMessage(text, success_callback) {
 	if (text!=='') {
 		var publication = window.client.publish('/messages_' + view_config.room_id, {
 			text: text,
-			identifier: view_config.identifier,
+			user_id: view_config.user_id,
 			token: view_config.token
 		});
 		publication.callback(success_callback);

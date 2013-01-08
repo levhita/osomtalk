@@ -47,19 +47,6 @@
 			return true;
 		}
 
-
-		self.addMessage = function(data) {
-			var message = {
-				_id: data._id,
-				room_id: self._id,
-				text: data.text,
-				user_id: data.user_id,
-				bookmarks: [],
-				replies: []
-			}
-			client.publish('/server_messages_' + self._id, message);
-		};
-		
 		/** TODO mongodebear **/
 		self.deleteMessage = function(message_id) {
 			var index = self.getMessageIndex(message_id);
@@ -87,14 +74,6 @@
 			}
 			return false;
 		}
-
-		self.addSystemMessage = function(text) {
-			message = {
-				text: text,
-				type: 'SYSTEM'
-			};
-			self.addMessage(message);
-		};
 	
 		self.cleanUsers = function() {
 			var timestamp = Math.round(+new Date()/1000);
