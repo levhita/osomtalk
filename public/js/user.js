@@ -9,7 +9,7 @@
 		self.username	= config.username || '';
 		self.type 		= config.type || "ANONYMOUS";
 		self.token		= config.token || '';
-		self.lastPing	= Math.round(+new Date()/1000);
+		self.last_ping	= Math.round(+new Date()/1000);
 		self.access_token    =  config.oauth_access_token || '';
 		self.access_token_secret = config.oauth_access_token_secret || '';
 		
@@ -17,7 +17,7 @@
 		self.token  = hmac.update(self.username).digest('hex');
 
 		self.ping = function() {
-			self.lastPing = Math.round(+new Date()/1000);
+			self.last_ping = Math.round(+new Date()/1000);
 		}
 
 		self.getData = function () {
@@ -27,7 +27,7 @@
 				username: self.username,
 				type: self.type, 	
 				token: self.token,	
-				lastPing: self.lastPing,
+				last_ping: self.last_ping,
 				access_token: self.access_token,
 				access_token_secret: self.access_token_secret
 			};

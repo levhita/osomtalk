@@ -45,11 +45,12 @@ app.configure ( function(){
 	app.set('view engine', 'html');
 	app.set('views', __dirname + '/views');
 	app.use(express.bodyParser());
-
+	
+	/* Use memory session */
 	app.use(express.cookieParser(appConfig.cookie_secret));
 	app.use(express.session());
 	
-	/*toogle use of redis
+	/* Toogle use of Redis
 	app.use(express.cookieParser());
 	app.use(
   		express.session({
@@ -151,14 +152,10 @@ app.get('/rooms/get_users/:room_id', function(req, res){
 /** Checks for username and take it in case is valid. **/
 app.get('/user/ping/:room_id', function(req, res){
 	var room_id = req.params.room_id;
-	if( osomtalk.roomExists(room_id)) {
-		if(req.session.user!==undefined) {
-			osomtalk.pingUser(room_id, req.session.user.user_id);
-			res.send({response: 'success'});
-		}
-		return true;
+	if(req.session.user!==undefined) {
+		osomtalk.pingUser(room_id, req.session.user._id);
+		res.send({response: 'success'});
 	}
-	res.send({error: 'UNEXISTANT_ROOM'});
 });
 
 /** Delete Message **/

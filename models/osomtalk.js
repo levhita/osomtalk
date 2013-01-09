@@ -257,13 +257,14 @@
 		}
 		
 		/** mongodebear **/
-		self.getUser = function(user_id) {
-			/** Cleanse the name up to a user_id status **/
+		/*self.getUser = function(user_id) {
+			
+			/** Cleanse the name up to a user_id status **
 			if ( !self.userExists(user_id) ) {
 				return false;
 			}
 			return self.users[user_id];
-		}
+		}*/
 
 		self.validateMessage = function(text) {
 			var trimmed_text = utils.trim(text);
@@ -274,18 +275,14 @@
 			}
 			return true;
 		}
-		
-		/** mongodebear **/
+
 		self.pingUser = function(room_id, user_id) {
-			if (!self.roomExists(room_id)) {
-				return false;
-			}
-			if (!self.userExists(user_id)) {
-				return false;
-			}
-			self.rooms[room_id].pingUser(user_id);
-			self.users[user_id].ping();
+			var last_ping = utils.getTimestamp();
+			self.users.update({_id: self.ObjectID(user_id)}, {$set: {last_ping: last_ping}}, {w:0});
+			self.rooms.update({_id: self.ObjectID(room_id),'users.user_id' : user_id },
+				{$set: {'users.$.last_ping': last_ping}}, {w:0});
 		}
+		
 		/** mongodebear redisear**/
 		self.validateSpam = function (user_id) {
 			var current_time = Math.round(+new Date()/1000);

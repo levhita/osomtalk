@@ -16,7 +16,7 @@ $(document).ready(function(){
 		
 	});
 	
-	//pingBack();
+	pingBack();
 
 	/** MarkDown Configuration **/
 	marked.setOptions({
@@ -239,10 +239,11 @@ function jumpToCompose() {
 }
 
 function pingBack() {
+	console.log("pinging");
 	$.ajax({
 		url: '/user/ping/'+ view_config.room_id,
 		success: function(data) {
-			setTimeout(function() { pingBack()}, 60000);
+			setTimeout(function() { pingBack()}, 10000);
 		}
 	}); 
 }
