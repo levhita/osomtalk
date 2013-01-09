@@ -167,12 +167,13 @@ app.post('/delete_message/:room_id/:message_id', function(req, res){
 	var message_id = req.params.message_id;
 	var user_id = req.body.user_id;
 	var token = req.body.token;
-	
 	osomtalk.verifyPermission(user_id, token, room_id, function (has_permission) {
 		if(has_permission) {
-			if (user_id=== req.session.user.user_id) {	
+			if (user_id === req.session.user._id) {	
 				osomtalk.deleteMessage(room_id, message_id);
 				res.send();
+			} else {
+				res.send({error: 'NO_PERMISSION'});	
 			}
 		} else {
 			res.send({error: 'NO_PERMISSION'});

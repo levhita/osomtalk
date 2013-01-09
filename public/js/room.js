@@ -28,7 +28,6 @@
 				text: data.text,
 				type: data.type,
 				user_id: data.user_id,
-				bookmarks: [],
 				replies: []
 			}
 			

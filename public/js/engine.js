@@ -108,14 +108,6 @@ $(document).ready(function(){
 		nextMessage();
 	});
 
-	/*key('h', function() {
-		previousBookmark();
-	});
-
-	key('l', function() {
-		nextBookmark();
-	});*/
-
 
 	if (window.webkitNotifications) {
 		if (window.webkitNotifications.checkPermission() == 0) {

@@ -53,7 +53,6 @@
 						text:       data.text,
 						user_id:    data.user_id,
 						type:       data.type,
-						bookmarks:  [],
 						replies:    []
 					}
 					self.messages.insert(message, {w:0});
@@ -114,16 +113,14 @@
 		}
 
 		self.deleteMessage = function(room_id, message_id) {
-			self.rooms.findOne({_id: self.ObjectID(room_id)}, function(err, room_data) {
-				self.messages.remove({_id: self.ObjectID(message_id)},{w:1}, function(err, result) {
-					if(!err) {
-						var data = {
-							action: 'delete_message',
-							message_id: message_id
-						};
-						client.publish('/server_actions_' + room_id, data);
-					}
-				});
+			self.messages.remove({_id: self.ObjectID(message_id)},{w:1}, function(err, result) {
+				if(!err) {
+					var data = {
+						action: 'delete_message',
+						message_id: message_id
+					};
+					client.publish('/server_actions_' + room_id, data);
+				}
 			});
 		}
 
@@ -300,7 +297,7 @@
 				};
 			} else if ( (current_time - self.spam_filter[user_id].last) <= 2 ){
 				/** checks for fast typing**/
-				console.log('Blocking ' + user_id + ' for Fast Typing');
+				//console.log('Blocking ' + user_id + ' for Fast Typing');
 				block = 'BLOCKED_TYPING';
 			} else {
 				/** Checks for more than 15 messages in less than a minute **/
