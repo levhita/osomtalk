@@ -10,8 +10,14 @@
 		self.type 		= config.type || "ANONYMOUS";
 		self.token		= config.token || '';
 		self.last_ping	= Math.round(+new Date()/1000);
-		self.access_token    =  config.oauth_access_token || '';
-		self.access_token_secret = config.oauth_access_token_secret || '';
+		
+		if(config.oauth_access_token) {
+			self.access_token    =  config.oauth_access_token;
+		}
+		
+		if(config.oauth_access_token_secret) {
+			self.access_token_secret = config.oauth_access_token_secret;
+		}
 		
 		var hmac = crypto.createHmac('sha256', utils.makeId(20));
 		self.token  = hmac.update(self.username).digest('hex');

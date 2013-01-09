@@ -243,23 +243,29 @@
 			});
 		}
 
+		/** Room can be set to null ar empty string to avoid validation
+		of room specific permission **/
 		self.verifyPermission = function(user_id, token, room_id, callback) {
 			self.getUser(user_id, function(user){
 				if(user != false) {
-					if(user.token !== token) {
+					if(user.token != token) {
 						callback(false);
 					} else {
-						self.getRoom(room_id, function(room){
-							if(room != false) {
-								if (room.userExists(user_id)) {
-									callback(true);
+						if( typeof room_id == 'string' && room_id.length==24) {
+							self.getRoom(room_id, function(room){
+								if(room != false) {
+									if (room.userExists(user_id)) {
+										callback(true);
+									} else {
+										callback(false);
+									}
 								} else {
 									callback(false);
 								}
-							} else {
-								callback(false);
-							}
-						});
+							});
+						} else {
+							callback(true);
+						}
 					}
 				} else {
 					callback(false);
@@ -295,7 +301,6 @@
 				};
 			} else if ( (current_time - self.spam_filter[user_id].last) <= 2 ){
 				/** checks for fast typing**/
-				//console.log('Blocking ' + user_id + ' for Fast Typing');
 				block = 'BLOCKED_TYPING';
 			} else {
 				/** Checks for more than 15 messages in less than a minute **/

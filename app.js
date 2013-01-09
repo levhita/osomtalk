@@ -97,7 +97,7 @@ app.get('/room/:room_id', function(req, res) {
 			
 			//In case of logged in user, add it to the template
 			if (req.session.user !== undefined) {
-				osomtalk.verifyPermission(req.session.user._id,	req.session.user.token, room_id,
+				osomtalk.verifyPermission(req.session.user._id,	req.session.user.token, null,
 					function(has_permission) {
 						if (has_permission ) {
 							data.user = req.session.user;
