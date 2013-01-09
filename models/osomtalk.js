@@ -86,7 +86,7 @@
 								} else {
 									type= 'Anonymous';
 								}
-								var join_message = 'User ' + user_data.username +' ('+type+') entered the room.';
+								var join_message = 'User "' + user_data.username +'" ('+type+') entered the room.';
 
 								osomtalk.addSystemMessageToRoom(room_id, join_message); 
 								
@@ -114,7 +114,7 @@
 		}
 
 		self.deleteMessage = function(room_id, message_id) {
-			self.rooms.findOne({room_id: self.ObjectID(room_id)}, function(err, room_data) {
+			self.rooms.findOne({_id: self.ObjectID(room_id)}, function(err, room_data) {
 				self.messages.remove({_id: self.ObjectID(message_id)},{w:1}, function(err, result) {
 					if(!err) {
 						var data = {
@@ -128,21 +128,26 @@
 		}
 
 		self.replyMessage = function(room_id, message_id, user_id, text){
-			if (!self.roomExists(room_id)) {
-				return false;
-			}
-			var replied = self.rooms[room_id].replyMessage(message_id, user_id, text);
-
-			if (replied !== undefined) {
-				var index = self.rooms[room_id].getMessageIndex(message_id);
-				var data = {
-					action: 'update_message_replies',
-					message_id: message_id,
-					replies: self.rooms[room_id].messages[index].replies
-				};
-				client.publish('/server_actions_' + room_id, data);
-			}
-			return replied;
+			self.messages.findOne({_id: self.ObjectID(message_id)}, function (err, message) {
+				if(!err && message != null) {
+					var reply = {
+						timestamp: utils.getTimestamp(),
+						user_id: user_id,
+						text: text
+					}
+					self.messages.update({_id: self.ObjectID(message_id)}, {$push:{replies: reply}}, {w:0});
+					
+					var replies = message.replies;
+					replies.push(reply);
+					
+					var data = {
+						action: 'update_message_replies',
+						message_id: message._id,
+						replies: replies
+					};
+					client.publish('/server_actions_' + room_id, data);						
+				}
+			});
 		}
 
 		self.getRoom = function(room_id, callback) {

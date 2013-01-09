@@ -108,13 +108,13 @@ $(document).ready(function(){
 		nextMessage();
 	});
 
-	key('h', function() {
+	/*key('h', function() {
 		previousBookmark();
 	});
 
 	key('l', function() {
 		nextBookmark();
-	});
+	});*/
 
 
 	if (window.webkitNotifications) {

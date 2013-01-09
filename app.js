@@ -165,17 +165,19 @@ app.get('/user/ping/:room_id', function(req, res){
 app.post('/delete_message/:room_id/:message_id', function(req, res){
 	var room_id = req.params.room_id;
 	var message_id = req.params.message_id;
-	var message_user_id = req.body.user_id;
+	var user_id = req.body.user_id;
 	var token = req.body.token;
 	
-	//if(osomtalk.verifyPermission(user_id, token, room_id)) {
-		// Verify poster and deleter are the same
-		if (message_user_id=== req.session.user.user_id) {	
-			osomtalk.deleteMessage(room_id, message_id);
-			res.send();
+	osomtalk.verifyPermission(user_id, token, room_id, function (has_permission) {
+		if(has_permission) {
+			if (user_id=== req.session.user.user_id) {	
+				osomtalk.deleteMessage(room_id, message_id);
+				res.send();
+			}
+		} else {
+			res.send({error: 'NO_PERMISSION'});
 		}
-	//}
-	res.send({error: 'NO_PERMISSION'});
+	});
 });
 
 /** Reply Message **/
@@ -186,14 +188,14 @@ app.post('/reply_message/:room_id/:message_id', function(req, res){
 	var token = req.body.token;
 	var text = req.body.text;
 	
-	if(osomtalk.verifyPermission(user_id, token, room_id)) {
-		var replied = osomtalk.replyMessage(room_id, message_id, user_id, text);
-		if(replied !== undefined) {
-			res.send({result: replied});
-			return;
+	osomtalk.verifyPermission(user_id, token, room_id, function (has_permission) {
+		if(has_permission) {
+			osomtalk.replyMessage(room_id, message_id, user_id, text);
+			res.send();
+		}else {
+			res.send({error: 'NO_PERMISSION'});
 		}
-	}
-	res.send({error: 'NO_PERMISSION'});
+	}); 
 });
 
 /** creates a new room and then returns the generated id. **/

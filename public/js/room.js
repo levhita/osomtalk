@@ -35,20 +35,30 @@
 			self.messages.push(message);
 			self.renderMessage(message);
 			
-			if (view_config.notifications == true) { // Notifications active
+			if ( message.type == 'USER' ){
 				var user_index = self.getUserIndex(message.user_id);
-				var text = (message.text >30)? message.text.substring(0,20) + '...': message.text;
+				self.showNotification(self.name, self.users_details[user_index].username, message.text, 5000, function(){});
+			} else if(message.type == 'SYSTEM') {
+				self.showNotification(self.name, 'OsomTalk', message.text, 3000, function(){});		
+			}
+		
+		};
+
+		self.showNotification= function (title, user, text, time, onclick) {
+			if (view_config.notifications == true) { // Notifications active
+				var text = (text >30)? text.substring(0,20) + '...': text;
 				var notification = window.webkitNotifications.createNotification(
-					'/img/favicon.png', self.name, self.users_details[user_index].username +": " + text);
+					'/img/favicon.png', self.name, user +": " + text);
 				notification.ondisplay = function() {
 					setTimeout(function() {
 						notification.cancel();
 					}, 5000);
 				};
+				notification.onclick = onclick;
 				notification.show();
-			}			
-		};
-
+			}
+		} 
+		
 		self.getMessageIndex = function(message_id) {
 			for (var i = 0; i < self.messages.length; i++) {
 				if(self.messages[i]._id==message_id) {
@@ -71,28 +81,6 @@
 			var index = self.getMessageIndex(message_id);
 			if (index !== false) {
 				self.messages.splice(index, 1);
-				return true;
-			}
-			return false;
-		}
-
-		self.replyMessage = function(message_id, user_id, text) {
-			var index = self.getMessageIndex(message_id);
-			var timestamp = Math.round(+new Date()/1000);
-			
-			if (index !== false) {
-				var user = osomtalk.getUser(user_id);
-				var reply = {
-					id: timestamp + "-" + user_id,
-					timestamp: timestamp,
-					user:{
-						user_id: user_id,
-						username: user.username,
-						type: user.type
-					} ,
-					text: text
-				}
-				self.messages[index].replies.push(reply);
 				return true;
 			}
 			return false;
@@ -160,10 +148,10 @@
 				if(previewsHTML !== '') {
 					string += '</div>';
 				}
-				/*string += '<div class="replies">';
+				string += '<div class="replies">';
 				if(message.replies.length > 0 ) {
 					string += self.renderReplies(message.replies);
-				}*/
+				}
 				string += '</div>';
 				
 				string += '</div>';
@@ -189,8 +177,9 @@
 			var text = '';
 			/** Render Replies **/
 			for(var i = 0; i < replies.length; i++) {
-				var user_text = replies[i].user.username.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-				user_text = (replies[i].user.type==="TWITTER")? "@"+user_text: user_text + '<span class="muted">(Anonymous)</span>';
+				var user = self.users_details[self.getUserIndex(replies[i].user_id)];
+				var user_text = user.username.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+				user_text = (user.type==="TWITTER")? "@"+user_text: user_text + '<span class="muted">(Anonymous)</span>';
 				var date = new Date(replies[i].timestamp * 1000);
 				date = utils.getLocaleShortDateString(date) + " " + date.toLocaleTimeString();
 
