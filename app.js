@@ -258,14 +258,14 @@ app.get('/auth/twitter/callback', function(req, res, next){
 					console.log(error);
 					res.send("yeah something broke.");
 				} else {
-					req.session.user = osomtalk.addUser({
+					osomtalk.addUser({
 						type: 'TWITTER',
 						username: results.screen_name,
 						twitter_id: results.user_id,
 						access_token:  oauth_access_token,
 						access_token_secret: oauth_access_token_secret
 					}, function(user) {
-						req.session.user= user;
+						req.session.user = user;
 						res.redirect(req.session.oauth.referer);
 					});
 					

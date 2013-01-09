@@ -159,6 +159,17 @@
 			}
 		}
 
+		self.getUser = function(user_id, callback) {
+			if(user_id.length != 24) {
+				callback(false);
+			} else {
+				osomtalk.users.findOne({_id: osomtalk.ObjectID(user_id)},
+					function(err, results) {
+						callback(results);
+					}); 
+			}
+		}
+
 		self.getMessages = function(room_id, callback) {
 			var data = [];
 			self.messages.find({room_id: room_id},
@@ -232,40 +243,30 @@
 			});
 		}
 
-		/** mongodebear **/
 		self.verifyPermission = function(user_id, token, room_id, callback) {
-			/*if ( !self.userExists(user_id) ) {
-				//console.log("User doesn't exists: " + user_id);
-				callback(false);
-			}
-			if (self.users[user_id].token !== token) {
-				//console.log("Wrong Token: " + token);
-				callback(false);
-			}*/
-			
-			/*if(room_id !== undefined) {
-				if ( !self.roomExists(room_id) ) {
-					//console.log("Room doesn't exists");
-					return false;
+			self.getUser(user_id, function(user){
+				if(user != false) {
+					if(user.token !== token) {
+						callback(false);
+					} else {
+						self.getRoom(room_id, function(room){
+							if(room != false) {
+								if (room.userExists(user_id)) {
+									callback(true);
+								} else {
+									callback(false);
+								}
+							} else {
+								callback(false);
+							}
+						});
+					}
+				} else {
+					callback(false);
 				}
-				if (!self.rooms[room_id].userExists(user_id)){
-					//console.log("User doesn't belong to room");
-					return false;
-				}
-			}*/
-			callback(true);
+			});
 		}
 		
-		/** mongodebear **/
-		/*self.getUser = function(user_id) {
-			
-			/** Cleanse the name up to a user_id status **
-			if ( !self.userExists(user_id) ) {
-				return false;
-			}
-			return self.users[user_id];
-		}*/
-
 		self.validateMessage = function(text) {
 			var trimmed_text = utils.trim(text);
 			if (text.length>1024) {
@@ -277,15 +278,15 @@
 		}
 
 		self.pingUser = function(room_id, user_id) {
-			var last_ping = utils.getTimestamp();
-			self.users.update({_id: self.ObjectID(user_id)}, {$set: {last_ping: last_ping}}, {w:0});
+			var timestamp = utils.getTimestamp();
+			self.users.update({_id: self.ObjectID(user_id)}, {$set: {last_ping: timestamp}}, {w:0});
 			self.rooms.update({_id: self.ObjectID(room_id),'users.user_id' : user_id },
-				{$set: {'users.$.last_ping': last_ping}}, {w:0});
+				{$set: {'users.$.last_ping': timestamp}}, {w:0});
 		}
 		
-		/** mongodebear redisear**/
+		/** mongodebear rediseñar**/
 		self.validateSpam = function (user_id) {
-			var current_time = Math.round(+new Date()/1000);
+			var current_time = utils.getTimestamp();
 			var block='';
 			if ( self.spam_filter[user_id] === undefined ) {
 				self.spam_filter[user_id] = {

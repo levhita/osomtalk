@@ -57,24 +57,6 @@
 			return false;
 		}
 
-		/** TODO mongodebear **/
-		self.replyMessage = function(message_id, user_id, text) {
-			var index = self.getMessageIndex(message_id);
-			var timestamp = utils.getTimeStamp();
-			
-			if (index !== false) {
-				var reply = {
-					id: timestamp + "-" + user_id,
-					timestamp: timestamp,
-					user_id: user_id,
-					text: text
-				}
-				self.messages[index].replies.push(reply);
-				return true;
-			}
-			return false;
-		}
-	
 		self.cleanUsers = function() {
 			var timestamp = Math.round(+new Date()/1000);
 			//console.log("Checking timeout " + self.id);
