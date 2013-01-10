@@ -9,6 +9,7 @@
 		self.type 		= config.type || 'PUBLIC';
 		self.admins		= config.admins || [];
 		self.users  	= config.users || [];
+		self.last_ping	= utils.getTimestamp();
 		
 		/** This one should be the one **/
 		self.getData = function () {
@@ -17,7 +18,8 @@
 				name: 		self.name,
 				type: 		self.type,
 				admins:  	self.admins,
-				users:  	self.users
+				users:  	self.users,
+				last_ping:  self.last_ping
 			}
 		};
 
@@ -38,54 +40,6 @@
 			return ids;
 		};
 
-		/** TODO mongodebear **/
-		self.pingUser = function(user_id) {
-			if ( self.users_ids[user_id] == undefined ) {
-				return false;
-			}
-			self.users_ids[user_id] = Math.round(+new Date()/1000);
-			return true;
-		}
-
-		/** TODO mongodebear **/
-		self.deleteMessage = function(message_id) {
-			var index = self.getMessageIndex(message_id);
-			if (index !== false) {
-				self.messages.splice(index, 1);
-				return true;
-			}
-			return false;
-		}
-
-		self.cleanUsers = function() {
-			var timestamp = Math.round(+new Date()/1000);
-			//console.log("Checking timeout " + self.id);
-			for( i in self.users_ids ) {
-				if( (timestamp - self.users_ids[i]) >120) { // Seconds
-					delete self.users_ids[i];
-					
-					if ( typeof window  === 'undefined' ) {
-						user = osomtalk.getUser(i);
-						var type = '';
-						if (user.type == 'TWITTER') {
-							type= '@' + user.username;
-						} else {
-							type= 'Anonymous';
-						}
-						var leave_message = 'User ' + user.username +' ('+type+') left the room.';
-						self.addSystemMessage(leave_message);
-						
-						var data = {action: 'update_users'};
-						client.publish('/server_actions_' + self.id, data);
-					}
-				}
-			}
-
-			setTimeout(function(){self.cleanUsers()}, 120*1000);//Milliseconds
-		}
-		
-		/** Starts the user cleaning iterative process **/
-		//self.cleanUsers();
 		return self;
 	};
 

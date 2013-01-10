@@ -10,6 +10,7 @@
 		self.type 		= config.type || 'ANONYMOUS';
 		self.token 		= config.token || '';
 		self.archived	= false;
+		self.rooms 		= 0;
 		self.last_ping	= utils.getTimestamp();
 		
 		if(config.twitter_id) {
@@ -35,6 +36,7 @@
 				type: self.type,	
 				token: self.token,
 				archived: self.archived,
+				rooms: self.rooms,
 				last_ping: self.last_ping
 			};
 		

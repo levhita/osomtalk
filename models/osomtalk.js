@@ -76,9 +76,14 @@
 					if ( !room.userExists(user_id) ) {
 						osomtalk.users.findOne({_id: self.ObjectID(user_id)}, function(err, user_data){
 							if(!err && user_data != null) {
+								
+								/** Add user to the users array in the room **/
 								self.rooms.update({_id: self.ObjectID(room_id)},
 									{$push:{users: {user_id: user_id, last_ping: utils.getTimestamp()}}}, {w:0});
 								
+								/** Increment user rooms by one **/
+								self.users.update({_id: self.ObjectID(user_id)}, {$inc: {rooms: 1}}, {w:0});
+
 								var join_message = 'User "';
 								if (user_data.type == 'TWITTER') {
 									join_message += '@' + user_data.username +'" (Twitter)';
@@ -322,6 +327,7 @@
 			self.users.update({_id: self.ObjectID(user_id)}, {$set: {last_ping: timestamp}}, {w:0});
 			self.rooms.update({_id: self.ObjectID(room_id),'users.user_id' : user_id },
 				{$set: {'users.$.last_ping': timestamp}}, {w:0});
+			self.rooms.update({_id: self.ObjectID(room_id)}, {$set: {last_ping: timestamp}}, {w:0});
 		}
 		
 		/** mongodebear rediseñar**/
@@ -375,20 +381,71 @@
 			return true;
 		}
 
-		/** mongodebear **/
+		/** Archive users after 2 Hours IDLE **/
 		self.cleanUsers = function() {
-			var timestamp = Math.round(+new Date()/1000);
-			for( i in self.users) {
-				if( (timestamp - self.users[i].lastPing) >  7200) {//Seconds
-					//console.log(i + " Timed out totally");
-					delete self.users[i];
+			var timestamp = self.getTimestamp()- 7200;// 2Hrs
+			self.users.update({last_ping: {$lt: timestamp}}, {$set:{archived: true}}, {w:0});
+			
+			setTimeout(function(){self.cleanUsers()}, 7200*1000);//Check Every 2 Hours
+		}
+		
+		/** Removes Empty Anonymous Rooms after 24Hrs Empty **/
+		self.cleanRooms = function() {
+			var timestamp = self.getTimestamp()- 86400;// 24Hrs
+			
+			self.rooms.find({last_ping: {$lt: timestamp}, type: 'ANONYMOUS'}).toArray(
+				function(err, rooms) {
+					if(!err) {
+						room_ids = [];
+						for(var i = 0; i < rooms.length; i++) {
+						 	room_ids.push(rooms[i]._id);
+						 	users_ids = [];
+						 	for(var j = 0; j < rooms[i].users.length; j++) {
+						 		users_ids.push(self.ObjectID(rooms[i].users[j]._id));
+						 	}
+						 	console.log(users_ids);
+						 	self.users.update({_id: {$in: users_ids}, {$inc: {rooms: -1}}, {w:0});
+						}
+						/** Deletes all Messages in every room
+						(ANONYMOUS Rooms doesn't suppose to have messages anyway XD)**/
+						self.messages.remove({room_id: {$in: room_ids}}, {w:0});
+					}
+				});
+			/** Delete the room **/
+			self.rooms.remove({last_ping: {$lt: timestamp}, type: 'ANONYMOUS'}, {w:0});
+
+
+			setTimeout(function(){self.cleanRooms()}, 3600*1000);// Check Every Hour
+		}
+		
+		self.cleanRooms() = function() {
+			var timestamp = utils.getTimestamp();
+			//console.log("Checking timeout " + self.id);
+			for( i in self.users_ids ) {
+				if( (timestamp - self.users_ids[i]) >120) { // Seconds
+					delete self.users_ids[i];
+					
+					if ( typeof window  === 'undefined' ) {
+						user = osomtalk.getUser(i);
+						var type = '';
+						if (user.type == 'TWITTER') {
+							type= '@' + user.username;
+						} else {
+							type= 'Anonymous';
+						}
+						var leave_message = 'User ' + user.username +' ('+type+') left the room.';
+						self.addSystemMessage(leave_message);
+						
+						var data = {action: 'update_users'};
+						client.publish('/server_actions_' + self.id, data);
+					}
 				}
 			}
-			setTimeout(function(){self.cleanUsers()}, 7200*1000);//Milliseconds
+		}
 		}
 
 		/** Starts the user cleaning iterative process **/
-		//self.cleanUsers();
+		self.cleanUsers();
 
 		return self;
 	};
