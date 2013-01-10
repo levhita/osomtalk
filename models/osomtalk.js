@@ -394,7 +394,14 @@
 			console.log("Archiving Users");
 			var timestamp = utils.getTimestamp()- 10;//7200;// 2Hrs
 			self.users.update({last_ping: {$lt: timestamp}}, {$set:{archived: true}}, {w:0, multi:1});
-
+			
+			self.users.remove({
+				last_ping: {$lt: timestamp},
+				archived: true,
+				type: 'ANONYMOUS',
+				rooms: {$lte: 0}
+			}, {w:0});
+			
 			setTimeout(function(){self.cleanUsers()}, 7200*1000);//Check Every 2 Hours
 		}
 		
