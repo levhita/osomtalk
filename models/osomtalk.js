@@ -440,35 +440,34 @@
 			self.rooms.find().each(
 				function(err, room_data) {
           			if(!err && room_data != null) {
-          				var users_ids = [];
-						for(var i = 0; i < room_data.users.length; i++) {
+          				for(var i = 0; i < room_data.users.length; i++) {
 							var user = room_data.users[i];
 							if (user.last_ping < timestamp && user.archived == false) {
-								users_ids.push(user.user_id);
+								/** Updates **/
+								self.rooms.update({_id: room_data._id, 'users.user_id' : user.user_id },
+									{$set: {'users.$.archived': true}}, {w:0});
+								
+								/** Send the message **/
 								self.getUser(user.user_id, function (user) {
 									if (user) {
-						 				var leave_message = 'User ';
+						 				var leave_message = 'User "';
 										if (user.type == 'TWITTER') {
-											leave_message += 'User "@' + user.username +'" (Twitter)' ;
+											leave_message += '@' + user.username +'" (Twitter)' ;
 										} else {
-											leave_message += 'User "' + user.username +'" (Anonymous)' ;
+											leave_message += user.username +'" (Anonymous)' ;
 										}
 										leave_message += ' left the room.';
-										self.addSystemMessageToRoom(room_data._id, leave_message);
+										self.addSystemMessageToRoom(room_data._id.toHexString(), leave_message);
 									}
 						 		});
 						 	}
 						}
-						self.users.update({_id: {$in: users_ids}}, {$set: {archived: true}}, {w:1},
-							function() {
-							 	var data = {action: 'update_users'};
-								client.publish('/server_actions_' + room_data._id, data);	
-						 	}
-						 );
-          			}
+						/** Launch the order to update users on the browser **/
+						var data = {action: 'update_users'};
+						client.publish('/server_actions_' + room_data._id, data);	
+					}
         		}
         	);
-			
 			setTimeout(function(){self.timeOutUsers()}, 120*1000);// Check Every 2 Minutes
 		}
 
