@@ -88,7 +88,7 @@ app.get('/room/:room_id', function(req, res) {
 	}
 	
 	osomtalk.getRoom(room_id, function (room) {
-		if ( typeof room !== "undefined" ) {
+		if ( room !== false ) {
 			data = {
 				user: false,
 				room: room,
@@ -164,6 +164,7 @@ app.post('/delete_message/:room_id/:message_id', function(req, res){
 	var message_id = req.params.message_id;
 	var user_id = req.body.user_id;
 	var token = req.body.token;
+	
 	osomtalk.verifyPermission(user_id, token, room_id, function (has_permission) {
 		if(has_permission) {
 			if (user_id === req.session.user._id) {	

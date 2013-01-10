@@ -79,13 +79,13 @@
 								self.rooms.update({_id: self.ObjectID(room_id)},
 									{$push:{users: {user_id: user_id, last_ping: utils.getTimestamp()}}}, {w:0});
 								
-								var type = '';
+								var join_message = 'User "';
 								if (user_data.type == 'TWITTER') {
-									type= '@' + user_data.username;
+									join_message += '@' + user_data.username +'" (Twitter)';
 								} else {
-									type= 'Anonymous';
+									join_message += user_data.username +'" (Anonymous)';
 								}
-								var join_message = 'User "' + user_data.username +'" ('+type+') entered the room.';
+								join_message +=' entered the room.';
 
 								osomtalk.addSystemMessageToRoom(room_id, join_message); 
 								
@@ -148,25 +148,33 @@
 		}
 
 		self.getRoom = function(room_id, callback) {
-			if(room_id.length != 24) {
+			if(typeof room_id !='string' || room_id.length != 24) {
 				callback(false);
 			} else {
 				osomtalk.rooms.findOne({_id: osomtalk.ObjectID(room_id)},
 					function(err, results) {
-						var room = new Room(results);
-						callback(room);
+						if(!err && results != null) {
+							var room = new Room(results);
+							callback(room);
+						} else {
+							callback(false);
+						}
 					}); 
 			}
 		}
 
 		self.getUser = function(user_id, callback) {
-			if(user_id.length != 24) {
+			if(typeof user_id !='string' || user_id.length != 24) {
 				callback(false);
 			} else {
 				osomtalk.users.findOne({_id: osomtalk.ObjectID(user_id)},
 					function(err, results) {
-						callback(results);
-					}); 
+						if(!err && results != null) {
+							callback(results);
+						} else {
+							callback(false);
+						}
+					});
 			}
 		}
 
@@ -187,7 +195,7 @@
 		self.getUsersFromRoom = function(room_id, callback) {
 			if(room_id.length != 24) {
 				callback(false);
-			} else {
+			} else {			
 				self.rooms.findOne({_id: self.ObjectID(room_id)}, function(err, room_data) {
 					if (!err && room_data != null) {
 						var room = new Room(room_data);
@@ -222,25 +230,46 @@
 
 		self.addUser = function(user, callback) {
 			var uniquer = utils.createUniquer(user.username);
-			self.users.findOne({uniquer: uniquer}, function(err, user_data){
-				if(!err) {
-					if( user_data != null) {
-						if (user_data.type !== ' TWITTER') {
-							callback(false);
-							return;
-						} else if (user.type === user_data.type ) {
-							callback(user);
-							return;
+			//, limit: 1
+			self.users.find({uniquer: uniquer}, {'sort': [['last_ping', 'desc']], limit: 1}).toArray(
+				function(err, user_data) {
+					if(!err) {
+						if( user_data.length > 0) {
+							user_data = user_data[0];
+							if (user_data.type === 'TWITTER') {
+								if ( user.type === user_data.type  ) {
+									callback(new User(user_data));
+									return;
+								} else {
+									// You can't take an already twitter name with an anonymous
+									callback(false);
+									return;
+								}
+							} else if (user_data.type === 'ANONYMOUS' && user_data.archived === false) {
+								if(user.type === 'TWITTER') {
+									/** Twitter users overwrites ANONYMOUS user (archive them) **/
+									self.users.update({_id: self.ObjectID(user_data._id)}, {$set: {archived:true}}, {w:0});
+									/** We just archive the last one and let the process continue to create the new user **/
+								} else {
+									/** Anonymous user can't overwrite another active anonymous **/
+									callback(false);
+									return;
+								}
+							} else {
+								/** Anonymous user can overwrite another archived anonymous,
+								we let the process continue to create the new user **/
+							}
 						}
-						self.users.remove({_id: user_data._id}, {w:0});
+						user.username = user.username.trim();
+						user._id = self.ObjectID();
+						user = new User(user);
+						self.users.insert(user.getData(), {w:0});
+						callback(user);
+					} else {
+						callback(false);
 					}
-					user.username = user.username.trim();
-					user._id = self.ObjectID();
-					user = new User(user);
-					self.users.insert(user.getData(), {w:0});
-					callback(user);
 				}
-			});
+			);
 		}
 
 		/** Room can be set to null ar empty string to avoid validation
@@ -249,25 +278,30 @@
 			self.getUser(user_id, function(user){
 				if(user != false) {
 					if(user.token != token) {
+						//console.log("Bad token");
 						callback(false);
 					} else {
 						if( typeof room_id == 'string' && room_id.length==24) {
 							self.getRoom(room_id, function(room){
-								if(room != false) {
+								if(room !== false) {
 									if (room.userExists(user_id)) {
 										callback(true);
 									} else {
+										//console.log("user doesn't exist in room");
 										callback(false);
 									}
 								} else {
+									//console.log('Unexistant room');
 									callback(false);
 								}
 							});
 						} else {
+							//console.log('Not asked  to verify permissions for room');
 							callback(true);
 						}
 					}
 				} else {
+					//console.log("couldn't get User");
 					callback(false);
 				}
 			});

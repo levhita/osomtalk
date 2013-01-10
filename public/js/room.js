@@ -128,7 +128,7 @@
 				if( user.type == 'ANONYMOUS') {
 					string = '<div class="message" id="'+message._id+'"><div class="info"><span class="user">' + escapedName + '</span> <span class="muted">(Anonymous)</span><div class="time">' + date + '</div></div><div class="utility">' + toggle_preview_button + delete_button + reply_button + '</div><div class="text">' + utils.markdown(message.text) +'</div>';
 				} else if( user.type=='TWITTER') {
-					string = '<div class="message" id="'+message._id+'"><div class="info"><span class="user">' + escapedName + '</span> <a class="muted" target="_BLANK" href="http://twitter.com/'+user.username+'">(twitter)</a><div class="time">' + date + '</div></div><div class="utility">' + toggle_preview_button + delete_button + reply_button + '</div><div class="text">' + utils.markdown(message.text) +"</div>";
+					string = '<div class="message" id="'+message._id+'"><div class="info"><span class="user">@' + escapedName + '</span> <a class="muted" target="_BLANK" href="http://twitter.com/'+user.username+'">(twitter)</a><div class="time">' + date + '</div></div><div class="utility">' + toggle_preview_button + delete_button + reply_button + '</div><div class="text">' + utils.markdown(message.text) +"</div>";
 				}
 			} else if(message.type=='OFFICIAL') {
 				string = '<div class="message" id="'+message._id+'"><div class="info"><span class="user">OsomTalk</span> <span class="muted">(Official)</span><div class="time">' + date + '</div></div><div class="utility">' + toggle_preview_button + '</div><div class="text">' + utils.markdown(message.text) +'</div>';
