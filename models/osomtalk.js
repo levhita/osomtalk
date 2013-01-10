@@ -393,19 +393,22 @@
 			self.users.update({last_ping: {$lt: timestamp}}, {$set:{archived: true}}, {w:0});
 
 			setTimeout(function(){self.cleanUsers()}, 7200*1000);//Check Every 2 Hours
-		}
+		}//http://localhost:3000/room/50ef1775bf2f20561b000001#
 		
 		/** Removes Empty Anonymous Rooms after 24Hrs Empty **/
 		self.cleanRooms = function() {
 			console.log("Cleaning Rooms");
-			var timestamp = utils.getTimestamp()- 86400;// 24Hrs
-			
-			self.rooms.find({last_ping: {$lt: timestamp}, type: 'ANONYMOUS'}).toArray(
+			var one_timestamp = utils.getTimestamp()- 10;//86400; // 1 Day
+			var two_timestamp = utils.getTimestamp()- 10;//172800; // 2 Days
+			self.rooms.find({$or: [
+					{last_ping: {$lt: two_timestamp}, type: 'PUBLIC'}, 
+					{last_ping: {$lt: one_timestamp}, type: 'ANONYMOUS'}
+				]}).toArray(
 				function(err, rooms) {
 					if(!err) {
 						room_ids = [];
 						for(var i = 0; i < rooms.length; i++) {
-						 	room_ids.push(rooms[i]._id);
+						 	room_ids.push(rooms[i]._id.toHexString());
 						 	users_object_ids = [];
 						 	users_ids = [];
 						 	for(var j = 0; j < rooms[i].users.length; j++) {
@@ -414,7 +417,7 @@
 						 	}
 						 	console.log("Cleaning Users:");
 						 	console.log(users_ids);
-						 	self.users.update({_id: {$in: users_ids}}, {$inc: {rooms: -1}}, {w:0});
+						 	self.users.update({_id: {$in: users_object_ids}}, {$inc: {rooms: -1}}, {w:0});
 						}
 						console.log("Cleaning Messages From Rooms:");
 						console.log(room_ids);
@@ -424,7 +427,8 @@
 						
 						console.log("Deleting all Rooms older than 24 Hrs");
 						/** Delete the room **/
-						self.rooms.remove({last_ping: {$lt: timestamp}, type: 'ANONYMOUS'}, {w:0});
+						self.rooms.remove({last_ping: {$lt: two_timestamp}, type: 'PUBLIC'}, {w:0});
+						self.rooms.remove({last_ping: {$lt: one_timestamp}, type: 'ANONYMOUS'}, {w:0});
 					}
 				});
 			
@@ -477,7 +481,7 @@
 			self.cleanUsers();
 			self.cleanRooms();
 			self.timeOutUsers();
-		}, 1000);
+		}, 60 * 1000);// 60 Seconds
 
 		return self;
 	};
