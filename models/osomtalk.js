@@ -434,82 +434,50 @@
 		/** Removes Empty Anonymous Rooms after 24Hrs Empty **/
 		self.timeOutUsers = function() {
 			
-// AQUI!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-
-			console.log("TimeOutUsers");
-			var timestamp = utils.getTimestamp();
+			console.log("TimingOutUsers");
+			var timestamp = utils.getTimestamp() - 120; // 2 Minutes
+			
 			self.rooms.find().each(
 				function(err, room_data) {
-          			if(room_data != null) {
-          				var room = new Room(room_data);
-          				var timed_out = room.getTimedOut();
-          				self.rooms.update({_id: room._id, $lt:})
-					}
+          			if(!err && room_data != null) {
+          				var users_ids = [];
+						for(var i = 0; i < room_data.users.length; i++) {
+							var user = room_data.users[i];
+							if (user.last_ping < timestamp && user.archived == false) {
+								users_ids.push(user.user_id);
+								self.getUser(user.user_id, function (user) {
+									if (user) {
+						 				var leave_message = 'User ';
+										if (user.type == 'TWITTER') {
+											leave_message += 'User "@' + user.username +'" (Twitter)' ;
+										} else {
+											leave_message += 'User "' + user.username +'" (Anonymous)' ;
+										}
+										leave_message += ' left the room.';
+										self.addSystemMessageToRoom(room_data._id, leave_message);
+									}
+						 		});
+						 	}
+						}
+						self.users.update({_id: {$in: users_ids}}, {$set: {archived: true}}, {w:1},
+							function() {
+							 	var data = {action: 'update_users'};
+								client.publish('/server_actions_' + room_data._id, data);	
+						 	}
+						 );
+          			}
         		}
         	);
 			
-			self.rooms.find().toArray(
-				function(err, rooms) {
-					if(!err) {
-						room_ids = [];
-						for(var i = 0; i < rooms.length; i++) {
-						 	room_ids.push(rooms[i]._id);
-						 	users_object_ids = [];
-						 	users_ids = [];
-						 	for(var j = 0; j < rooms[i].users.length; j++) {
-						 		users_object_ids.push(self.ObjectID(rooms[i].users[j].user_id));
-						 		users_ids.push(rooms[i].users[j].user_id);
-						 	}
-						 	console.log("Cleaning Users:");
-						 	console.log(users_ids);
-						 	self.users.update({_id: {$in: users_ids}}, {$inc: {rooms: -1}}, {w:0});
-						}
-						console.log("Cleaning Messages From Rooms:");
-						console.log(room_ids);
-						/** Deletes all Messages in every room
-						(ANONYMOUS Rooms doesn't suppose to have messages anyway XD)**/
-						self.messages.remove({room_id: {$in: room_ids}}, {w:0});
-						
-						console.log("Deleting all Rooms older than 24 Hrs");
-						/** Delete the room **/
-						self.rooms.remove({last_ping: {$lt: timestamp}, type: 'ANONYMOUS'}, {w:0});
-					}
-				});
-			
-			setTimeout(function(){self.cleanRooms()}, 3600*1000);// Check Every Hour
+			setTimeout(function(){self.timeOutUsers()}, 120*1000);// Check Every 2 Minutes
 		}
-
-		/*self.cleanRooms() = function() {
-			var timestamp = utils.getTimestamp();
-			//console.log("Checking timeout " + self.id);
-			for( i in self.users_ids ) {
-				if( (timestamp - self.users_ids[i]) >120) { // Seconds
-					delete self.users_ids[i];
-					
-					if ( typeof window  === 'undefined' ) {
-						user = osomtalk.getUser(i);
-						var type = '';
-						if (user.type == 'TWITTER') {
-							type= '@' + user.username;
-						} else {
-							type= 'Anonymous';
-						}
-						var leave_message = 'User ' + user.username +' ('+type+') left the room.';
-						self.addSystemMessage(leave_message);
-						
-						var data = {action: 'update_users'};
-						client.publish('/server_actions_' + self.id, data);
-					}
-				}
-			}
-		}*/
 
 		/** Starts the cleaning iterative process **/
 		// Wait a minute before trying to access the DB
 		setTimeout( function(){
 			self.cleanUsers();
 			self.cleanRooms();
+			self.timeOutUsers();
 		}, 1000);
 
 		return self;
