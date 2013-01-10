@@ -79,7 +79,11 @@
 								
 								/** Add user to the users array in the room **/
 								self.rooms.update({_id: self.ObjectID(room_id)},
-									{$push:{users: {user_id: user_id, last_ping: utils.getTimestamp()}}}, {w:0});
+									{$push:{users: {
+										user_id: user_id,
+										last_ping: utils.getTimestamp(),
+										archived: false
+									}}}, {w:0});
 								
 								/** Increment user rooms by one **/
 								self.users.update({_id: self.ObjectID(user_id)}, {$inc: {rooms: 1}}, {w:0});
@@ -235,7 +239,6 @@
 
 		self.addUser = function(user, callback) {
 			var uniquer = utils.createUniquer(user.username);
-			//, limit: 1
 			self.users.find({uniquer: uniquer}, {'sort': [['last_ping', 'desc']], limit: 1}).toArray(
 				function(err, user_data) {
 					if(!err) {
@@ -243,6 +246,8 @@
 							user_data = user_data[0];
 							if (user_data.type === 'TWITTER') {
 								if ( user.type === user_data.type  ) {
+									user_data.archived = false;
+									self.users.update({_id: user_data._id}, {$set:{archived: false}}, {w:0});
 									callback(new User(user_data));
 									return;
 								} else {
@@ -383,15 +388,17 @@
 
 		/** Archive users after 2 Hours IDLE **/
 		self.cleanUsers = function() {
-			var timestamp = self.getTimestamp()- 7200;// 2Hrs
+			console.log("Cleaning Users");
+			var timestamp = utils.getTimestamp()- 7200;// 2Hrs
 			self.users.update({last_ping: {$lt: timestamp}}, {$set:{archived: true}}, {w:0});
-			
+
 			setTimeout(function(){self.cleanUsers()}, 7200*1000);//Check Every 2 Hours
 		}
 		
 		/** Removes Empty Anonymous Rooms after 24Hrs Empty **/
 		self.cleanRooms = function() {
-			var timestamp = self.getTimestamp()- 86400;// 24Hrs
+			console.log("Cleaning Rooms");
+			var timestamp = utils.getTimestamp()- 86400;// 24Hrs
 			
 			self.rooms.find({last_ping: {$lt: timestamp}, type: 'ANONYMOUS'}).toArray(
 				function(err, rooms) {
@@ -399,26 +406,81 @@
 						room_ids = [];
 						for(var i = 0; i < rooms.length; i++) {
 						 	room_ids.push(rooms[i]._id);
+						 	users_object_ids = [];
 						 	users_ids = [];
 						 	for(var j = 0; j < rooms[i].users.length; j++) {
-						 		users_ids.push(self.ObjectID(rooms[i].users[j]._id));
+						 		users_object_ids.push(self.ObjectID(rooms[i].users[j].user_id));
+						 		users_ids.push(rooms[i].users[j].user_id);
 						 	}
+						 	console.log("Cleaning Users:");
 						 	console.log(users_ids);
-						 	self.users.update({_id: {$in: users_ids}, {$inc: {rooms: -1}}, {w:0});
+						 	self.users.update({_id: {$in: users_ids}}, {$inc: {rooms: -1}}, {w:0});
 						}
+						console.log("Cleaning Messages From Rooms:");
+						console.log(room_ids);
 						/** Deletes all Messages in every room
 						(ANONYMOUS Rooms doesn't suppose to have messages anyway XD)**/
 						self.messages.remove({room_id: {$in: room_ids}}, {w:0});
+						
+						console.log("Deleting all Rooms older than 24 Hrs");
+						/** Delete the room **/
+						self.rooms.remove({last_ping: {$lt: timestamp}, type: 'ANONYMOUS'}, {w:0});
 					}
 				});
-			/** Delete the room **/
-			self.rooms.remove({last_ping: {$lt: timestamp}, type: 'ANONYMOUS'}, {w:0});
-
-
+			
 			setTimeout(function(){self.cleanRooms()}, 3600*1000);// Check Every Hour
 		}
 		
-		self.cleanRooms() = function() {
+		/** Removes Empty Anonymous Rooms after 24Hrs Empty **/
+		self.timeOutUsers = function() {
+			
+// AQUI!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+			console.log("TimeOutUsers");
+			var timestamp = utils.getTimestamp();
+			self.rooms.find().each(
+				function(err, room_data) {
+          			if(room_data != null) {
+          				var room = new Room(room_data);
+          				var timed_out = room.getTimedOut();
+          				self.rooms.update({_id: room._id, $lt:})
+					}
+        		}
+        	);
+			
+			self.rooms.find().toArray(
+				function(err, rooms) {
+					if(!err) {
+						room_ids = [];
+						for(var i = 0; i < rooms.length; i++) {
+						 	room_ids.push(rooms[i]._id);
+						 	users_object_ids = [];
+						 	users_ids = [];
+						 	for(var j = 0; j < rooms[i].users.length; j++) {
+						 		users_object_ids.push(self.ObjectID(rooms[i].users[j].user_id));
+						 		users_ids.push(rooms[i].users[j].user_id);
+						 	}
+						 	console.log("Cleaning Users:");
+						 	console.log(users_ids);
+						 	self.users.update({_id: {$in: users_ids}}, {$inc: {rooms: -1}}, {w:0});
+						}
+						console.log("Cleaning Messages From Rooms:");
+						console.log(room_ids);
+						/** Deletes all Messages in every room
+						(ANONYMOUS Rooms doesn't suppose to have messages anyway XD)**/
+						self.messages.remove({room_id: {$in: room_ids}}, {w:0});
+						
+						console.log("Deleting all Rooms older than 24 Hrs");
+						/** Delete the room **/
+						self.rooms.remove({last_ping: {$lt: timestamp}, type: 'ANONYMOUS'}, {w:0});
+					}
+				});
+			
+			setTimeout(function(){self.cleanRooms()}, 3600*1000);// Check Every Hour
+		}
+
+		/*self.cleanRooms() = function() {
 			var timestamp = utils.getTimestamp();
 			//console.log("Checking timeout " + self.id);
 			for( i in self.users_ids ) {
@@ -441,11 +503,14 @@
 					}
 				}
 			}
-		}
-		}
+		}*/
 
-		/** Starts the user cleaning iterative process **/
-		self.cleanUsers();
+		/** Starts the cleaning iterative process **/
+		// Wait a minute before trying to access the DB
+		setTimeout( function(){
+			self.cleanUsers();
+			self.cleanRooms();
+		}, 1000);
 
 		return self;
 	};
