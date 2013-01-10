@@ -392,7 +392,7 @@
 		/** Archive users after 2 Hours IDLE **/
 		self.cleanUsers = function() {
 			console.log("Archiving Users");
-			var timestamp = utils.getTimestamp()- 10;//7200;// 2Hrs
+			var timestamp = utils.getTimestamp()- 7200;// 2Hrs
 			self.users.update({last_ping: {$lt: timestamp}}, {$set:{archived: true}}, {w:0, multi:1});
 			
 			self.users.remove({
@@ -408,8 +408,8 @@
 		/** Removes Empty Anonymous Rooms after 24Hrs Empty **/
 		self.cleanRooms = function() {
 			console.log("Cleaning Rooms");
-			var one_timestamp = utils.getTimestamp()- 10;//86400; // 1 Day
-			var two_timestamp = utils.getTimestamp()- 10;//172800; // 2 Days
+			var one_timestamp = utils.getTimestamp()- 86400; // 1 Day
+			var two_timestamp = utils.getTimestamp()- 172800; // 2 Days
 			self.rooms.find({$or: [
 					{last_ping: {$lt: two_timestamp}, type: 'PUBLIC'}, 
 					{last_ping: {$lt: one_timestamp}, type: 'ANONYMOUS'}
