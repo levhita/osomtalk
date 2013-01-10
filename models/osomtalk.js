@@ -386,14 +386,17 @@
 			return true;
 		}
 
+				
+
+
 		/** Archive users after 2 Hours IDLE **/
 		self.cleanUsers = function() {
-			console.log("Cleaning Users");
-			var timestamp = utils.getTimestamp()- 7200;// 2Hrs
-			self.users.update({last_ping: {$lt: timestamp}}, {$set:{archived: true}}, {w:0});
+			console.log("Archiving Users");
+			var timestamp = utils.getTimestamp()- 10;//7200;// 2Hrs
+			self.users.update({last_ping: {$lt: timestamp}}, {$set:{archived: true}}, {w:0, multi:1});
 
 			setTimeout(function(){self.cleanUsers()}, 7200*1000);//Check Every 2 Hours
-		}//http://localhost:3000/room/50ef1775bf2f20561b000001#
+		}
 		
 		/** Removes Empty Anonymous Rooms after 24Hrs Empty **/
 		self.cleanRooms = function() {
