@@ -389,12 +389,15 @@
 				
 
 
-		/** Archive users after 2 Hours IDLE **/
+		/** Clean users after 2 Hours IDLE **/
 		self.cleanUsers = function() {
-			console.log("Archiving Users");
+			
 			var timestamp = utils.getTimestamp()- 7200;// 2Hrs
+			
+			//console.log("Archiving Twitter Users");
 			self.users.update({last_ping: {$lt: timestamp}}, {$set:{archived: true}}, {w:0, multi:1});
 			
+			//console.log("Deleting Anonymous Users without any room");
 			self.users.remove({
 				last_ping: {$lt: timestamp},
 				archived: true,
@@ -407,7 +410,7 @@
 		
 		/** Removes Empty Anonymous Rooms after 24Hrs Empty **/
 		self.cleanRooms = function() {
-			console.log("Cleaning Rooms");
+			//console.log("Cleaning Rooms");
 			var one_timestamp = utils.getTimestamp()- 86400; // 1 Day
 			var two_timestamp = utils.getTimestamp()- 172800; // 2 Days
 			self.rooms.find({$or: [
@@ -425,17 +428,17 @@
 						 		users_object_ids.push(self.ObjectID(rooms[i].users[j].user_id));
 						 		users_ids.push(rooms[i].users[j].user_id);
 						 	}
-						 	console.log("Cleaning Users:");
-						 	console.log(users_ids);
+						 	//console.log("Cleaning Users:");
+						 	//console.log(users_ids);
 						 	self.users.update({_id: {$in: users_object_ids}}, {$inc: {rooms: -1}}, {w:0});
 						}
-						console.log("Cleaning Messages From Rooms:");
-						console.log(room_ids);
+						//console.log("Cleaning Messages From Rooms:");
+						//console.log(room_ids);
 						/** Deletes all Messages in every room
 						(ANONYMOUS Rooms doesn't suppose to have messages anyway XD)**/
 						self.messages.remove({room_id: {$in: room_ids}}, {w:0});
 						
-						console.log("Deleting all Rooms older than 24 Hrs");
+						//console.log("Deleting all Rooms older than 24 Hrs");
 						/** Delete the room **/
 						self.rooms.remove({last_ping: {$lt: two_timestamp}, type: 'PUBLIC'}, {w:0});
 						self.rooms.remove({last_ping: {$lt: one_timestamp}, type: 'ANONYMOUS'}, {w:0});
@@ -448,7 +451,7 @@
 		/** Removes Empty Anonymous Rooms after 24Hrs Empty **/
 		self.timeOutUsers = function() {
 			
-			console.log("TimingOutUsers");
+			//console.log("TimingOutUsers");
 			var timestamp = utils.getTimestamp() - 120; // 2 Minutes
 			
 			self.rooms.find().each(
