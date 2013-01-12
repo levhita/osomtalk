@@ -137,9 +137,22 @@ app.get('/rooms/get/:room_id', function(req, res){
 });
 
 /** Get all the room data **/
+app.get('/rooms/get_messages/:room_id/:last_id', function(req, res){
+	var room_id = req.params.room_id;
+	var last_id = req.params.last_id;
+	
+	osomtalk.getMessages(room_id, last_id, function (messages) {
+		if ( typeof messages !== "undefined" ) {
+			res.send(messages);
+		}
+	});
+
+});
+
+/** Get all the room data **/
 app.get('/rooms/get_messages/:room_id', function(req, res){
 	var room_id = req.params.room_id;
-	osomtalk.getMessages(room_id, function (messages) {
+	osomtalk.getMessages(room_id, null, function (messages) {
 		if ( typeof messages !== "undefined" ) {
 			res.send(messages);
 		}

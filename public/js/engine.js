@@ -8,8 +8,8 @@ $(document).ready(function(){
 	room.getRoomData(function (){
 		room.getUsersData(function(){
 			room.renderUsers();
-			room.getMessagesData(function(){
-				room.renderMessages();
+			room.getMessagesData(null, function(messages){
+				room.appendMessages(messages);
 			});
 		});
 
@@ -247,22 +247,6 @@ function pingBack() {
 	}); 
 }
 
-/*function clickedLove(element) {
-	var message_id = $(element).closest('.message').attr('id');
-	loveMessage(message_id);
-}*/
-/*function loveMessage(message_id) {
-	$.ajax({
-		type: 'POST',
-		url: '/love_message/' + view_config.room_id + '/' + message_id,
-		data: {
-			user_id: view_config.user_id,
-			token: view_config.token
-		},
-		success: function(data) {}
-	});
-}*/
-
 function deleteMessage(message_id) {
 	$.ajax({
 		type: 'POST',
@@ -407,6 +391,14 @@ function updateUtility() {
 		$('#previews_button button[value=0]').addClass('active');
 	}
 }
+
+function loadMore() {
+	last_message = room.messages[0];
+	room.getMessagesData(last_message._id, function(messages){
+		room.appendMessages(messages);
+	});
+}
+
 
 view_config.notifications = false;
 view_config.previews = true;

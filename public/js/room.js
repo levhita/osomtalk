@@ -32,8 +32,9 @@
 			}
 			
 			self.messages.push(message);
-			self.renderMessage(message);
-			
+			var html = self.renderMessage(message);
+			$('#messages').prepend(html);
+
 			if ( message.type == 'USER' ){
 				var user_index = self.getUserIndex(message.user_id);
 				self.showNotification(self.name, self.users_details[user_index].username, message.text, 5000, function(){});
@@ -41,6 +42,13 @@
 				self.showNotification(self.name, 'OsomTalk', message.text, 3000, function(){});		
 			}
 		
+		};
+
+		self.appendMessages = function(messages) {
+			for(var i = messages.length -1; i >=0; i--) {
+				self.messages.unshift(messages[i]);
+			}
+			self.renderMessages(messages, true);
 		};
 
 		self.showNotification= function (title, user, text, time, onclick) {
@@ -154,11 +162,8 @@
 				string += '</div>';
 				
 				string += '</div>';
-				
-				$('#messages').prepend(string);
-			} else {
-				$('#messages').prepend(string);
 			}
+			return string;
 		}
 
 		self.renderUser = function (user) {
@@ -192,9 +197,18 @@
 		}
 		
 
-		self.renderMessages = function() {
-			for(var i = 0; i < self.messages.length; i++) {
-				self.renderMessage(self.messages[i]);
+		self.renderMessages = function(messages, tail) {
+			if(tail) {
+				for(var i = messages.length-1; i >=0; i--) {
+					var html = self.renderMessage(messages[i]);
+					$('#messages').append(html);
+				}
+				
+			} else {
+				for(var i = 0; i < messages.length; i++) {
+					var html = self.renderMessage(messages[i]);
+					$('#messages').prepend(html);
+				}
 			}
 		}
 
@@ -217,12 +231,17 @@
 			});
 		};
 		
-		self.getMessagesData = function(callback){
+		self.getMessagesData = function(last_id, callback){
+			var url = '';
+			if(last_id == null) {
+				url ='/rooms/get_messages/'+ self._id;
+			} else {
+				url = '/rooms/get_messages/'+ self._id + '/' + last_id;
+			}
 			$.ajax({
-				url: '/rooms/get_messages/'+ self._id,
-				success: function(data) {
-					self.messages = data;
-					callback();
+				url: url,
+				success: function(messages) {
+					callback(messages);
 				}
 			});
 		};

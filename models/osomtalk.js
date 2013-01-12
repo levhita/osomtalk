@@ -187,18 +187,27 @@
 			}
 		}
 
-		self.getMessages = function(room_id, callback) {
+		self.getMessages = function(room_id, last_id, callback) {
 			var data = [];
-			self.messages.find({room_id: room_id},
+			var options = {"limit": 20, 'sort': [['_id', 'desc']]};
+			var query = {};
+			
+			if(last_id == null) {
+				query = {room_id: room_id};
+			} else {
+				query = {_id: {$lt: self.ObjectID(last_id)}, room_id: room_id}
+			}
+			self.messages.find(query, options,
 				function(err, messages) {
 					messages.each(function(err, message) {
 						if(message !== null){
-							data.push(message)
+						data.unshift(message)
 						} else {
 							callback(data);
 						}
 					});
-				});
+				}
+			);
 		};
 
 		self.getUsersFromRoom = function(room_id, callback) {
