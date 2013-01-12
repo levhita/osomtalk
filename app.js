@@ -61,10 +61,10 @@ app.configure ( function(){
 	  		}),
 	  		secret: appConfig.cookie_secret
 	  	})
-	 );*/
+);*/
 
-	app.use(require('less-middleware')({ src: __dirname + '/public' }));
-	app.use(express.static(path.join(__dirname, 'public')));
+app.use(require('less-middleware')({ src: __dirname + '/public' }));
+app.use(express.static(path.join(__dirname, 'public')));
 });
 
 app.configure('development', function(){
@@ -74,6 +74,15 @@ app.configure('development', function(){
 
 app.get('/', function(req, res) {
 	res.render('index', {ANALYTICS: global.ANALYTICS});
+});
+
+app.get('/logout', function(req, res) {
+	if (req.session) {
+		req.session.auth = null;
+		res.clearCookie('auth');
+		req.session.destroy(function() {});
+	}
+	res.redirect('/');
 });
 
 app.get('/about', function(req, res) {
@@ -206,17 +215,17 @@ app.post('/rooms/create', function(req, res){
 	
 	var room_id = osomtalk.addRoom({name:req.body.name});
 	var welcomeMessage = 
-	   ['#Welcome to OsomTalk',
-		'OsomTalk isn\'t like any other chat out there, here you can.',
-		'',
-		'* Use MarkDown Syntax -> http://daringfireball.net/projects/markdown/syntax',
-		'* Have youtube videos inserted by just pasting the link-> http://youtu.be/vbrII7frHV0',
-		'* Even images (gifs included) are inserted without any fuzz -> http://i0.kym-cdn.com/photos/images/original/000/090/603/258witx.gif',
-		'',
-		'Have fun using with **OsomTalk!**',
-		'',
-		'PD: This Message was written directly in OsomTalk, isn\'t that OSOM.'
-	   ].join('\n');
+	['#Welcome to OsomTalk',
+	'OsomTalk isn\'t like any other chat out there, here you can.',
+	'',
+	'* Use MarkDown Syntax -> http://daringfireball.net/projects/markdown/syntax',
+	'* Have youtube videos inserted by just pasting the link-> http://youtu.be/vbrII7frHV0',
+	'* Even images (gifs included) are inserted without any fuzz -> http://i0.kym-cdn.com/photos/images/original/000/090/603/258witx.gif',
+	'',
+	'Have fun using with **OsomTalk!**',
+	'',
+	'PD: This Message was written directly in OsomTalk, isn\'t that OSOM.'
+	].join('\n');
 	
 	osomtalk.addMessageToRoom(room_id, {
 		text: welcomeMessage,
