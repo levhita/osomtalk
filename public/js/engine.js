@@ -182,7 +182,7 @@ function scrollToTop() {
 function selectTop() {
 	var past = window.selected_index;
 	for(var i=room.messages.length-1; i >= 0; i--) {
-		if(room.messages[i].user.type == "TWITTER" || room.messages[i].user.type == "ANONYMOUS") {
+		if(room.messages[i].type == "USER") {
 			$('#'+room.messages[i]._id).addClass('selected');
 			$('html, body').animate({scrollTop: $('#'+room.messages[i]._id).offset().top- 200}, 500);
 			window.selected_index = i;
@@ -201,7 +201,7 @@ function nextMessage() {
 	}
 	var past=window.selected_index;
 	for(var i = window.selected_index+1; i < room.messages.length; i++) {
-		if(room.messages[i].user.type == "TWITTER" || room.messages[i].user.type == "ANONYMOUS") {
+		if(room.messages[i].type == "USER") {
 			$('#'+room.messages[i]._id).addClass('selected');
 			$('html, body').animate({scrollTop: $('#'+room.messages[i]._id).offset().top- 150}, 200);
 			window.selected_index = i;
@@ -220,7 +220,7 @@ function previousMessage() {
 	}
 	var past=window.selected_index;
 	for(var i = window.selected_index-1; i >= 0; i--) {
-		if(room.messages[i].user.type == "TWITTER" || room.messages[i].user.type == "ANONYMOUS") {
+		if(room.messages[i].type == "USER") {
 			$('#'+room.messages[i]._id).addClass('selected');
 			$('html, body').animate({scrollTop: $('#'+room.messages[i]._id).offset().top- 150}, 200);
 			window.selected_index = i;
