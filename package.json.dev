@@ -8,14 +8,14 @@
   },
   "dependencies": {
     "express": "3.0.3",
-    "consolidate": "*",
-    "jqtpl": ">= 0.0.0",
+    "jqtpl": ">= 2.0.0",
     "less-middleware": "*",
-    "faye": "*",
+    "faye": ">= 0.8.0",
     "oauth": "~0.9.8",
     "redis": "~0.8.2",
     "url": "~0.7.9",
-    "connect-redis": "~1.4.5"
+    "connect-redis": "~1.4.5",
+    "mongodb": "~1.2.9"
   },
   "engines": {
     "node": "0.8.x"

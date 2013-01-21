@@ -4,9 +4,8 @@ var express = require('express')
 , http      = require('http')
 , path      = require('path')
 , faye      = require('faye')
-, jqtpl     = require("jqtpl")
-, cons      = require('consolidate')
 , fs 		= require('fs')
+// Toogle use of Redis
 //, RedisStore = require('connect-redis')(express)
 //, redis = require('redis')
 , OsomTalk  = require('./models/osomtalk.js').OsomTalk;
@@ -40,31 +39,35 @@ fs.readFile('analytics.html', 'utf8', function (err,data) {
 var app = express();
 app.configure ( function(){
 	app.set('port', process.env.PORT || 3000);
-	app.engine('html', cons.jqtpl);
-
-	app.set('view engine', 'html');
+	
+	/** Jqtpl **/
 	app.set('views', __dirname + '/views');
+	app.set('view engine', 'html');
+	app.set('layout', false);
+	app.engine('html', require('jqtpl').__express);
+
+
 	app.use(express.bodyParser());
 	
-	/* Use memory session */
+	/** Use memory session **/
 	app.use(express.cookieParser(appConfig.cookie_secret));
 	app.use(express.session());
 	
-	/* Toogle use of Redis
-	app.use(express.cookieParser());
+	/* Toogle use of Redis /
+	/app.use(express.cookieParser());
 	app.use(
-  		express.session({
-	  		store: new RedisStore({
-	  			host: appConfig.osomtalk_session.host,
+		express.session({
+			store: new RedisStore({
+				host: appConfig.osomtalk_session.host,
 				pass: appConfig.osomtalk_session.pass,
 				port: appConfig.osomtalk_session.port
-	  		}),
-	  		secret: appConfig.cookie_secret
-	  	})
-);*/
+			}),
+			secret: appConfig.cookie_secret
+		})
+		);*/
 
-app.use(require('less-middleware')({ src: __dirname + '/public' }));
-app.use(express.static(path.join(__dirname, 'public')));
+	app.use(require('less-middleware')({ src: __dirname + '/public' }));
+	app.use(express.static(path.join(__dirname, 'public')));
 });
 
 app.configure('development', function(){
