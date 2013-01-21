@@ -219,7 +219,9 @@
 						var room = new Room(room_data);
 
 						var search = []; 
+						var archived = [];
 						for(var i = 0; i < room.users.length; i++) {
+							archived[room.users[i].user_id] = room.users[i].archived;
 							search.push(self.ObjectID(room.users[i].user_id));
 						}
 			
@@ -231,6 +233,7 @@
 										username: user.username,
 										type: user.type,
 										user_id: user._id,
+										archived: archived[user._id]
 									}
 									data.push(aux);
 								} else {
@@ -401,7 +404,7 @@
 		/** Clean users after 2 Hours IDLE **/
 		self.cleanUsers = function() {
 			
-			var timestamp = utils.getTimestamp()- 7200;// 2Hrs
+			var timestamp = utils.getTimestamp()- appConfig.session_expire;// 2Hrs
 			
 			//console.log("Archiving Twitter Users");
 			self.users.update({last_ping: {$lt: timestamp}}, {$set:{archived: true}}, {w:0, multi:1});
@@ -414,7 +417,7 @@
 				rooms: {$lte: 0}
 			}, {w:0});
 			
-			setTimeout(function(){self.cleanUsers()}, 7200*1000);//Check Every 2 Hours
+			setTimeout(function(){self.cleanUsers()}, 1800 * 1000);//Check Every 30 minutes
 		}
 		
 		/** Removes Empty Anonymous Rooms after 24Hrs Empty **/

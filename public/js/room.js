@@ -215,7 +215,9 @@
 		self.renderUsers = function() {
 			$('#users').html('');
 			for(var i = 0; i < self.users_details.length; i++) {
-				self.renderUser(self.users_details[i]);
+				if (self.users_details[i].archived !== true) {
+					self.renderUser(self.users_details[i]);
+				}
 			}
 		}
 		
