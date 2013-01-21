@@ -5,10 +5,6 @@ var express = require('express')
 , path      = require('path')
 , faye      = require('faye')
 , fs 		= require('fs')
-/* Toogle use of Redis *
-, RedisStore = require('connect-redis')(express)
-, redis = require('redis')
-/**/
 , OsomTalk  = require('./models/osomtalk.js').OsomTalk;
 
 /** Configurations **/
@@ -19,6 +15,21 @@ global.appConfig 		= require('./app_config.js').AppConfig;
 global.crypto 			= require('crypto');
 global.OAuth 			= require('oauth').OAuth;
 global.MongoClient 		= require('mongodb').MongoClient;
+
+
+/* Toogle use of Redis */
+if (appConfig.use_redis) {
+	var RedisStore = require('connect-redis')(express), redis = require('redis');
+
+	global.redisclient = redis.createClient(appConfig.osomtalk_session.port, appConfig.osomtalk_session.host);
+	global.redisclient.on("error", function(err) {
+	  console.error("Error connecting to redis", err);
+	  process.exit(1);
+	});
+
+	global.redisclient.auth(appConfig.osomtalk_session.pass, function() {console.log("Connected!");});
+	global.redisStore 		= new RedisStore({client: global.redisclient});
+}
 
 /** Global OsomTalk Classes **/
 global.User 			= require('./public/js/user.js').User;
@@ -50,25 +61,25 @@ app.configure ( function(){
 
 	app.use(express.bodyParser());
 	
-	/** Use memory session */
-	app.use(express.cookieParser(appConfig.cookie_secret));
-	app.use(express.session());
-	/**/
-
-	/** Toogle use of Redis /
-	app.use(express.cookieParser());
-	app.use(
-		express.session({
-			store: new RedisStore({
-				host: appConfig.osomtalk_session.host,
-				pass: appConfig.osomtalk_session.pass,
-				port: appConfig.osomtalk_session.port
-			}),
-			secret: appConfig.cookie_secret,
-			cookie: {maxAge: appConfig.session_expire}
-		})
+	if(appConfig.use_redis) {
+		console.log("Using redis for session");
+		app.use(express.cookieParser());
+		app.use(
+			express.session({
+				store: global.redisStore,
+				secret: appConfig.cookie_secret,
+				cookie: {maxAge: appConfig.session_expire}
+			})
 		);
-	/**/
+	} else {
+		console.log("Using memory for session");
+		app.use(express.cookieParser(appConfig.cookie_secret));
+		app.use(express.session({cookie: {maxAge: appConfig.session_expire}}));
+	}
+	
+	app.use(express.cookieParser(appConfig.cookie_secret));
+	app.use(express.session({cookie: {maxAge: appConfig.session_expire}}));
+
 	app.use(require('less-middleware')({ src: __dirname + '/public' }));
 	app.use(express.static(path.join(__dirname, 'public')));
 });

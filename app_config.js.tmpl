@@ -1,15 +1,47 @@
 (function (global){
+	var config = 'development';
+	//var config = 'testing';
+	//var config = 'production';
+	
 	global.AppConfig = {
-		consumer_key: "your_consumer_key",
-		consumer_secret: "your_consumer_secret",
-		cookie_secret: "something very secret",
-		osomtalk_chat: "your_connection_string",
-		osomtalk_session: {
-			string: "redis://nodejitsu:l56k56kj57lk@nodejitsudb345344545.redis.irstack.com:5433",
-			host: "nodejitsudb345344545.redis.irstack.com",
-			pass: "nodejitsudb345344545.redis.irstack.com:l56k56kj57lk",
-			port: 5433
-		},
-		port: 3000
+		consumer_key: "",
+		consumer_secret: "",
+		cookie_secret: "",
+		session_expire: 7200
+	};
+
+	if (config=='development') {
+		global.AppConfig.osomtalk_chat = "mongodb://localhost/osomtalk";
+		global.AppConfig.use_redis = false;
+		global.AppConfig.port = 3000;
+				
+		global.AppConfig.osomtalk_session = {
+			string: "redis://nodejitsu:nodejitsudb76500.redis.irstack.com:f327cfe980c5fbebb4@nodejitsudb76500.redis.irstack.com:6389",
+			host: "nodejitsudb76500.redis.irstack.com",
+			pass: "nodejitsudb76500.redis.irstack.com:f327cfe980c5fbebb4",
+			port: 6389
+		};
+	} else if (config=='production') {
+		global.AppConfig.osomtalk_chat= "mongodb://user:50fd8f00001@host.mongohq.com:108/osomtalk";
+		global.AppConfig.use_redis= false;
+		global.AppConfig.port = 80;
+				
+		global.AppConfig.osomtalk_session = {
+			string: "redis://nodejitsu:nodejitsudb76500.redis.irstack.com:f327cfe980c5fbebb4@nodejitsudb76500.redis.irstack.com:6389",
+			host: "nodejitsudb76500.redis.irstack.com",
+			pass: "nodejitsudb76500.redis.irstack.com:f327cfe980c5fbebb4",
+			port: 6389
+		};
+	}  else if (config=='testing') {
+		global.AppConfig.osomtalk_chat= "mongodb://user:50fd8f00001@host.mongohq.com:108/osomtalk";
+		global.AppConfig.use_redis = true;
+		global.AppConfig.port = 3000;
+		
+		global.AppConfig.osomtalk_session = {
+			string: "redis://nodejitsu:nodejitsudb76500.redis.irstack.com:f327cfe980c5fbebb4@nodejitsudb76500.redis.irstack.com:6389",
+			host: "nodejitsudb76500.redis.irstack.com",
+			pass: "nodejitsudb76500.redis.irstack.com:f327cfe980c5fbebb4",
+			port: 6389
+		};
 	}
 }(typeof window  === 'undefined' ? exports : window));
