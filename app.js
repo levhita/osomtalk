@@ -5,7 +5,8 @@ var express = require('express')
 , path      = require('path')
 , faye      = require('faye')
 , fs 		= require('fs')
-, OsomTalk  = require('./models/osomtalk.js').OsomTalk;
+, OsomTalk  = require('./models/osomtalk.js').OsomTalk
+, MemStore = express.session.MemoryStore;
 
 /** Configurations **/
 global.frontEndConfig 	= require('./public/js/frontend_config.js').FrontEndConfig;
@@ -71,13 +72,19 @@ app.configure ( function(){
 			express.session({
 				store: global.redisStore,
 				secret: appConfig.cookie_secret,
-				cookie: {maxAge: appConfig.session_expire}
+				cookie: {maxAge: appConfig.session_expire * 1000}
 			})
 		);
 	} else {
 		console.log("Using Memory for Session");
+		
 		app.use(express.cookieParser(appConfig.cookie_secret));
-		app.use(express.session({cookie: {maxAge: appConfig.session_expire}}));
+		app.use(
+			express.session({
+				cookie: {maxAge: appConfig.session_expire * 1000},
+				store: MemStore({reapInterval: appConfig.session_expire * 1000})
+			})
+		);
 	}
 });
 
