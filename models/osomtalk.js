@@ -26,6 +26,7 @@
 					db.createCollection('messages', function(err, collection){
 						self.messages = collection;
 						collection.ensureIndex("room_id",function(){});
+						collection.ensureIndex("microtimestamp",function(){});
 					});
 
 					self.ObjectID = self.db.bson_serializer.ObjectID;
@@ -49,6 +50,7 @@
 				if(!err && room_data != null) {
 					var message = {
 						_id:        self.ObjectID(),
+						microtimestamp:  +new Date,
 						room_id:    room_id,
 						text:       data.text,
 						user_id:    data.user_id,
@@ -187,15 +189,16 @@
 			}
 		}
 
-		self.getMessages = function(room_id, last_id, callback) {
+		self.getMessages = function(room_id, last_microtimestamp, callback) {
 			var data = [];
-			var options = {"limit": 20, 'sort': [['_id', 'desc']]};
+			var options = {"limit": 20, 'sort': [['microtimestamp', 'desc']]};
 			var query = {};
 			
-			if(last_id == null) {
+			if(last_microtimestamp == null) {
 				query = {room_id: room_id};
 			} else {
-				query = {_id: {$lt: self.ObjectID(last_id)}, room_id: room_id}
+				console.log(last_microtimestamp);
+				query = {microtimestamp: {$lt: last_microtimestamp}, room_id: room_id}
 			}
 			self.messages.find(query, options,
 				function(err, messages) {

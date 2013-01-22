@@ -12,15 +12,10 @@
 
 	if (config=='development') {
 		global.AppConfig.osomtalk_chat = "mongodb://localhost/osomtalk";
-		global.AppConfig.use_redis = false;
+		global.AppConfig.use_redis = true;
 		global.AppConfig.port = 3000;
 				
-		global.AppConfig.osomtalk_session = {
-			string: "redis://nodejitsu:nodejitsudb76500.redis.irstack.com:f327cfe980c5fbebb4@nodejitsudb76500.redis.irstack.com:6389",
-			host: "nodejitsudb76500.redis.irstack.com",
-			pass: "nodejitsudb76500.redis.irstack.com:f327cfe980c5fbebb4",
-			port: 6389
-		};
+		global.AppConfig.osomtalk_session = {host: "localhost",	pass: "", port: 6379};
 	} else if (config=='production') {
 		global.AppConfig.osomtalk_chat= "mongodb://user:50fd8f00001@host.mongohq.com:108/osomtalk";
 		global.AppConfig.use_redis= false;

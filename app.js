@@ -23,7 +23,7 @@ if (appConfig.use_redis) {
 
 	global.redisclient = redis.createClient(appConfig.osomtalk_session.port, appConfig.osomtalk_session.host);
 	global.redisclient.on("error", function(err) {
-	  console.error("Error connecting to redis", err);
+	  console.error("Error connecting to redis ", err);
 	  process.exit(1);
 	});
 
@@ -61,8 +61,11 @@ app.configure ( function(){
 
 	app.use(express.bodyParser());
 	
+	app.use(require('less-middleware')({ src: __dirname + '/public' }));
+	app.use(express.static(path.join(__dirname, 'public')));
+
 	if(appConfig.use_redis) {
-		console.log("Using redis for session");
+		console.log("Using Redis for Session");
 		app.use(express.cookieParser());
 		app.use(
 			express.session({
@@ -72,16 +75,10 @@ app.configure ( function(){
 			})
 		);
 	} else {
-		console.log("Using memory for session");
+		console.log("Using Memory for Session");
 		app.use(express.cookieParser(appConfig.cookie_secret));
 		app.use(express.session({cookie: {maxAge: appConfig.session_expire}}));
 	}
-	
-	app.use(express.cookieParser(appConfig.cookie_secret));
-	app.use(express.session({cookie: {maxAge: appConfig.session_expire}}));
-
-	app.use(require('less-middleware')({ src: __dirname + '/public' }));
-	app.use(express.static(path.join(__dirname, 'public')));
 });
 
 app.configure('development', function(){
@@ -154,11 +151,11 @@ app.get('/rooms/get/:room_id', function(req, res){
 });
 
 /** Get all the room data **/
-app.get('/rooms/get_messages/:room_id/:last_id', function(req, res){
+app.get('/rooms/get_messages/:room_id/:last_microtimestamp', function(req, res){
 	var room_id = req.params.room_id;
-	var last_id = req.params.last_id;
+	var last_microtimestamp = req.params.last_microtimestamp;
 	
-	osomtalk.getMessages(room_id, last_id, function (messages) {
+	osomtalk.getMessages(room_id, last_microtimestamp, function (messages) {
 		if ( typeof messages !== "undefined" ) {
 			res.send(messages);
 		}

@@ -394,7 +394,7 @@ function updateUtility() {
 
 function loadMore() {
 	last_message = room.messages[0];
-	room.getMessagesData(last_message._id, function(messages){
+	room.getMessagesData(last_message.microtimestamp, function(messages){
 		room.appendMessages(messages);
 	});
 }
