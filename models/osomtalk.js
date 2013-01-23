@@ -197,8 +197,7 @@
 			if(last_microtimestamp == null) {
 				query = {room_id: room_id};
 			} else {
-				console.log(last_microtimestamp);
-				query = {microtimestamp: {$lt: last_microtimestamp}, room_id: room_id}
+				query = {microtimestamp: {$lt: +last_microtimestamp}, room_id: room_id}
 			}
 			self.messages.find(query, options,
 				function(err, messages) {
