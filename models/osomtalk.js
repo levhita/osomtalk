@@ -493,11 +493,11 @@
 			setTimeout(function(){self.cleanRooms()}, 3600*1000);// Check Every Hour
 		}
 		
-		/** Time out users after 2 minutes **/
+		/** Time out users after 1 minutes **/
 		self.timeOutUsers = function() {
 			
 			//console.log("TimingOutUsers");
-			var timestamp = utils.getTimestamp() - 120; // 2 Minutes
+			var timestamp = utils.getTimestamp() - 60; // 1 Minutes
 			
 			self.rooms.find().each(
 				function(err, room_data) {

@@ -41,7 +41,6 @@
 			} else if(message.type == 'SYSTEM') {
 				self.showNotification(self.name, 'OsomTalk', message.text, 3000, function(){});		
 			}
-		
 		};
 
 		self.appendMessages = function(messages) {
@@ -134,12 +133,12 @@
 			var reply_button = ' <a class="reply_button btn btn-mini btn-inverse" onclick="openReplyMessage(\'' + message._id + '\');"><i class="icon-reply icon-white"></i></a>';
 			if(message.type=='USER') {
 				if( user.type == 'ANONYMOUS') {
-					string = '<div class="message" id="'+message._id+'"><div class="info"><span class="user">' + escapedName + '</span> <span class="muted">(Anonymous)</span><div class="time">' + date + '</div></div><div class="utility">' + toggle_preview_button + delete_button + reply_button + '</div><div class="text">' + utils.markdown(message.text) +'</div>';
+					string = '<div class="message" id="'+message._id+'"><div class="info"><span class="user">' + escapedName + '</span> <span class="muted">(anonymous)</span><div class="time">' + date + '</div></div><div class="utility">' + toggle_preview_button + delete_button + reply_button + '</div><div class="text">' + utils.markdown(message.text) +'</div>';
 				} else if( user.type=='TWITTER') {
-					string = '<div class="message" id="'+message._id+'"><div class="info"><span class="user">@' + escapedName + '</span> <a class="muted" target="_BLANK" href="http://twitter.com/'+user.username+'">(twitter)</a><div class="time">' + date + '</div></div><div class="utility">' + toggle_preview_button + delete_button + reply_button + '</div><div class="text">' + utils.markdown(message.text) +"</div>";
+					string = '<div class="message" id="'+message._id+'"><div class="info"><span class="user">@' + escapedName + '</span> <span class="muted">(<a class="muted" target="_BLANK" href="http://twitter.com/'+user.username+'">twitter</a>)</span><div class="time">' + date + '</div></div><div class="utility">' + toggle_preview_button + delete_button + reply_button + '</div><div class="text">' + utils.markdown(message.text) +"</div>";
 				}
 			} else if(message.type=='OFFICIAL') {
-				string = '<div class="message" id="'+message._id+'"><div class="info"><span class="user">OsomTalk</span> <span class="muted">(Official)</span><div class="time">' + date + '</div></div><div class="utility">' + toggle_preview_button + '</div><div class="text">' + utils.markdown(message.text) +'</div>';
+				string = '<div class="message" id="'+message._id+'"><div class="info"><span class="user">OsomTalk</span> <span class="muted">(official)</span><div class="time">' + date + '</div></div><div class="utility">' + toggle_preview_button + '</div><div class="text">' + utils.markdown(message.text) +'</div>';
 			} else if(message.type=='SYSTEM') {
 				var escapedText = message.text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 				string = '<div class="message system" id="'+message._id+'"><span class="time">' + date + ':</span> ' + escapedText +'</div>';
@@ -170,9 +169,9 @@
 			var escapedName = user.username.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 			var type = "";
 			if(user.type=='TWITTER') {
-				type = ' <a class="muted" target="_BLANK" href="http://twitter.com/' + user.username + '">(@' + user.username + ')</a>';
+				type = ' <span class="muted">(<a class="muted" target="_BLANK" href="http://twitter.com/' + user.username + '">twitter</a>)</span>';
 			} else {
-				type = ' <span class="muted">(Anonymous)</span>';
+				type = ' <span class="muted">(anonymous)</span>';
 			}
 			$('#users').prepend('<div class="user" id="user_' + user.user_id + '">' + escapedName + type + '</div>');
 		}

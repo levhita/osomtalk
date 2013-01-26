@@ -242,7 +242,7 @@ function pingBack() {
 	$.ajax({
 		url: '/user/ping/'+ view_config.room_id,
 		success: function(data) {
-			setTimeout(function() { pingBack()}, 60000);
+			setTimeout(function() { pingBack()}, 30000);
 		}
 	}); 
 }
