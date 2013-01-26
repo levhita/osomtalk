@@ -192,7 +192,7 @@ app.get('/rooms/get_users/:room_id', function(req, res){
 });
 
 
-/** Checks for username and take it in case is valid. **/
+/** Ping to a room**/
 app.get('/user/ping/:room_id', function(req, res){
 	var room_id = req.params.room_id;
 	if(req.session.user!==undefined) {

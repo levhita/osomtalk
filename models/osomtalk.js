@@ -75,10 +75,11 @@
 			self.rooms.findOne({_id: self.ObjectID(room_id)}, function(err, room_data) {
 				if(!err && room_data != null) {
 					var room = new Room(room_data);
+					
 					if ( !room.userExists(user_id) ) {
 						osomtalk.users.findOne({_id: self.ObjectID(user_id)}, function(err, user_data){
 							if(!err && user_data != null) {
-								
+							
 								/** Add user to the users array in the room **/
 								self.rooms.update({_id: self.ObjectID(room_id)},
 									{$push:{users: {
@@ -106,7 +107,38 @@
 								callback(false);
 							}
 						});
-					};
+					} else if(room.userIsArchived(user_id)) {
+						osomtalk.users.findOne({_id: self.ObjectID(user_id)}, function(err, user_data){
+							if(!err && user_data != null) {
+							
+								/** Set the user to not being Archived **/
+								self.rooms.update(
+									{_id: self.ObjectID(room_id), 'users.user_id': user_id },
+									{$set: {'users.$.archived':false}},
+									{w:0}
+								);
+								
+								/** Increment user rooms by one **/
+								self.users.update({_id: self.ObjectID(user_id)}, {$inc: {rooms: 1}}, {w:0});
+
+								var join_message = 'User "';
+								if (user_data.type == 'TWITTER') {
+									join_message += '@' + user_data.username +'" (Twitter)';
+								} else {
+									join_message += user_data.username +'" (Anonymous)';
+								}
+								join_message +=' entered the room.';
+
+								osomtalk.addSystemMessageToRoom(room_id, join_message); 
+								
+								var data = {action: 'update_users'};
+								client.publish('/server_actions_' + room_id, data);
+							} else{
+								callback(false);
+							}
+						});
+					}
+
 				} else {
 					callback(false);
 				}
@@ -388,9 +420,11 @@
 			if (username=='') {
 				return {error: 'EMPTY'};
 			}
+			
 			/** Check For Impersonator **/
-			if (username.toLowerCase()=="osomtalk bot" || username.toLowerCase()=="osomtalk" || username.toLowerCase()=="osom talk" ) {
-				return {error: 'CHEATER'};
+			var invalid=['osomtalk bot', 'osomtalk', 'osom talk', 'admin', 'levhita', 'administrator', 'osom', 'root'];
+			for (var i=0; i< invalid.length; i++) {
+				if (username.toLowerCase()==invalid[i])	return {error: 'CHEATER'};
 			}
 			
 			/**Check For Too Long**/
@@ -399,9 +433,6 @@
 			}
 			return true;
 		}
-
-				
-
 
 		/** Clean users after 2 Hours IDLE **/
 		self.cleanUsers = function() {
@@ -462,7 +493,7 @@
 			setTimeout(function(){self.cleanRooms()}, 3600*1000);// Check Every Hour
 		}
 		
-		/** Removes Empty Anonymous Rooms after 24Hrs Empty **/
+		/** Time out users after 2 minutes **/
 		self.timeOutUsers = function() {
 			
 			//console.log("TimingOutUsers");
@@ -473,10 +504,13 @@
           			if(!err && room_data != null) {
           				for(var i = 0; i < room_data.users.length; i++) {
 							var user = room_data.users[i];
-							if (user.last_ping < timestamp && user.archived == false) {
+							if ( (user.last_ping < timestamp) && user.archived == false) {
 								/** Updates **/
 								self.rooms.update({_id: room_data._id, 'users.user_id' : user.user_id },
 									{$set: {'users.$.archived': true}}, {w:0});
+								
+								/** Decrement user rooms by one **/
+								self.users.update({_id: self.ObjectID(user.user_id)}, {$inc: {rooms: -1}}, {w:0});
 								
 								/** Send the message **/
 								self.getUser(user.user_id, function (user) {

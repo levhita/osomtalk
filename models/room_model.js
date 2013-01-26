@@ -32,6 +32,15 @@
 			return false;
 		}
 
+		self.userIsArchived = function(user_id) {
+			for(var i = 0; i < self.users.length; i++) {
+				if( self.users[i].user_id == user_id) {
+					return self.users[i].archived;
+				}
+			}
+			return undefined;
+		}
+
 		self.getUsersIds = function () {
 			var ids = []
 			for(i in self.users) {
