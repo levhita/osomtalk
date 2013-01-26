@@ -450,7 +450,7 @@
 				rooms: {$lte: 0}
 			}, {w:0});
 			
-			setTimeout(function(){self.cleanUsers()}, 1800 * 1000);//Check Every 30 minutes
+			setTimeout(function(){self.cleanUsers()}, 27*60*1000);//Check Every 27 minutes
 		}
 		
 		/** Removes Empty Anonymous Rooms after 24Hrs Empty **/
@@ -490,8 +490,33 @@
 					}
 				});
 			
-			setTimeout(function(){self.cleanRooms()}, 3600*1000);// Check Every Hour
+			setTimeout(function(){self.cleanRooms()}, 60*60*1000);// Check Every Hour
 		}
+
+
+		/** Removes older Messages  in  Public Rooms**/
+		self.cleanMessages = function() {
+			//console.log("Cleaning Messages");
+			self.rooms.find({type: 'PUBLIC'}).toArray(
+				function(err, rooms) {
+					if(!err) {
+						for(var i = 0; i < rooms.length; i++) {
+							var room_id = rooms[i]._id.toHexString();
+							self.messages.find({room_id: room_id}).limit(1).skip(200).sort({ microtimestamp: -1 }).toArray(
+								function(err, results) {
+									if(!err && results.length ==1) {
+										var oldest = results[0];
+										self.messages.remove({room_id: room_id, microtimestamp : {$lte : oldest.microtimestamp }}, {w:0});
+									}
+								});
+						}
+					}
+				});
+			
+			setTimeout(function(){self.cleanMessages()}, 43*60*1000);// Check 43 minutes
+		}
+
+
 		
 		/** Time out users after 1 minutes **/
 		self.timeOutUsers = function() {
@@ -533,7 +558,7 @@
 					}
         		}
         	);
-			setTimeout(function(){self.timeOutUsers()}, 120*1000);// Check Every 2 Minutes
+			setTimeout(function(){self.timeOutUsers()}, 2*60*1000);// Check Every 2 Minutes
 		}
 
 		/** Starts the cleaning iterative process **/
@@ -541,8 +566,9 @@
 		setTimeout( function(){
 			self.cleanUsers();
 			self.cleanRooms();
+			self.cleanMessages();
 			self.timeOutUsers();
-		}, 60 * 1000);// 60 Seconds
+		}, 30*1000);// 30 Seconds
 
 		return self;
 	};
