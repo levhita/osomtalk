@@ -87,7 +87,7 @@
 							if(!err && user_data != null) {
 							
 								/** Add user to the users array in the room **/
-								self.rooms.update({_id: self.ObjectID(room_id)},
+								self.rooms.update({_id: self.ObjectID(room._id.toHexString())},
 									{$push:{users: {
 										user_id: user_id,
 										last_ping: utils.getTimestamp(),
@@ -105,21 +105,27 @@
 								}
 								join_message +=' entered the room.';
 
-								osomtalk.addSystemMessageToRoom(room_id, join_message); 
+								osomtalk.addSystemMessageToRoom(room._id.toHexString(), join_message); 
 								
 								var data = {action: 'update_users'};
-								client.publish('/server_actions_' + room_id, data);
+								client.publish('/server_actions_' + room._id.toHexString(), data);
 							} else{
 								callback(false);
 							}
 						});
 					} else if(room.userIsArchived(user_id)) {
+
 						osomtalk.users.findOne({_id: self.ObjectID(user_id)}, function(err, user_data){
 							if(!err && user_data != null) {
-							
+								var query = {};
+								if ( room_id.length == 10) {
+									query = {short_id: room_id,  'users.user_id': user_id };
+								} else {
+									query = {_id: osomtalk.ObjectID(room_id), 'users.user_id': user_id };
+								}
 								/** Set the user to not being Archived **/
 								self.rooms.update(
-									{_id: self.ObjectID(room_id), 'users.user_id': user_id },
+									query,
 									{$set: {'users.$.archived':false}},
 									{w:0}
 								);
@@ -135,10 +141,10 @@
 								}
 								join_message +=' entered the room.';
 
-								osomtalk.addSystemMessageToRoom(room_id, join_message); 
+								osomtalk.addSystemMessageToRoom(room._id.toHexString(), join_message); 
 								
 								var data = {action: 'update_users'};
-								client.publish('/server_actions_' + room_id, data);
+								client.publish('/server_actions_' + room._id.toHexString(), data);
 							} else{
 								callback(false);
 							}
