@@ -71,8 +71,7 @@ app.configure ( function(){
 		app.use(
 			express.session({
 				store: global.redisStore,
-				secret: appConfig.cookie_secret,
-				cookie: {maxAge: appConfig.session_expire * 1000}
+				secret: appConfig.cookie_secret
 			})
 		);
 	} else {
