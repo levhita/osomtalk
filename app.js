@@ -112,7 +112,7 @@ app.get('/about', function(req, res) {
 app.get('/room/:room_id', function(req, res) {
 	var room_id = req.params.room_id;
 	
-	if(room_id.length != 24) {
+	if(room_id.length != 24 && room_id.length != 10) {
 		res.redirect('/');
 	}
 	

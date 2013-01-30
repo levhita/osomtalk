@@ -6,6 +6,7 @@
 
 		self._id			= config._id;
 		self.name		= config.name || '';
+		self.short_id	= config.short_id || '';
 		self.type 		= config.type || 'PUBLIC';
 		self.admins		= config.admins || [];
 		self.users  	= config.users || [];
@@ -15,6 +16,7 @@
 		self.getData = function () {
 			return {
 				_id: 		self._id,
+				short_id: 	self.short_id,
 				name: 		self.name,
 				type: 		self.type,
 				admins:  	self.admins,

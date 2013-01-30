@@ -72,7 +72,13 @@
 		};
 
 		self.addUserToRoom = function(user_id, room_id, callback){
-			self.rooms.findOne({_id: self.ObjectID(room_id)}, function(err, room_data) {
+			var query = {};
+			if ( room_id.length == 10) {
+				query = {short_id: room_id};
+			} else {
+				query = {_id: osomtalk.ObjectID(room_id)};
+			}
+			self.rooms.findOne(query, function(err, room_data) {
 				if(!err && room_data != null) {
 					var room = new Room(room_data);
 					
@@ -155,6 +161,17 @@
 			return room._id.toHexString();
 		}
 
+		self.searchEmptyId = function(room_id) {
+			var short_id = utils.makeId(10);
+			self.rooms.findOne({short_id: short_id}, function(err, results){
+				if (results==null) {
+					self.rooms.update({_id: room_id}, {$set: {short_id: short_id}}, {w:0});
+				} else {
+					self.searchEmptyId(room_id);
+				}
+			});
+		}
+
 		self.deleteMessage = function(room_id, message_id) {
 			self.messages.remove({_id: self.ObjectID(message_id)},{w:1}, function(err, result) {
 				if(!err) {
@@ -191,10 +208,16 @@
 		}
 
 		self.getRoom = function(room_id, callback) {
-			if(typeof room_id !='string' || room_id.length != 24) {
+			if(typeof room_id !='string' || ( room_id.length != 24 && room_id.length != 10) ) {
 				callback(false);
 			} else {
-				osomtalk.rooms.findOne({_id: osomtalk.ObjectID(room_id)},
+				var query = {};
+				if ( room_id.length == 10) {
+					query = {short_id: room_id};
+				} else {
+					query = {_id: osomtalk.ObjectID(room_id)};
+				}
+				osomtalk.rooms.findOne(query,
 					function(err, results) {
 						if(!err && results != null) {
 							var room = new Room(results);
