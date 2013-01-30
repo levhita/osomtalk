@@ -157,6 +157,7 @@
 				name:room.name,
 				type:'PUBLIC'
 			});
+			self.searchEmptyId(room._id);
 			self.rooms.insert(room.getData(), {w:1}, function(err, results){});
 			return room._id.toHexString();
 		}
@@ -462,16 +463,17 @@
 			
 			var timestamp = utils.getTimestamp()- appConfig.session_expire;// 2Hrs
 			
-			//console.log("Archiving Twitter Users");
+			//console.log("Archiving Users");
 			self.users.update({last_ping: {$lt: timestamp}}, {$set:{archived: true}}, {w:0, multi:1});
 			
 			//console.log("Deleting Anonymous Users without any room");
-			self.users.remove({
+			// rooms quantity now means something else :/
+			/*self.users.remove({
 				last_ping: {$lt: timestamp},
 				archived: true,
 				type: 'ANONYMOUS',
 				rooms: {$lte: 0}
-			}, {w:0});
+			}, {w:0});*/
 			
 			setTimeout(function(){self.cleanUsers()}, 27*60*1000);//Check Every 27 minutes
 		}
