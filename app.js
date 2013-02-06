@@ -118,12 +118,14 @@ app.get('/room/:room_id', function(req, res) {
 	
 	osomtalk.getRoom(room_id, function (room) {
 		if ( room !== false ) {
-			data = {
+			var ua = req.headers['user-agent'];
+			
+			var data = {
 				user: false,
 				room: room,
-				ANALYTICS: global.ANALYTICS
+				ANALYTICS: global.ANALYTICS,
+				is_mobile: utils.isMobile(ua)
 			};
-			
 			//In case of logged in user, add it to the template
 			if (req.session.user !== undefined) {
 				osomtalk.verifyPermission(req.session.user._id,	req.session.user.token, null,

@@ -13,20 +13,17 @@
 	<script type="text/javascript" src="/js/jquery.oembed.js"></script>
 	
 	{{if user == false }}
-		<script type="text/javascript" src="/js/room_logged_out.js"></script>
+	<script type="text/javascript" src="/js/room_logged_out.js"></script>
 	{{else}}
-		<script>
-			var view_config = {
-				room_id: '${room._id}',
-				short_id: '${room.short_id}',
-				token: '${user.token}',
-				user_id: '${user._id}',
-				is_mobile: false
-			}
-			if( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) ) {
- 				view_config.is_mobile = true;
-			}
-		</script>
+	<script>
+		var view_config = {
+			room_id: '${room._id}',
+			short_id: '${room.short_id}',
+			token: '${user.token}',
+			user_id: '${user._id}',
+			is_mobile: ${is_mobile}
+		}
+	</script>
 	{{/if}}
 	
 
@@ -52,14 +49,14 @@
 							<li><a href="/">Home</a></li>
 							<li><a href="/about">About</a></li>
 							{{if user !== false }}
-								<li><a href="/logout">Logout</a></li>
+							<li><a href="/logout">Logout</a></li>
 							{{/if}}
 						</ul>
 						{{if user !== false }}
-							<form class="navbar-form pull-right outlined">
-								<span class="share_label outlined">Share this link to invite your friends:</span>
-								<input type="text" name="share_text" value="${frontEndConfig.url}/room/${room.short_id}"onclick="this.select();"/>
-							</form>
+						<form class="navbar-form pull-right outlined">
+							<span class="share_label outlined">Share this link to invite your friends:</span>
+							<input type="text" name="share_text" value="${frontEndConfig.url}/room/${room.short_id}"onclick="this.select();"/>
+						</form>
 						{{/if}}
 					</div><!--/.nav-collapse -->
 				</div>
@@ -101,64 +98,88 @@
 						<input type="button" href="#" onclick="sendMessageBody();" class="btn btn-primary btn-block" value="Send Message" />
 					</form>
 				</div>
+				{{if is_mobile == true }}
 				<div class="accordion" id="accordion2">
-				  <div class="accordion-group">
-				    <div class="accordion-heading">
-				      <a class="accordion-toggle btn-inverse" data-toggle="collapse" data-parent="#accordion2" href="#collapseOne">
-				        Help
-				      </a>
-				    </div>
-				    <div id="collapseOne" class="accordion-body collapse no-transition">
-				      <div class="accordion-inner">
-				        <li><small><code>CTRL+ENTER</code> to send your message.</small></li>
-						<li><small>Try some more <a href="#shortcutsModal" role="button" data-toggle="modal">shortcuts</a> to chat like a boss.</small></li>
-						<li><small>Uses <a href="#markdownModal" role="button" data-toggle="modal">Markdown's Syntax</a>.</small></li>
-						<li><small>Want to share an image from your computer?, try <a target="_blank" href="http://imgur.com">imgur.com</a>.</small></li>
-				      </div>
-				    </div>
-				  </div>
-				  
-				  <div class="accordion-group">
-				    <div class="accordion-heading">
-				      <a class="accordion-toggle  btn-inverse" data-toggle="collapse" data-parent="#accordion2" href="#collapseTwo">
-				        Config
-				      </a>
-				    </div>
-				    <div id="collapseTwo" class="accordion-body collapse no-transition">
-				      <div class="accordion-inner">
-				        <div class="group">
-							<label>Notifications:</label>
-							<div id="notifications_button" class="btn-group" data-toggle="buttons-radio">						
-		  						<button type="button" class="btn btn-small btn-success" value="1">On</button>
-		  						<button type="button" class="btn btn-small btn-inverse"value="0">Off</button>
+					<div class="accordion-group">
+						<div class="accordion-heading">
+							<a class="accordion-toggle btn-inverse" data-toggle="collapse" data-parent="#accordion2" href="#collapseOne">
+								Help
+							</a>
+						</div>
+						<div id="collapseOne" class="accordion-body collapse no-transition">
+							<div class="accordion-inner">
+								<li><small><code>CTRL+ENTER</code> to send your message.</small></li>
+								<li><small>Try some more <a href="#shortcutsModal" role="button" data-toggle="modal">shortcuts</a> to chat like a boss.</small></li>
+								<li><small>Uses <a href="#markdownModal" role="button" data-toggle="modal">Markdown's Syntax</a>.</small></li>
+								<li><small>Want to share an image from your computer?, try <a target="_blank" href="http://imgur.com">imgur.com</a>.</small></li>
 							</div>
 						</div>
-						<div class="group">
-							<label>Media:</label>
-							<div id="previews_button" class="btn-group" data-toggle="buttons-radio">
-								<button type="button" class="btn btn-small btn-success" value="1">On</button>
-		  						<button type="button" class="btn btn-small btn-inverse" value="0">Off</button>
-							</div>
-						</div>
-				      </div>
-				    </div>
-				  </div>
+					</div>
 
-				  <div class="accordion-group">
-				    <div class="accordion-heading">
-				      <a class="accordion-toggle btn-inverse" data-toggle="collapse" data-parent="#accordion2" href="#collapsetThree">
-				        Connected Users
-				      </a>
-				    </div>
-				    <div id="collapsetThree" class="accordion-body collapse no-transition">
-				      <div class="accordion-inner">
-				        <div id="users"></div>
-				      </div>
-				    </div>
-				  </div>
+					<div class="accordion-group">
+						<div class="accordion-heading">
+							<a class="accordion-toggle  btn-inverse" data-toggle="collapse" data-parent="#accordion2" href="#collapseTwo">
+								Config
+							</a>
+						</div>
+						<div id="collapseTwo" class="accordion-body collapse no-transition">
+							<div class="accordion-inner">
+								<div class="group">
+									<label>Notifications:</label>
+									<div id="notifications_button" class="btn-group" data-toggle="buttons-radio">						
+										<button type="button" class="btn btn-small btn-success" value="1">On</button>
+										<button type="button" class="btn btn-small btn-inverse"value="0">Off</button>
+									</div>
+								</div>
+								<div class="group">
+									<label>Media:</label>
+									<div id="previews_button" class="btn-group" data-toggle="buttons-radio">
+										<button type="button" class="btn btn-small btn-success" value="1">On</button>
+										<button type="button" class="btn btn-small btn-inverse" value="0">Off</button>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="accordion-group">
+						<div class="accordion-heading">
+							<a class="accordion-toggle btn-inverse" data-toggle="collapse" data-parent="#accordion2" href="#collapsetThree">
+								Connected Users
+							</a>
+						</div>
+						<div id="collapsetThree" class="accordion-body collapse no-transition">
+							<div class="accordion-inner">
+								<div id="users"></div>
+							</div>
+						</div>
+					</div>
 				</div>
-			</div> 
-
+				{{else}}
+				<ul>
+					<li><small><code>CTRL+ENTER</code> to send your message.</small></li>
+					<li><small>Try some more <a href="#shortcutsModal" role="button" data-toggle="modal">shortcuts</a> to chat like a boss.</small></li>
+					<li><small>Uses <a href="#markdownModal" role="button" data-toggle="modal">Markdown's Syntax</a>.</small></li>
+					<li><small>Want to share an image from your computer?, try <a target="_blank" href="http://imgur.com">imgur.com</a>.</small></li>
+				</ul>
+				<div class="group">
+					<label>Notifications:</label>
+					<div id="notifications_button" class="btn-group" data-toggle="buttons-radio">						
+						<button type="button" class="btn btn-small btn-success" value="1">On</button>
+						<button type="button" class="btn btn-small btn-inverse"value="0">Off</button>
+					</div>
+				</div>
+				<div class="group">
+					<label>Media:</label>
+					<div id="previews_button" class="btn-group" data-toggle="buttons-radio">
+						<button type="button" class="btn btn-small btn-success" value="1">On</button>
+						<button type="button" class="btn btn-small btn-inverse" value="0">Off</button>
+					</div>
+				</div>
+				<h3>Connected Users</h3>
+				<div id="users"></div>
+				{{/if}}
+			</div>
 			<div class="span8 messages_container">
 				<h3  class="dawrfed outlined" >Messages:</h3>
 				<div id="messages"></div>
@@ -208,81 +229,81 @@
 			<p>Here you can see an example of the supported Markdown Syntax so you can start playing with it.</p>
 			
 			<pre>
-# You can Put a big header,
-## a medium header
-### or a small header
+				# You can Put a big header,
+				## a medium header
+				### or a small header
 
-This is a new Paragraph
-Line jumps does nothing unless you put two of them.
+				This is a new Paragraph
+				Line jumps does nothing unless you put two of them.
 
-Like this one that creates a second paragraph, also you can
-use 1 and 2 asterisks to create **Bold** and *Italics* text.
+				Like this one that creates a second paragraph, also you can
+				use 1 and 2 asterisks to create **Bold** and *Italics* text.
 
-* You can create list.
-* Like this one.
+				* You can create list.
+				* Like this one.
 
-> Quote your favorite artists or maybe a past conversation by
-> just by using the '>'' character at the start of the line.</pre>
-			<p>Remember you can press <code>ALT+P</code> in the message editor to see a preview of your message.</p>
-			
-			<p>You can read more about the Markdown syntax in <a href="http://daringfireball.net/projects/markdown/basics">Daring Fireball Page</a>, not all the features listed there will work tough, because we use a limited version of it.</p>
+				> Quote your favorite artists or maybe a past conversation by
+				> just by using the '>'' character at the start of the line.</pre>
+				<p>Remember you can press <code>ALT+P</code> in the message editor to see a preview of your message.</p>
+
+				<p>You can read more about the Markdown syntax in <a href="http://daringfireball.net/projects/markdown/basics">Daring Fireball Page</a>, not all the features listed there will work tough, because we use a limited version of it.</p>
+			</div>
+
+			<div class="modal-footer">
+				<button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+			</div>
 		</div>
-
-		<div class="modal-footer">
-			<button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-		</div>
-	</div>
 
 		<!-- markdown Modal -->
-	<div id="replyModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-		<div class="modal-header">
-			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-			<h3 id="myModalLabel">Reply</h3>
+		<div id="replyModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+				<h3 id="myModalLabel">Reply</h3>
+			</div>
+			<div class="modal-body">
+				<input type="hidden" name="message_id_input" id="message_id_input" value=""/>
+				<input class="input-block-level" type="text" name="reply_input" id="reply_input" value=""/>
+			</div>
+			<div class="modal-footer">
+				<button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+				<button class="btn btn-primary" onclick="replyMessage();">Send Reply</button>
+			</div>
 		</div>
-		<div class="modal-body">
-			<input type="hidden" name="message_id_input" id="message_id_input" value=""/>
-			<input class="input-block-level" type="text" name="reply_input" id="reply_input" value=""/>
-		</div>
-		<div class="modal-footer">
-			<button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-			<button class="btn btn-primary" onclick="replyMessage();">Send Reply</button>
-		</div>
-	</div>
 
-	<!-- New Message Modal -->
-	<div id="newMessageModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-		<div class="modal-header">
-			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-			<h3 id="myModalLabel">New Message</h3>
-		</div>
-		<div class="modal-body" style="text-align:center">
+		<!-- New Message Modal -->
+		<div id="newMessageModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+				<h3 id="myModalLabel">New Message</h3>
+			</div>
+			<div class="modal-body" style="text-align:center">
 
-			<textarea style="width:95%" name="message_text_modal" id="message_text_modal" placeholder="Compose your message..." rows="10"></textarea>
+				<textarea style="width:95%" name="message_text_modal" id="message_text_modal" placeholder="Compose your message..." rows="10"></textarea>
+			</div>
+			<div class="modal-footer">
+				<button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+				<button class="btn btn-primary" onclick="sendMessageModal();">Send Message</button>
+			</div>
 		</div>
-		<div class="modal-footer">
-			<button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-			<button class="btn btn-primary" onclick="sendMessageModal();">Send Message</button>
-		</div>
-	</div>
 
 
-	<!-- External Libraries -->
-	<script type="text/javascript" src="/js/bootstrap.min.js"></script>
-	{{if user !== false }}
+		<!-- External Libraries -->
+		<script type="text/javascript" src="/js/bootstrap.min.js"></script>
+		{{if user !== false }}
 		<script type="text/javascript" src="/js/faye-browser-min.js"></script>
 		<script type="text/javascript" src="/js/xregexp-min.js"></script>
 		<script type="text/javascript" src="/js/utils.js"></script>
 		<script type="text/javascript" src="/js/marked.js"></script>
 		<script type="text/javascript" src="/js/keymaster.min.js"></script>	
-	{{/if}}
+		{{/if}}
 		
-	<!-- Our Libraries -->
-	<script type="text/javascript" src="/js/frontend_config.js"></script>
-	{{if user !== false }}
+		<!-- Our Libraries -->
+		<script type="text/javascript" src="/js/frontend_config.js"></script>
+		{{if user !== false }}
 		<script type="text/javascript" src="/js/room.js"></script>
 		<script type="text/javascript" src="/js/engine.js"></script>
-	{{/if}}
+		{{/if}}
 		
-	{{html ANALYTICS}}
-</body>
-</html>
+		{{html ANALYTICS}}
+	</body>
+	</html>

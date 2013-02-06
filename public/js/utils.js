@@ -12,6 +12,13 @@
 			return string.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
 		}
 
+		self.isMobile = function(string) {
+			if( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(string) ) {
+ 				return true;
+			}
+			return false;
+		}
+
 		self.createUniquer = function(string) {
 			/** trims, lowercase and replace spaces for underscores **/
 			return utils.trim(string).toLowerCase().split(' ').join('_');
@@ -43,42 +50,62 @@
 		//Search for all links in the text
 		var searchPattern = /(\bhttps?:\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
 		matches = text.match(searchPattern);
-		if(matches) {
+		if (matches) {
 			matches = $.unique(matches);
 			matches.forEach( function(entry) {
 				var preview = '';
-				if (entry.match(/\.(gif|png|jpg|jpeg)$/)) {
+				if ( entry.match(/\.(gif|png|jpg|jpeg)$/) ) {
 					// Turn images into Media
 					preview = '<a href="' + entry + '" target="_blank"><img class="image_preview" src="' + entry + '" alt="Image preview"/></a>';
 					previews.unshift(preview);
 				} else {
-					preview = '<div><a href="'+entry+'" class="oembed">Loading Preview...</a></div>';
-					previews.unshift(preview);
+					if ( view_config.is_mobile == false) {
+						preview = '<div><a href="'+entry+'" class="oembed">Loading Preview...</a></div>';
+						previews.unshift(preview);
+
+						setTimeout(function(){
+							$("#" + message_id).find('.oembed').oembed(null,
+							{
+								includeHandle: false,
+								embedMethod: 'fill',
+								maxWidth: 500,
+								onProviderNotFound: function() {
+									//$(this).parent().remove();
+								},
+								onError: function() {
+									//$(this).parent().remove();
+									console.log('oembed_error');
+								}
+							});
+						}, 500);
+					} else {
+						var videoRegExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=)([^#\&\?]*).*/i;
+						var video_id = '';
+						if (id_matchs = entry.match( videoRegExp )) {
+							if (id_matchs[2].length==11){
+					   			video_id = id_matchs[2];
+							}
+							preview = '<div class="video_title"><span></span> <small class="video_duration muted"></small></div><a class="video_thumbnails"href="https://youtu.be/' + video_id + '" target="_blank"><img src="http://img.youtube.com/vi/' + video_id + '/1.jpg"/> <img src="http://img.youtube.com/vi/' + video_id + '/2.jpg"/> <img src="http://img.youtube.com/vi/' + video_id + '/3.jpg"/></a>';
+							$.ajax({
+								url: 'https://gdata.youtube.com/feeds/api/videos/'+video_id+'?v=2&alt=json',
+								success: function(data) {
+						       		$("#" + message_id).find('.video_title span').html(data.entry.title.$t);
+						       		$("#" + message_id).find('.video_duration').html(' (' + Math.floor(data.entry.media$group.yt$duration.seconds / 60) + ':' + (data.entry.media$group.yt$duration.seconds % 60) + ')' );
+   								}	
+   							});
+   							previews.unshift(preview);
+						}
+					}
 				}
 			});
-			
-			setTimeout(function(){
-				$("#" + message_id).find('.oembed').oembed(null,
-				{
-					includeHandle: false,
-					embedMethod: 'fill',
-					maxWidth: 500,
-					onProviderNotFound: function() {
-						//$(this).parent().remove();
-					},
-					onError: function() {
-						//$(this).parent().remove();
-						console.log('oembed_error');
-					}
-				});
-			}, 1000);
-
-			if(previews.length > 0) {
-				previews.forEach( function(entry) {
-					previewHTML += entry + " ";
-				});
-			}
 		}
+		
+		if(previews.length > 0) {
+			previews.forEach( function(entry) {
+				previewHTML += entry + " ";
+			});
+		}
+		
 		return previewHTML;
 	}
 
