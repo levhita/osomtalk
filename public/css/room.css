@@ -49,3 +49,21 @@ body {
 .footer {
 	text-align: center;
 }
+
+img.emoji {
+  width:22px;
+  height:22px;
+}
+h2>img.emoji {
+  width:64px;
+  height:64px;
+}
+h3>img.emoji {
+  width:48px;
+  height:48px;
+}
+
+h4>img.emoji {
+  width:32px;
+  height:32px;
+}

@@ -14,7 +14,7 @@
 
 		self.isMobile = function(string) {
 			if( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(string) ) {
- 				return true;
+				return true;
 			}
 			return false;
 		}
@@ -37,15 +37,17 @@
 		}
 
 		self.contains = function(array, k) {
-			for(var p in array)
-				if(array[p] === k)
+			for(var p in array) {
+				if(array[p] === k) {
 					return true;
-				return false;
+				}
 			}
+			return false;
+		}
 
-			self.getPreviewsHTML = function(text, message_id) {
-				var previews = [];
-				var previewHTML = '';
+		self.getPreviewsHTML = function(text, message_id) {
+			var previews = [];
+			var previewHTML = '';
 
 		//Search for all links in the text
 		var searchPattern = /(\bhttps?:\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
@@ -83,43 +85,43 @@
 						var video_id = '';
 						if (id_matchs = entry.match( videoRegExp )) {
 							if (id_matchs[2].length==11){
-					   			video_id = id_matchs[2];
+								video_id = id_matchs[2];
 							}
 							preview = '<div class="video_title"><span></span> <small class="video_duration muted"></small></div><a class="video_thumbnails"href="https://youtu.be/' + video_id + '" target="_blank"><img src="http://img.youtube.com/vi/' + video_id + '/1.jpg"/> <img src="http://img.youtube.com/vi/' + video_id + '/2.jpg"/> <img src="http://img.youtube.com/vi/' + video_id + '/3.jpg"/></a>';
 							$.ajax({
 								url: 'https://gdata.youtube.com/feeds/api/videos/'+video_id+'?v=2&alt=json',
 								success: function(data) {
-						       		$("#" + message_id).find('.video_title span').html(data.entry.title.$t);
-						       		$("#" + message_id).find('.video_duration').html(' (' + Math.floor(data.entry.media$group.yt$duration.seconds / 60) + ':' + (data.entry.media$group.yt$duration.seconds % 60) + ')' );
-   								}	
-   							});
-   							previews.unshift(preview);
+									$("#" + message_id).find('.video_title span').html(data.entry.title.$t);
+									$("#" + message_id).find('.video_duration').html(' (' + Math.floor(data.entry.media$group.yt$duration.seconds / 60) + ':' + (data.entry.media$group.yt$duration.seconds % 60) + ')' );
+								}	
+							});
+							previews.unshift(preview);
 						}
 					}
 				}
 			});
-		}
-		
-		if(previews.length > 0) {
-			previews.forEach( function(entry) {
-				previewHTML += entry + " ";
-			});
-		}
-		
-		return previewHTML;
-	}
+}
 
-	/** Taken From http://stackoverflow.com/a/5885493/7946 **/
-	self.makeId = function (length, current){
-		current = current ? current : '';
-		return length ? self.makeId( --length , "0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz".charAt( Math.floor( Math.random() * 60 ) ) + current ) : current;
-	}
+if(previews.length > 0) {
+	previews.forEach( function(entry) {
+		previewHTML += entry + " ";
+	});
+}
 
-	self.getTimestamp = function(){
-		return Math.round(+new Date()/1000);
-	}
+return previewHTML;
+}
 
-	return self;
+/** Taken From http://stackoverflow.com/a/5885493/7946 **/
+self.makeId = function (length, current){
+	current = current ? current : '';
+	return length ? self.makeId( --length , "0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz".charAt( Math.floor( Math.random() * 60 ) ) + current ) : current;
+}
+
+self.getTimestamp = function(){
+	return Math.round(+new Date()/1000);
+}
+
+return self;
 };
 
 global.utils = new Utils();
