@@ -132,10 +132,14 @@ $(document).ready(function(){
 	});
 
 	$('#message_text').bind('keypress', function(e) {
-		if (e.keyCode === 10 || e.keyCode == 13 && e.ctrlKey) { // CTRL + ENTER
+		if (e.keyCode === 13 && !e.shiftKey) { // Not Shift+Enter
 			sendMessageBody();
+			$('#message_text').attr('rows', '1');
 			e.preventDefault();
+		} else if(e.keyCode === 13 && e.shiftKey){
+			$('#message_text').attr('rows', '5');
 		}
+		console.log(e);
 	});
 
 	$('#message_text').bind('keyup', function(e) {

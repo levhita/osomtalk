@@ -124,13 +124,13 @@
 			var delete_button = '';
 			
 			if (previewsHTML !== '') {
-				toggle_preview_button = '<a class="toggle_previews btn btn-mini btn-inverse" onclick="tooglePreview(\'' + message._id + '\');"><i class="icon-eye-open icon-white"></i></a>';
+				toggle_preview_button = '<a class="toggle_previews" onclick="tooglePreview(\'' + message._id + '\');"><i class="icon-eye-open icon-white"></i></a>';
 			}
 			
 			if (message.user_id === view_config.user_id) {
-				delete_button = ' <a class="delete_button btn btn-mini btn-inverse" onclick="deleteMessage(\'' + message._id + '\');"><i class="icon-remove icon-white"></i></a>';
+				delete_button = '&nbsp;&nbsp;&nbsp;<a class="delete_button" onclick="deleteMessage(\'' + message._id + '\');"><i class="icon-remove icon-white"></i></a>';
 			}
-			var reply_button = ' <a class="reply_button btn btn-mini btn-inverse" onclick="openReplyMessage(\'' + message._id + '\');"><i class="icon-reply icon-white"></i></a>';
+			var reply_button = '';// <a class="reply_button btn btn-mini btn-inverse" onclick="openReplyMessage(\'' + message._id + '\');"><i class="icon-reply icon-white"></i></a>';
 			if(message.type=='USER') {
 				if( user.type == 'ANONYMOUS') {
 					string = '<div class="message" id="'+message._id+'"><div class="info"><span class="user">' + escapedName + '</span> <span class="muted">(anonymous)</span><div class="time">' + date + '</div></div><div class="utility">' + toggle_preview_button + delete_button + reply_button + '</div><div class="text">' + utils.markdown(message.text) +'</div>';

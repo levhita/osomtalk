@@ -92,12 +92,6 @@
 			{{else}}			
 			<div class="span4">
 				<h3 class="dawrfed outlined">${user.username}</h3>
-				<div id="utility_div">
-					<form class="form-inline">
-						<textarea class="span12" name="message_text" id="message_text" placeholder="Compose your message..." rows="5"></textarea><br/>
-						<input type="button" href="#" onclick="sendMessageBody();" class="btn btn-primary btn-block" value="Send Message" />
-					</form>
-				</div>
 				{{if is_mobile == true }}
 				<div class="accordion" id="accordion2">
 					<div class="accordion-group">
@@ -108,8 +102,7 @@
 						</div>
 						<div id="collapseOne" class="accordion-body collapse no-transition">
 							<div class="accordion-inner">
-								<li><small><code>CTRL+ENTER</code> to send your message.</small></li>
-								<li><small>Try some more <a href="#shortcutsModal" role="button" data-toggle="modal">shortcuts</a> to chat like a boss.</small></li>
+								<li><small><code>ENTER</code> to send your message.</small></li>
 								<li><small>Uses <a href="#markdownModal" role="button" data-toggle="modal">Markdown's Syntax</a>.</small></li>
 								<li><small>Want to share an image from your computer?, try <a target="_blank" href="http://imgur.com">imgur.com</a>.</small></li>
 							</div>
@@ -157,7 +150,8 @@
 				</div>
 				{{else}}
 				<ul>
-					<li><small><code>CTRL+ENTER</code> to send your message.</small></li>
+					<li><small><code>ENTER</code> to send your message.</small></li>
+					<li><code>SHIFT + ENTER</code> to add new lines.</li>
 					<li><small>Try some more <a href="#shortcutsModal" role="button" data-toggle="modal">shortcuts</a> to chat like a boss.</small></li>
 					<li><small>Uses <a href="#markdownModal" role="button" data-toggle="modal">Markdown's Syntax</a>.</small></li>
 					<li><small>Want to share an image from your computer?, try <a target="_blank" href="http://imgur.com">imgur.com</a>.</small></li>
@@ -181,9 +175,15 @@
 				{{/if}}
 			</div>
 			<div class="span8 messages_container">
-				<h3  class="dawrfed outlined" >Messages:</h3>
+				<div id="utility_div">
+					<form class="form-inline" style="padding-right: 60px">
+						<a href="#" style="width:15px; float:right; margin-right:-60px " onclick="sendMessageBody();" class="btn btn-primary"><i class="icon-comment icon-white"></i></a>
+						<textarea style="width:100%; margin-right:30px" name="message_text" id="message_text"
+						placeholder="Write Something cool, like, banana. We *DO* support _Markdown_" rows="1"></textarea>
+					</form>
+				</div>
 				<div id="messages"></div>
-				<button class="btn btn-large btn-primary btn-block" type="button" onclick="loadMore();">Load More</button>
+				<button class="btn btn-large btn-primary btn-block" onclick="loadMore();">Load More</button>
 			</div>
 			{{/if}}
 		</div>
@@ -203,7 +203,8 @@
 		</div>
 		<div class="modal-body">
 			<ul>
-				<li><code>CTRL + ENTER</code> to <strong>Send</strong> your message.</li>
+				<li><code>ENTER</code> to <strong>Send</strong> your message.</li>
+				<li><code>SHIFT + ENTER</code> to add new lines.</li>
 				<li><code>C</code> to <strong>Scroll top and Enter</strong> the message composer.</li>
 				<li><code>N</code> Open a <strong>New Message</strong> window.</li>
 				<li><code>T</code> to <strong>Jump to and Select</strong> the top message.</small></li>
